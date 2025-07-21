@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Hub - SRM BTech AI/ML</title>
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="brand">
+                <img src="icon-192.png" alt="Academic Hub" class="logo">
+                <div class="brand-text">
+                    <h1>Academic Hub</h1>
+                    <span>BTech AI/ML • Semester 3</span>
+                </div>
+            </div>
+            
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <input type="text" placeholder="Search assignments, materials, subjects..." id="globalSearch">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="action-btn notification-btn" id="notificationBtn">
+                    🔔
+                    <span class="badge" id="notificationBadge">0</span>
+                </button>
+                <button class="action-btn sync-btn" id="syncBtn">🔄</button>
+                <button class="action-btn alarm-btn" id="alarmBtn" title="Study Alarms">⏰</button>
+                <button class="action-btn theme-btn" id="themeBtn">🌙</button>
+                <div class="profile">
+                    <div class="profile-avatar">RP</div>
+                    <div class="profile-info">
+                        <span>R R PRAKASHRAVI</span>
+                        <small>RA2411026011210</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="nav">
+                <div class="nav-section">
+                    <h3>OVERVIEW</h3>
+                    <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="#subjects" class="nav-link" data-section="subjects">
+                        <span class="nav-icon">📚</span>
+                        My Subjects
+                        <span class="nav-badge">7</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>ACADEMIC</h3>
+                    <a href="#assignments" class="nav-link" data-section="assignments">
+                        <span class="nav-icon">📝</span>
+                        Assignments
+                        <span class="nav-badge urgent" id="assignmentCount">0</span>
+                    </a>
+                    <a href="#materials" class="nav-link" data-section="materials">
+                        <span class="nav-icon">📄</span>
+                        Study Materials
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>TOOLS</h3>
+                    <a href="#timer" class="nav-link" data-section="timer">
+                        <span class="nav-icon">⏱️</span>
+                        Study Timer
+                    </a>
+                    <a href="#progress" class="nav-link" data-section="progress">
+                        <span class="nav-icon">📈</span>
+                        Progress
+                    </a>
+                    <a href="#alarms" class="nav-link" data-section="alarms">
+                        <span class="nav-icon">⏰</span>
+                        Study Alarms
+                    </a>
+                </div>
+            </nav>
+
+            <div class="quick-stats">
+                <h4>Quick Stats</h4>
+                <div class="stat-item">
+                    <span>Study Hours</span>
+                    <strong id="studyHours">0h</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Assignments</span>
+                    <strong id="assignments">0</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Materials</span>
+                    <strong id="materials">0</strong>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="section-header">
+                    <h1 id="greetingText">Good evening, Prakash!</h1>
+                    <p>Here's your academic overview for today</p>
+                </div>
+
+                <!-- Dashboard Stats -->
+                <div class="dashboard-stats">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-content">
+                            <h3 id="totalSubjects">7</h3>
+                            <p>Total Subjects</p>
+                        </div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3 id="completedTasks">0</h3>
+                            <p>Completed Tasks</p>
+                        </div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-content">
+                            <h3 id="totalStudyTime">0h</h3>
+                            <p>Study Time</p>
+                        </div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <h3 id="overallProgress">0%</h3>
+                            <p>Progress</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-section">
+                    <h2>Recent Activity</h2>
+                    <div class="activity-list" id="activityList">
+                        <div class="empty-state">
+                            <p>No recent activity</p>
+                            <small>Start studying to see your progress here</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Deadlines -->
+                <div class="dashboard-section">
+                    <h2>Upcoming Deadlines</h2>
+                    <div class="deadline-list" id="deadlineList">
+                        <div class="empty-state">
+                            <p>No upcoming deadlines</p>
+                            <small>Add assignments to track deadlines</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subjects Section -->
+            <section id="subjects" class="content-section">
+                <div class="section-header">
+                    <div class="header-left">
+                        <h1>My Subjects</h1>
+                    </div>
+                    <div class="header-right">
+                        <span>Semester 3 - BTech AI/ML</span>
+                    </div>
+                </div>
+
+                <div class="subjects-grid">
+                    <!-- Mathematics -->
+                    <div class="subject-card math" data-subject="math">
+                        <div class="card-header">
+                            <div class="subject-icon">📐</div>
+                            <div class="subject-info">
+                                <h3>Transforms and Boundary Value Problems</h3>
+                                <div class="subject-code">21MAB201T</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. V. Vidhya</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('math')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Data Structures -->
+                    <div class="subject-card dsa" data-subject="dsa">
+                        <div class="card-header">
+                            <div class="subject-icon">🌳</div>
+                            <div class="subject-info">
+                                <h3>Data Structures and Algorithms</h3>
+                                <div class="subject-code">21CSC201J</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. Kalpana C</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('dsa')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Computer Organization -->
+                    <div class="subject-card coa" data-subject="coa">
+                        <div class="card-header">
+                            <div class="subject-icon">💻</div>
+                            <div class="subject-info">
+                                <h3>Computer Organization and Architecture</h3>
+                                <div class="subject-code">21CSS201T</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. Meenakshi M</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('coa')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Programming -->
+                    <div class="subject-card programming" data-subject="programming">
+                        <div class="card-header">
+                            <div class="subject-icon">👨‍💻</div>
+                            <div class="subject-info">
+                                <h3>Advanced Programming Practice</h3>
+                                <div class="subject-code">21CSC203P</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. Prince Chelladurai S</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('programming')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Operating Systems -->
+                    <div class="subject-card os" data-subject="os">
+                        <div class="card-header">
+                            <div class="subject-icon">⚙️</div>
+                            <div class="subject-info">
+                                <h3>Operating Systems</h3>
+                                <div class="subject-code">21CSC202J</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. G. Priyadharshini</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('os')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Universal Human Values -->
+                    <div class="subject-card uhv" data-subject="uhv">
+                        <div class="card-header">
+                            <div class="subject-icon">🧘</div>
+                            <div class="subject-info">
+                                <h3>Universal Human Values - II</h3>
+                                <div class="subject-code">21LEM202T</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>3</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. Caleb Theodar M</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('uhv')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Professional Ethics -->
+                    <div class="subject-card ethics" data-subject="ethics">
+                        <div class="card-header">
+                            <div class="subject-icon">⚖️</div>
+                            <div class="subject-info">
+                                <h3>Professional Ethics</h3>
+                                <div class="subject-code">21LEM201T</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="subject-details">
+                                <div class="detail-row">
+                                    <span>Credits:</span>
+                                    <span>0 (Online)</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Faculty:</span>
+                                    <span>Dr. B. Monika Nair</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-text">0% Complete</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" onclick="openMaterials('ethics')">View Materials</button>
+                            <button class="btn btn-primary">Start Studying</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Assignments Section -->
+            <section id="assignments" class="content-section">
+                <div class="section-header">
+                    <h1>Assignments</h1>
+                    <button class="btn btn-primary" onclick="showAddAssignmentModal()">+ Add Assignment</button>
+                </div>
+
+                <div class="assignment-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                    <button class="filter-btn" data-filter="overdue">Overdue</button>
+                </div>
+
+                <div class="assignments-list" id="assignmentsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>No assignments yet</h3>
+                        <p>Add your first assignment to get started</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Materials Section -->
+            <section id="materials" class="content-section">
+                <div class="section-header">
+                    <h1>Study Materials</h1>
+                    <p>Your digital study locker</p>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <h3>Drop files here or click to upload</h3>
+                        <p>Supports PDF, DOC, PPT, images and more</p>
+                        <input type="file" id="fileInput" multiple hidden>
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            Choose Files
+                        </button>
+                    </div>
+                </div>
+
+                <div class="materials-container">
+                    <div class="materials-header">
+                        <h3>Your Materials (<span id="fileCount">0</span>)</h3>
+                        <select id="subjectFilter">
+                            <option value="all">All Subjects</option>
+                            <option value="math">Mathematics</option>
+                            <option value="dsa">Data Structures</option>
+                            <option value="coa">Computer Organization</option>
+                            <option value="programming">Programming</option>
+                            <option value="os">Operating Systems</option>
+                            <option value="uhv">UHV</option>
+                            <option value="ethics">Ethics</option>
+                        </select>
+                    </div>
+
+                    <div class="materials-grid" id="materialsGrid">
+                        <div class="empty-state">
+                            <div class="empty-icon">📚</div>
+                            <h3>No materials uploaded yet</h3>
+                            <p>Upload your first study material to get started</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timer Section -->
+            <section id="timer" class="content-section">
+                <div class="section-header">
+                    <h1>Study Timer</h1>
+                    <p>Track your study time for each subject</p>
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer-display">
+                        <div class="timer-circle">
+                            <span id="timerDisplay">00:00:00</span>
+                        </div>
+                    </div>
+
+                    <div class="timer-controls">
+                        <select id="timerSubject" class="subject-select">
+                            <option value="math">Mathematics</option>
+                            <option value="dsa">Data Structures</option>
+                            <option value="coa">Computer Organization</option>
+                            <option value="programming">Advanced Programming</option>
+                            <option value="os">Operating Systems</option>
+                            <option value="uhv">Universal Human Values</option>
+                            <option value="ethics">Professional Ethics</option>
+                        </select>
+
+                        <div class="timer-buttons">
+                            <button id="startTimer" class="btn btn-primary">Start</button>
+                            <button id="pauseTimer" class="btn btn-secondary" disabled>Pause</button>
+                            <button id="resetTimer" class="btn btn-outline">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="today-sessions" id="todaySessions">
+                    <h3>Today's Study Sessions</h3>
+                    <div class="sessions-list" id="sessionsList">
+                        <div class="empty-state">
+                            <p>No study sessions today</p>
+                            <small>Start a timer to track your study time</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progress" class="content-section">
+                <div class="section-header">
+                    <h1>Progress Analytics</h1>
+                    <p>Your study progress and insights</p>
+                </div>
+
+                <div class="progress-cards">
+                    <div class="progress-card">
+                        <h3>Weekly Study Hours</h3>
+                        <canvas id="weeklyChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="progress-card">
+                        <h3>Subject Distribution</h3>
+                        <canvas id="subjectChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="progress-stats">
+                    <div class="progress-stat">
+                        <h4>This Week</h4>
+                        <div class="stat-value" id="weeklyHours">0h</div>
+                    </div>
+                    <div class="progress-stat">
+                        <h4>This Month</h4>
+                        <div class="stat-value" id="monthlyHours">0h</div>
+                    </div>
+                    <div class="progress-stat">
+                        <h4>Average/Day</h4>
+                        <div class="stat-value" id="dailyAverage">0h</div>
+                    </div>
+                    <div class="progress-stat">
+                        <h4>Goal Progress</h4>
+                        <div class="stat-value" id="goalProgress">0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alarms Section -->
+            <section id="alarms" class="content-section">
+                <div class="section-header">
+                    <h1>Study Alarms</h1>
+                    <button class="btn btn-primary" onclick="showAddAlarmModal()">+ Add Alarm</button>
+                </div>
+
+                <div class="alarms-list" id="alarmsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">⏰</div>
+                        <h3>No alarms set</h3>
+                        <p>Set study alarms to stay on track</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Assignment Modal -->
+    <div id="assignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Assignment</h3>
+                <button class="modal-close" onclick="hideAddAssignmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Assignment Title</label>
+                    <input type="text" id="assignmentTitle" placeholder="Enter assignment title">
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="assignmentSubject">
+                        <option value="math">Mathematics</option>
+                        <option value="dsa">Data Structures</option>
+                        <option value="coa">Computer Organization</option>
+                        <option value="programming">Programming</option>
+                        <option value="os">Operating Systems</option>
+                        <option value="uhv">UHV</option>
+                        <option value="ethics">Ethics</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="datetime-local" id="assignmentDueDate">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="assignmentDescription" placeholder="Assignment details..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="hideAddAssignmentModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAssignment()">Save Assignment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alarm Modal -->
+    <div id="alarmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Study Alarm</h3>
+                <button class="modal-close" onclick="hideAddAlarmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Alarm Name</label>
+                    <input type="text" id="alarmName" placeholder="e.g., Study Math">
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" id="alarmTime">
+                </div>
+                <div class="form-group">
+                    <label>Days</label>
+                    <div class="days-selector">
+                        <label class="day-option"><input type="checkbox" value="mon"> Mon</label>
+                        <label class="day-option"><input type="checkbox" value="tue"> Tue</label>
+                        <label class="day-option"><input type="checkbox" value="wed"> Wed</label>
+                        <label class="day-option"><input type="checkbox" value="thu"> Thu</label>
+                        <label class="day-option"><input type="checkbox" value="fri"> Fri</label>
+                        <label class="day-option"><input type="checkbox" value="sat"> Sat</label>
+                        <label class="day-option"><input type="checkbox" value="sun"> Sun</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="alarmSubject">
+                        <option value="">General</option>
+                        <option value="math">Mathematics</option>
+                        <option value="dsa">Data Structures</option>
+                        <option value="coa">Computer Organization</option>
+                        <option value="programming">Programming</option>
+                        <option value="os">Operating Systems</option>
+                        <option value="uhv">UHV</option>
+                        <option value="ethics">Ethics</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="hideAddAlarmModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAlarm()">Save Alarm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Preview Modal -->
+    <div id="fileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalFileName">File Preview</h3>
+                <button class="modal-close" onclick="closeFileModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="downloadCurrentFile()">Download</button>
+                <button class="btn btn-danger" onclick="deleteCurrentFile()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div id="notificationPanel" class="notification-panel">
+        <div class="panel-header">
+            <h3>Notifications</h3>
+            <button class="clear-all" onclick="clearAllNotifications()">Clear All</button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <div class="empty-state">
+                <p>No notifications</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
