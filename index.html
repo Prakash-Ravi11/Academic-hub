@@ -221,7 +221,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('math')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('math')">Start Studying</button>
                         </div>
                     </div>
 
@@ -254,7 +254,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('dsa')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('dsa')">Start Studying</button>
                         </div>
                     </div>
 
@@ -287,7 +287,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('coa')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('coa')">Start Studying</button>
                         </div>
                     </div>
 
@@ -320,7 +320,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('programming')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('programming')">Start Studying</button>
                         </div>
                     </div>
 
@@ -353,7 +353,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('os')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('os')">Start Studying</button>
                         </div>
                     </div>
 
@@ -386,7 +386,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('uhv')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('uhv')">Start Studying</button>
                         </div>
                     </div>
 
@@ -419,7 +419,7 @@
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-outline" onclick="openMaterials('ethics')">View Materials</button>
-                            <button class="btn btn-primary">Start Studying</button>
+                            <button class="btn btn-primary" onclick="startStudying('ethics')">Start Studying</button>
                         </div>
                     </div>
                 </div>
@@ -460,7 +460,7 @@
                         <div class="upload-icon">📁</div>
                         <h3>Drop files here or click to upload</h3>
                         <p>Supports PDF, DOC, PPT, images and more</p>
-                        <input type="file" id="fileInput" multiple hidden>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt" hidden>
                         <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
                             Choose Files
                         </button>
