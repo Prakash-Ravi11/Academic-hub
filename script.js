@@ -1750,3 +1750,117 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 });
+
+// === Utility Functions ===
+function getFilesFromStorage(subject) {
+  const data = localStorage.getItem(`files_${subject}`);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveFilesToStorage(subject, files) {
+  localStorage.setItem(`files_${subject}`, JSON.stringify(files));
+}
+
+function addFileToStorage(subject, fileObj) {
+  const files = getFilesFromStorage(subject);
+  files.push(fileObj);
+  saveFilesToStorage(subject, files);
+}
+
+// === Upload Handler ===
+document.getElementById('fileInput').addEventListener('change', function () {
+  const subject = document.getElementById('subjectSelect').value;
+  const files = Array.from(this.files);
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const fileData = {
+        name: prompt(`Enter name for "${file.name}"`) || file.name,
+        content: e.target.result,
+        uploaded: new Date().toISOString()
+      };
+      addFileToStorage(subject, fileData);
+      displayFile(subject, fileData);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  this.value = '';
+});
+
+// === Display Function ===
+function displayFile(subject, fileData) {
+  const container = document.getElementById(`${subject.toLowerCase()}Files`);
+  const card = document.createElement('div');
+  card.className = 'file-card';
+  card.innerHTML = `
+    <strong>${fileData.name}</strong><br>
+    <small>${new Date(fileData.uploaded).toLocaleString()}</small><br>
+    <button onclick="viewFile('${fileData.content}')">📄 View</button>
+  `;
+  container.appendChild(card);
+}
+
+function viewFile(dataUrl) {
+  const newWindow = window.open();
+  newWindow.document.write(`<iframe src="${dataUrl}" style="width:100%;height:100%;border:none;"></iframe>`);
+}
+
+// === Initial Render (on load) ===
+window.onload = function () {
+  const subjects = ['Maths', 'Science', 'English', 'Others'];
+  subjects.forEach(subject => {
+    const files = getFilesFromStorage(subject);
+    files.forEach(file => displayFile(subject, file));
+  });
+};
+
+// === Assignment Storage ===
+function getAssignments() {
+  const data = localStorage.getItem('assignments');
+  return data ? JSON.parse(data) : [];
+}
+
+function saveAssignment(assignment) {
+  const assignments = getAssignments();
+  assignments.push(assignment);
+  localStorage.setItem('assignments', JSON.stringify(assignments));
+}
+
+function displayAssignment(assignment) {
+  const container = document.getElementById('assignmentList');
+  const card = document.createElement('div');
+  card.className = 'assignment-card';
+  card.innerHTML = `
+    <strong>${assignment.title}</strong><br>
+    <small>Due: ${assignment.dueDate}</small><br>
+    <p>${assignment.description}</p>
+  `;
+  container.appendChild(card);
+}
+
+// === Assignment Submit Handler ===
+document.getElementById('assignmentForm')?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const title = document.getElementById('assignmentTitle').value;
+  const description = document.getElementById('assignmentDesc').value;
+  const dueDate = document.getElementById('assignmentDue').value;
+
+  const newAssignment = { title, description, dueDate };
+  saveAssignment(newAssignment);
+  displayAssignment(newAssignment);
+  this.reset();
+});
+
+// === Render Assignments on Load ===
+window.addEventListener('load', function () {
+  const assignments = getAssignments();
+  assignments.forEach(displayAssignment);
+});
+
+// === Assignment Page Redirect ===
+document.getElementById('gcrLink')?.addEventListener('click', function () {
+  window.open('https://classroom.google.com', '_blank');
+});
+
