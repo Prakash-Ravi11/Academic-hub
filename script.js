@@ -1715,3 +1715,201 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 });
+// Add this AFTER all existing code in script.js - at the very bottom
+
+// ==== MISSING BUTTON FUNCTIONS - ADD THESE ====
+
+// View Materials button function
+function openMaterials(subject) {
+    console.log('Opening materials for:', subject);
+    
+    // Switch to materials section
+    academicHub.showSection('materials');
+    
+    // Update active navigation
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const materialsLink = document.querySelector('[data-section="materials"]');
+    if (materialsLink) {
+        materialsLink.classList.add('active');
+    }
+    
+    // Filter materials by subject
+    const subjectFilter = document.getElementById('subjectFilter');
+    if (subjectFilter) {
+        subjectFilter.value = subject;
+        academicHub.filterMaterials(subject);
+    }
+    
+    academicHub.showToast(`Viewing ${academicHub.getSubjectName(subject)} materials`, 'info');
+}
+
+// Start Studying button function  
+function startStudying(subject) {
+    console.log('Starting study for:', subject);
+    
+    // Switch to timer section
+    academicHub.showSection('timer');
+    
+    // Update active navigation
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const timerLink = document.querySelector('[data-section="timer"]');
+    if (timerLink) {
+        timerLink.classList.add('active');
+    }
+    
+    // Set subject in timer
+    const timerSubject = document.getElementById('timerSubject');
+    if (timerSubject) {
+        timerSubject.value = subject;
+        academicHub.timer.currentSubject = subject;
+    }
+    
+    academicHub.showToast(`Ready to study ${academicHub.getSubjectName(subject)}!`, 'success');
+}
+
+// Fix the file upload functionality
+function fixFileUploadIssue() {
+    console.log('Fixing file upload...');
+    
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    
+    if (!fileInput) {
+        console.error('File input not found!');
+        return;
+    }
+    
+    if (!uploadArea) {
+        console.error('Upload area not found!');
+        return;
+    }
+    
+    // Clear any existing event listeners
+    fileInput.onchange = null;
+    
+    // Add working file change event
+    fileInput.addEventListener('change', function(e) {
+        console.log('Files selected:', e.target.files.length);
+        if (e.target.files.length > 0) {
+            academicHub.handleFiles(e.target.files);
+        }
+    });
+    
+    // Fix drag and drop
+    uploadArea.ondragover = function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#007AFF';
+        uploadArea.style.backgroundColor = 'rgba(0, 122, 255, 0.1)';
+    };
+    
+    uploadArea.ondragleave = function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        uploadArea.style.backgroundColor = '';
+    };
+    
+    uploadArea.ondrop = function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        uploadArea.style.backgroundColor = '';
+        
+        const files = e.dataTransfer.files;
+        console.log('Files dropped:', files.length);
+        if (files.length > 0) {
+            academicHub.handleFiles(files);
+        }
+    };
+    
+    // Fix click to upload
+    uploadArea.onclick = function() {
+        console.log('Upload area clicked');
+        fileInput.click();
+    };
+    
+    console.log('File upload fixed successfully!');
+}
+
+// Fix the handleFiles function in academicHub if it's not working
+if (window.academicHub) {
+    // Override the handleFiles function to make it work properly
+    academicHub.handleFiles = async function(files) {
+        console.log('Processing files:', files.length);
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            console.log('Processing file:', file.name);
+            
+            try {
+                await this.addFile(file);
+                console.log('File added successfully:', file.name);
+            } catch (error) {
+                console.error('Error adding file:', error);
+            }
+        }
+        
+        this.updateMaterialsDisplay();
+        this.updateStats();
+        this.buildSearchIndex();
+        this.showToast(`${files.length} file(s) uploaded successfully!`, 'success');
+    };
+    
+    // Fix the addFile function
+    academicHub.addFile = function(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const fileData = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        subject: 'math', // Default subject
+                        uploadDate: new Date().toISOString(),
+                        data: e.target.result
+                    };
+
+                    this.storage.materials.push(fileData);
+                    this.saveMaterials();
+                    console.log('File saved to storage:', file.name);
+                    resolve(fileData);
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    reject(error);
+                }
+            };
+            
+            reader.onerror = (error) => {
+                console.error('FileReader error:', error);
+                reject(error);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    };
+}
+
+// Initialize fixes when everything is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for academicHub to be fully initialized
+    setTimeout(() => {
+        console.log('Initializing fixes...');
+        fixFileUploadIssue();
+    }, 2000);
+});
+
+// Also fix when switching to materials section
+const originalShowSection = academicHub?.showSection;
+if (originalShowSection) {
+    academicHub.showSection = function(sectionName) {
+        originalShowSection.call(this, sectionName);
+        
+        if (sectionName === 'materials') {
+            setTimeout(() => {
+                fixFileUploadIssue();
+            }, 100);
+        }
+    };
+}
+
