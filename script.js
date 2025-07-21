@@ -1913,3 +1913,437 @@ if (originalShowSection) {
     };
 }
 
+// ==== FIX FOR STUDY MATERIALS AND ASSIGNMENTS ====
+
+// Fix the materials display function
+function fixMaterialsDisplay() {
+    console.log('Fixing materials display...');
+    
+    const materialsGrid = document.getElementById('materialsGrid');
+    if (!materialsGrid) {
+        console.error('Materials grid not found!');
+        return;
+    }
+    
+    // Check if we have materials in storage
+    const materials = JSON.parse(localStorage.getItem('academic_hub_materials') || '[]');
+    console.log('Found materials:', materials.length);
+    
+    if (materials.length === 0) {
+        materialsGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📚</div>
+                <h3>No materials uploaded yet</h3>
+                <p>Upload your first study material to get started</p>
+            </div>
+        `;
+    } else {
+        materialsGrid.innerHTML = materials.map(material => createMaterialCard(material)).join('');
+    }
+    
+    // Update file count
+    const fileCount = document.getElementById('fileCount');
+    if (fileCount) {
+        fileCount.textContent = materials.length;
+    }
+}
+
+// Create material card function
+function createMaterialCard(material) {
+    const fileIcon = getFileIconFromType(material.type);
+    const fileSize = formatBytes(material.size);
+    const uploadDate = new Date(material.uploadDate).toLocaleDateString();
+    
+    return `
+        <div class="file-card" onclick="previewMaterial('${material.id}')">
+            <div class="file-header">
+                <div class="file-icon">${fileIcon}</div>
+                <div class="file-info">
+                    <h4 title="${material.name}">${material.name}</h4>
+                    <div class="file-subject">${getSubjectDisplayName(material.subject)}</div>
+                </div>
+            </div>
+            <div class="file-meta">
+                <span>${fileSize}</span>
+                <span>${uploadDate}</span>
+            </div>
+            <div class="file-actions" onclick="event.stopPropagation()">
+                <button class="btn btn-outline btn-sm" onclick="downloadMaterial('${material.id}')">Download</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteMaterial('${material.id}')">Delete</button>
+            </div>
+        </div>
+    `;
+}
+
+// Helper functions
+function getFileIconFromType(type) {
+    if (type.includes('pdf')) return '📄';
+    if (type.includes('word') || type.includes('document')) return '📝';
+    if (type.includes('powerpoint') || type.includes('presentation')) return '📊';
+    if (type.includes('image')) return '🖼️';
+    if (type.includes('text')) return '📃';
+    return '📁';
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function getSubjectDisplayName(subject) {
+    const subjects = {
+        'math': 'Mathematics',
+        'dsa': 'Data Structures',
+        'coa': 'Computer Organization',
+        'programming': 'Advanced Programming',
+        'os': 'Operating Systems',
+        'uhv': 'Universal Human Values',
+        'ethics': 'Professional Ethics'
+    };
+    return subjects[subject] || 'General';
+}
+
+// Fix file upload functionality
+function setupFileUploadFix() {
+    console.log('Setting up file upload...');
+    
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    
+    if (!fileInput || !uploadArea) {
+        console.error('File input or upload area not found!');
+        return;
+    }
+    
+    // Clear existing listeners
+    fileInput.onchange = null;
+    uploadArea.onclick = null;
+    
+    // File input change event
+    fileInput.addEventListener('change', function(e) {
+        console.log('Files selected:', e.target.files.length);
+        handleFileUpload(e.target.files);
+    });
+    
+    // Upload area click
+    uploadArea.addEventListener('click', function() {
+        console.log('Upload area clicked');
+        fileInput.click();
+    });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#007AFF';
+        uploadArea.style.backgroundColor = 'rgba(0, 122, 255, 0.1)';
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        uploadArea.style.backgroundColor = '';
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        uploadArea.style.backgroundColor = '';
+        
+        console.log('Files dropped:', e.dataTransfer.files.length);
+        handleFileUpload(e.dataTransfer.files);
+    });
+}
+
+// Handle file upload
+async function handleFileUpload(files) {
+    console.log('Processing', files.length, 'files...');
+    
+    const materials = JSON.parse(localStorage.getItem('academic_hub_materials') || '[]');
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        console.log('Processing file:', file.name);
+        
+        try {
+            const base64 = await fileToBase64(file);
+            
+            const material = {
+                id: Date.now() + i,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                subject: 'math', // Default subject
+                uploadDate: new Date().toISOString(),
+                data: base64
+            };
+            
+            materials.push(material);
+            console.log('File added:', file.name);
+            
+        } catch (error) {
+            console.error('Error processing file:', error);
+        }
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('academic_hub_materials', JSON.stringify(materials));
+    
+    // Refresh display
+    fixMaterialsDisplay();
+    
+    // Show success message
+    showSuccessToast(`${files.length} file(s) uploaded successfully!`);
+}
+
+// Convert file to base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Material actions
+function previewMaterial(id) {
+    console.log('Previewing material:', id);
+    const materials = JSON.parse(localStorage.getItem('academic_hub_materials') || '[]');
+    const material = materials.find(m => m.id == id);
+    
+    if (material) {
+        showSuccessToast(`Opening ${material.name}`);
+    }
+}
+
+function downloadMaterial(id) {
+    console.log('Downloading material:', id);
+    const materials = JSON.parse(localStorage.getItem('academic_hub_materials') || '[]');
+    const material = materials.find(m => m.id == id);
+    
+    if (material) {
+        const link = document.createElement('a');
+        link.href = material.data;
+        link.download = material.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showSuccessToast(`${material.name} downloaded!`);
+    }
+}
+
+function deleteMaterial(id) {
+    if (confirm('Are you sure you want to delete this file?')) {
+        console.log('Deleting material:', id);
+        let materials = JSON.parse(localStorage.getItem('academic_hub_materials') || '[]');
+        materials = materials.filter(m => m.id != id);
+        
+        localStorage.setItem('academic_hub_materials', JSON.stringify(materials));
+        fixMaterialsDisplay();
+        showSuccessToast('File deleted successfully!');
+    }
+}
+
+// Fix assignments display
+function fixAssignmentsDisplay() {
+    console.log('Fixing assignments display...');
+    
+    const assignmentsList = document.getElementById('assignmentsList');
+    if (!assignmentsList) {
+        console.error('Assignments list not found!');
+        return;
+    }
+    
+    const assignments = JSON.parse(localStorage.getItem('academic_hub_assignments') || '[]');
+    console.log('Found assignments:', assignments.length);
+    
+    if (assignments.length === 0) {
+        assignmentsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>No assignments yet</h3>
+                <p>Add your first assignment to get started</p>
+            </div>
+        `;
+    } else {
+        assignmentsList.innerHTML = assignments.map(assignment => createAssignmentCard(assignment)).join('');
+    }
+}
+
+// Create assignment card
+function createAssignmentCard(assignment) {
+    const dueDate = new Date(assignment.dueDate).toLocaleDateString();
+    const isOverdue = new Date(assignment.dueDate) < new Date() && !assignment.completed;
+    
+    return `
+        <div class="assignment-card ${assignment.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
+            <div class="assignment-header">
+                <h4>${assignment.title}</h4>
+                <div class="assignment-subject">${getSubjectDisplayName(assignment.subject)}</div>
+            </div>
+            <div class="assignment-content">
+                <p>${assignment.description || 'No description'}</p>
+                <div class="assignment-meta">
+                    <span>Due: ${dueDate}</span>
+                    <span class="status ${assignment.completed ? 'completed' : (isOverdue ? 'overdue' : 'pending')}">
+                        ${assignment.completed ? 'Completed' : (isOverdue ? 'Overdue' : 'Pending')}
+                    </span>
+                </div>
+            </div>
+            <div class="assignment-actions">
+                <button class="btn btn-outline btn-sm" onclick="toggleAssignment('${assignment.id}')">
+                    ${assignment.completed ? 'Mark Incomplete' : 'Mark Complete'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteAssignment('${assignment.id}')">Delete</button>
+            </div>
+        </div>
+    `;
+}
+
+// Assignment actions
+function toggleAssignment(id) {
+    let assignments = JSON.parse(localStorage.getItem('academic_hub_assignments') || '[]');
+    const assignment = assignments.find(a => a.id == id);
+    
+    if (assignment) {
+        assignment.completed = !assignment.completed;
+        localStorage.setItem('academic_hub_assignments', JSON.stringify(assignments));
+        fixAssignmentsDisplay();
+        showSuccessToast(assignment.completed ? 'Assignment completed!' : 'Assignment marked as pending');
+    }
+}
+
+function deleteAssignment(id) {
+    if (confirm('Are you sure you want to delete this assignment?')) {
+        let assignments = JSON.parse(localStorage.getItem('academic_hub_assignments') || '[]');
+        assignments = assignments.filter(a => a.id != id);
+        
+        localStorage.setItem('academic_hub_assignments', JSON.stringify(assignments));
+        fixAssignmentsDisplay();
+        showSuccessToast('Assignment deleted!');
+    }
+}
+
+// Show success toast
+function showSuccessToast(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #34C759;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        z-index: 1000;
+        font-weight: 500;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        document.body.removeChild(toast);
+    }, 3000);
+}
+
+// Override the showSection function to fix displays
+const originalShowSection = window.academicHub?.showSection;
+if (originalShowSection) {
+    window.academicHub.showSection = function(sectionName) {
+        originalShowSection.call(this, sectionName);
+        
+        // Fix specific sections
+        setTimeout(() => {
+            if (sectionName === 'materials') {
+                setupFileUploadFix();
+                fixMaterialsDisplay();
+            } else if (sectionName === 'assignments') {
+                fixAssignmentsDisplay();
+            }
+        }, 100);
+    };
+}
+
+// Initialize fixes when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        console.log('Initializing section fixes...');
+        setupFileUploadFix();
+        fixMaterialsDisplay();
+        fixAssignmentsDisplay();
+    }, 2000);
+});
+
+// Fix when sections are clicked
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function() {
+        const section = this.dataset.section;
+        setTimeout(() => {
+            if (section === 'materials') {
+                setupFileUploadFix();
+                fixMaterialsDisplay();
+            } else if (section === 'assignments') {
+                fixAssignmentsDisplay();
+            }
+        }, 200);
+    });
+});
+
+console.log('Materials and Assignments fix loaded!');
+// Assignment modal functions
+function showAddAssignmentModal() {
+    const modal = document.getElementById('assignmentModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function hideAddAssignmentModal() {
+    const modal = document.getElementById('assignmentModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function saveAssignment() {
+    const title = document.getElementById('assignmentTitle').value;
+    const subject = document.getElementById('assignmentSubject').value;
+    const dueDate = document.getElementById('assignmentDueDate').value;
+    const description = document.getElementById('assignmentDescription').value;
+
+    if (!title || !subject || !dueDate) {
+        alert('Please fill in all required fields');
+        return;
+    }
+
+    const assignments = JSON.parse(localStorage.getItem('academic_hub_assignments') || '[]');
+    
+    const assignment = {
+        id: Date.now(),
+        title,
+        subject,
+        dueDate,
+        description,
+        completed: false,
+        createdDate: new Date().toISOString()
+    };
+
+    assignments.push(assignment);
+    localStorage.setItem('academic_hub_assignments', JSON.stringify(assignments));
+    
+    // Clear form
+    document.getElementById('assignmentTitle').value = '';
+    document.getElementById('assignmentSubject').value = 'math';
+    document.getElementById('assignmentDueDate').value = '';
+    document.getElementById('assignmentDescription').value = '';
+    
+    hideAddAssignmentModal();
+    fixAssignmentsDisplay();
+    showSuccessToast('Assignment added successfully!');
+}
+
+
