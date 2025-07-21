@@ -1,4 +1,4 @@
-// Academic Hub - Complete and Fixed Implementation
+// Academic Hub - Complete Implementation
 class AcademicHub {
     constructor() {
         // Initialize data storage
@@ -7,9 +7,9 @@ class AcademicHub {
             assignments: JSON.parse(localStorage.getItem('academic_hub_assignments') || '[]'),
             sessions: JSON.parse(localStorage.getItem('academic_hub_sessions') || '[]'),
             alarms: JSON.parse(localStorage.getItem('academic_hub_alarms') || '[]'),
+            progress: JSON.parse(localStorage.getItem('academic_hub_progress') || '{}'),
             notifications: JSON.parse(localStorage.getItem('academic_hub_notifications') || '[]'),
-            settings: JSON.parse(localStorage.getItem('academic_hub_settings') || '{"theme": "dark", "language": "en", "autoSave": true}'),
-            progress: JSON.parse(localStorage.getItem('academic_hub_progress') || '{}')
+            settings: JSON.parse(localStorage.getItem('academic_hub_settings') || '{"theme": "dark"}')
         };
 
         // Timer state
@@ -18,104 +18,95 @@ class AcademicHub {
             startTime: null,
             elapsedTime: 0,
             interval: null,
-            currentSubject: null,
-            targetDuration: 25 * 60 * 1000, // Default to 25-minute Pomodoro
-            isBreakTime: false,
-            breakDuration: 5 * 60 * 1000,
-            goalReached: false
+            currentSubject: null
         };
 
-        // Application state
-        this.app = {
-            currentFile: null,
-            currentModal: null,
-            searchIndex: [],
-            isOnline: navigator.onLine,
-            lastSync: new Date().toISOString(),
-            version: '2.1.0'
-        };
+        // Current file for preview
+        this.currentFile = null;
 
-        // Initialize
+        // Search index
+        this.searchIndex = [];
+
         this.init();
     }
 
     init() {
-        try {
-            this.setupEventListeners();
-            this.setupNavigation();
-            this.setupTheme();
-            this.setupSearch();
-            this.setupFileUpload();
-            this.setupTimer();
-            this.setupNotifications();
-            this.setupAlarms();
-            this.setupKeyboardShortcuts();
-            this.updateAllDisplays();
-            this.updateGreeting();
-            this.buildSearchIndex();
-        } catch (error) {
-            this.handleError(error, 'initialization');
-        }
+        this.setupEventListeners();
+        this.setupNavigation();
+        this.setupTheme();
+        this.setupSearch();
+        this.setupFileUpload();
+        this.setupTimer();
+        this.setupNotifications();
+        this.setupAlarms();
+        this.updateAllDisplays();
+        this.updateGreeting();
+        this.buildSearchIndex();
     }
 
-    // Event Listeners
+    // Event Listeners Setup
     setupEventListeners() {
-        try {
-            // Navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.showSection(link.dataset.section);
-                    this.updateActiveNav(link);
-                });
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showSection(link.dataset.section);
+                this.updateActiveNav(link);
             });
+        });
 
-            // Header buttons
-            const themeBtn = document.getElementById('themeBtn');
-            if (themeBtn) themeBtn.addEventListener('click', () => this.toggleTheme());
+        // Theme toggle
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            this.toggleTheme();
+        });
 
-            const notificationBtn = document.getElementById('notificationBtn');
-            if (notificationBtn) notificationBtn.addEventListener('click', () => this.toggleNotificationPanel());
+        // Notification button
+        document.getElementById('notificationBtn').addEventListener('click', () => {
+            this.toggleNotificationPanel();
+        });
 
-            const syncBtn = document.getElementById('syncBtn');
-            if (syncBtn) syncBtn.addEventListener('click', () => this.syncData());
+        // Sync button
+        document.getElementById('syncBtn').addEventListener('click', () => {
+            this.syncData();
+        });
 
-            const alarmBtn = document.getElementById('alarmBtn');
-            if (alarmBtn) alarmBtn.addEventListener('click', () => this.showSection('alarms'));
+        // Alarm button
+        document.getElementById('alarmBtn').addEventListener('click', () => {
+            this.showSection('alarms');
+        });
 
-            // Assignment filters
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    this.filterAssignments(btn.dataset.filter);
-                    this.updateActiveFilter(btn);
-                });
+        // Assignment filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.filterAssignments(btn.dataset.filter);
+                this.updateActiveFilter(btn);
             });
+        });
 
-            // Subject filter
-            const subjectFilter = document.getElementById('subjectFilter');
-            if (subjectFilter) subjectFilter.addEventListener('change', (e) => this.filterMaterials(e.target.value));
-
-            // Modal close
-            document.querySelectorAll('.modal-close').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const modal = e.target.closest('.modal');
-                    this.hideModal(modal.id);
-                });
+        // Subject filter for materials
+        const subjectFilter = document.getElementById('subjectFilter');
+        if (subjectFilter) {
+            subjectFilter.addEventListener('change', (e) => {
+                this.filterMaterials(e.target.value);
             });
-
-            // Click outside modal
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) this.hideModal(modal.id);
-                });
-            });
-
-            // Window events
-            window.addEventListener('online', () => this.app.isOnline = true);
-            window.addEventListener('offline', () => this.app.isOnline = false);
-        } catch (error) {
-            this.handleError(error, 'setup_event_listeners');
         }
+
+        // Modal close events
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modal = e.target.closest('.modal');
+                this.hideModal(modal.id);
+            });
+        });
+
+        // Click outside modal to close
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.hideModal(modal.id);
+                }
+            });
+        });
     }
 
     // Navigation
@@ -124,58 +115,50 @@ class AcademicHub {
     }
 
     showSection(sectionName) {
-        try {
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-                section.style.opacity = '0';
-            });
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
 
-            const targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.add('active');
-                targetSection.style.opacity = '1';
-            }
-
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            const activeLink = document.querySelector(`[data-section="${sectionName}"]`);
-            if (activeLink) activeLink.classList.add('active');
-
-            setTimeout(() => this.updateSectionContent(sectionName), 100);
-        } catch (error) {
-            this.handleError(error, 'show_section');
+        // Show target section
+        const targetSection = document.getElementById(sectionName);
+        if (targetSection) {
+            targetSection.classList.add('active');
         }
-    }
 
-    updateSectionContent(sectionName) {
-        try {
-            switch (sectionName) {
-                case 'dashboard':
-                    this.updateDashboard();
-                    break;
-                case 'materials':
-                    this.updateMaterialsDisplay();
-                    this.setupFileUpload();
-                    break;
-                case 'assignments':
-                    this.updateAssignmentsDisplay();
-                    break;
-                case 'progress':
-                    this.updateProgressDisplay();
-                    break;
-                case 'alarms':
-                    this.updateAlarmsDisplay();
-                    break;
-                case 'timer':
-                    this.updateTodaySessions();
-                    break;
-            }
-        } catch (error) {
-            this.handleError(error, 'update_section_content');
+        // Update navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        const activeLink = document.querySelector(`[data-section="${sectionName}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Update content based on section
+        switch (sectionName) {
+            case 'dashboard':
+                this.updateDashboard();
+                break;
+            case 'materials':
+                this.updateMaterialsDisplay();
+                break;
+            case 'assignments':
+                this.updateAssignmentsDisplay();
+                break;
+            case 'progress':
+                this.updateProgressDisplay();
+                break;
+            case 'alarms':
+                this.updateAlarmsDisplay();
+                break;
         }
     }
 
     updateActiveNav(activeLink) {
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
         activeLink.classList.add('active');
     }
 
@@ -186,106 +169,138 @@ class AcademicHub {
     }
 
     toggleTheme() {
-        const newTheme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+        const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         this.applyTheme(newTheme);
         this.storage.settings.theme = newTheme;
         this.saveSettings();
-        this.showToast(`Switched to ${newTheme} theme`, 'info');
     }
 
     applyTheme(theme) {
         const themeBtn = document.getElementById('themeBtn');
-        document.body.classList.toggle('light-theme', theme === 'light');
-        if (themeBtn) themeBtn.textContent = theme === 'light' ? '☀️' : '🌙';
+        if (theme === 'light') {
+            document.body.classList.add('light-theme');
+            themeBtn.textContent = '☀️';
+        } else {
+            document.body.classList.remove('light-theme');
+            themeBtn.textContent = '🌙';
+        }
     }
 
     // Search Functionality
     setupSearch() {
         const searchInput = document.getElementById('globalSearch');
         const searchResults = document.querySelector('.search-results');
-        if (!searchInput || !searchResults) return;
 
-        let searchTimeout;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            if (!query) {
-                searchResults.classList.remove('show');
-                return;
-            }
-            searchTimeout = setTimeout(() => this.performSearch(query), 300);
-        });
+        if (searchInput && searchResults) {
+            let searchTimeout;
 
-        searchInput.addEventListener('focus', () => {
-            if (searchInput.value.trim()) searchResults.classList.add('show');
-        });
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
 
-        document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-                searchResults.classList.remove('show');
-            }
-        });
+                if (query.length === 0) {
+                    searchResults.classList.remove('show');
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    this.performSearch(query);
+                }, 300);
+            });
+
+            searchInput.addEventListener('focus', () => {
+                if (searchInput.value.trim().length > 0) {
+                    searchResults.classList.add('show');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.remove('show');
+                }
+            });
+        }
     }
 
     buildSearchIndex() {
-        this.app.searchIndex = [];
+        this.searchIndex = [];
 
         // Index materials
         this.storage.materials.forEach(material => {
-            this.app.searchIndex.push({
+            this.searchIndex.push({
                 type: 'material',
-                id: material.id,
                 title: material.name,
                 subtitle: this.getSubjectName(material.subject),
+                data: material,
                 keywords: [material.name, material.subject, this.getSubjectName(material.subject)]
             });
         });
 
         // Index assignments
         this.storage.assignments.forEach(assignment => {
-            this.app.searchIndex.push({
+            this.searchIndex.push({
                 type: 'assignment',
-                id: assignment.id,
                 title: assignment.title,
                 subtitle: this.getSubjectName(assignment.subject),
+                data: assignment,
                 keywords: [assignment.title, assignment.subject, this.getSubjectName(assignment.subject)]
             });
         });
 
         // Index subjects
-        this.getSubjectsList().forEach(subject => {
-            this.app.searchIndex.push({
+        const subjects = [
+            { id: 'math', name: 'Transforms and Boundary Value Problems', code: '21MAB201T' },
+            { id: 'dsa', name: 'Data Structures and Algorithms', code: '21CSC201J' },
+            { id: 'coa', name: 'Computer Organization and Architecture', code: '21CSS201T' },
+            { id: 'programming', name: 'Advanced Programming Practice', code: '21CSC203P' },
+            { id: 'os', name: 'Operating Systems', code: '21CSC202J' },
+            { id: 'uhv', name: 'Universal Human Values - II', code: '21LEM202T' },
+            { id: 'ethics', name: 'Professional Ethics', code: '21LEM201T' }
+        ];
+
+        subjects.forEach(subject => {
+            this.searchIndex.push({
                 type: 'subject',
-                id: subject.id,
                 title: subject.name,
                 subtitle: subject.code,
+                data: subject,
                 keywords: [subject.name, subject.code, subject.id]
             });
         });
     }
 
     performSearch(query) {
-        const results = this.app.searchIndex
-            .filter(item => item.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase())))
-            .slice(0, 5);
+        const results = this.searchIndex.filter(item => {
+            return item.keywords.some(keyword => 
+                keyword.toLowerCase().includes(query.toLowerCase())
+            );
+        }).slice(0, 5);
+
         this.displaySearchResults(results);
     }
 
     displaySearchResults(results) {
         const searchResults = document.querySelector('.search-results');
-        searchResults.innerHTML = results.length === 0
-            ? '<div class="search-result-item">No results found</div>'
-            : results.map(result => `
-                <div class="search-result-item" onclick="academicHub.handleSearchResult('${result.type}', '${result.id}')">
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+        } else {
+            searchResults.innerHTML = results.map(result => `
+                <div class="search-result-item" onclick="academicHub.handleSearchResult('${result.type}', '${result.data.id || result.data.name}')">
                     <div class="search-result-title">${result.title}</div>
                     <div class="search-result-subtitle">${result.subtitle}</div>
                 </div>
             `).join('');
+        }
+
         searchResults.classList.add('show');
     }
 
     handleSearchResult(type, id) {
-        document.querySelector('.search-results').classList.remove('show');
+        const searchResults = document.querySelector('.search-results');
+        searchResults.classList.remove('show');
+
         switch (type) {
             case 'material':
                 this.showSection('materials');
@@ -303,39 +318,34 @@ class AcademicHub {
     setupFileUpload() {
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
-        if (!fileInput || !uploadArea) return;
 
-        fileInput.onchange = null;
-        uploadArea.onclick = null;
-        uploadArea.ondragover = null;
-        uploadArea.ondragleave = null;
-        uploadArea.ondrop = null;
+        if (fileInput && uploadArea) {
+            fileInput.addEventListener('change', (e) => {
+                this.handleFiles(e.target.files);
+            });
 
-        fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            this.handleFiles(e.dataTransfer.files);
-        });
-        uploadArea.addEventListener('click', (e) => {
-            if (e.target === uploadArea || e.target.classList.contains('upload-content') || 
-                e.target.classList.contains('upload-icon') || e.target.tagName === 'H3' || e.target.tagName === 'P') {
-                fileInput.click();
-            }
-        });
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                this.handleFiles(e.dataTransfer.files);
+            });
+        }
     }
 
     async handleFiles(files) {
         const uploadPromises = Array.from(files).map(file => this.addFile(file));
         await Promise.all(uploadPromises);
+        
         this.updateMaterialsDisplay();
         this.updateStats();
         this.buildSearchIndex();
@@ -355,6 +365,7 @@ class AcademicHub {
                     uploadDate: new Date().toISOString(),
                     data: e.target.result
                 };
+
                 this.storage.materials.push(fileData);
                 this.saveMaterials();
                 resolve(fileData);
@@ -363,25 +374,39 @@ class AcademicHub {
         });
     }
 
+    getDefaultSubject() {
+        return 'math'; // Default to math for now
+    }
+
     updateMaterialsDisplay() {
         const grid = document.getElementById('materialsGrid');
         const fileCount = document.getElementById('fileCount');
+        
         if (!grid) return;
 
         const filter = document.getElementById('subjectFilter')?.value || 'all';
-        let materials = filter === 'all' ? this.storage.materials : this.storage.materials.filter(m => m.subject === filter);
+        let materials = this.storage.materials;
 
-        if (fileCount) fileCount.textContent = materials.length;
+        if (filter !== 'all') {
+            materials = materials.filter(m => m.subject === filter);
+        }
 
-        grid.innerHTML = materials.length === 0
-            ? `
+        if (fileCount) {
+            fileCount.textContent = materials.length;
+        }
+
+        if (materials.length === 0) {
+            grid.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📚</div>
                     <h3>No materials found</h3>
                     <p>Upload some study materials to get started</p>
                 </div>
-            `
-            : materials.map(file => this.createFileCard(file)).join('');
+            `;
+            return;
+        }
+
+        grid.innerHTML = materials.map(file => this.createFileCard(file)).join('');
     }
 
     createFileCard(file) {
@@ -415,8 +440,9 @@ class AcademicHub {
         const file = this.storage.materials.find(f => f.id == id);
         if (!file) return;
 
-        this.app.currentFile = file;
+        this.currentFile = file;
         document.getElementById('modalFileName').textContent = file.name;
+        
         const modalBody = document.getElementById('modalBody');
         if (file.type.includes('image')) {
             modalBody.innerHTML = `<img src="${file.data}" style="max-width: 100%; height: auto;" alt="${file.name}">`;
@@ -431,6 +457,7 @@ class AcademicHub {
                 </div>
             `;
         }
+        
         this.showModal('fileModal');
     }
 
@@ -444,6 +471,7 @@ class AcademicHub {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
         this.showToast(`${file.name} downloaded!`, 'success');
     }
 
@@ -468,9 +496,15 @@ class AcademicHub {
         const pauseBtn = document.getElementById('pauseTimer');
         const resetBtn = document.getElementById('resetTimer');
 
-        if (startBtn) startBtn.addEventListener('click', () => this.startTimer());
-        if (pauseBtn) pauseBtn.addEventListener('click', () => this.pauseTimer());
-        if (resetBtn) resetBtn.addEventListener('click', () => this.resetTimer());
+        if (startBtn) {
+            startBtn.addEventListener('click', () => this.startTimer());
+        }
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', () => this.pauseTimer());
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetTimer());
+        }
 
         this.updateTimerDisplay();
     }
@@ -481,11 +515,12 @@ class AcademicHub {
             this.timer.currentSubject = subjectSelect ? subjectSelect.value : 'general';
             this.timer.startTime = Date.now() - this.timer.elapsedTime;
             this.timer.isRunning = true;
+            
             this.timer.interval = setInterval(() => {
                 this.timer.elapsedTime = Date.now() - this.timer.startTime;
                 this.updateTimerDisplay();
-                this.checkTimerGoals();
             }, 1000);
+
             this.updateTimerButtons();
             this.showToast('Timer started!', 'success');
         }
@@ -495,6 +530,8 @@ class AcademicHub {
         if (this.timer.isRunning) {
             clearInterval(this.timer.interval);
             this.timer.isRunning = false;
+            
+            // Save session
             this.saveStudySession();
             this.updateTimerButtons();
             this.showToast('Timer paused and session saved!', 'info');
@@ -507,7 +544,7 @@ class AcademicHub {
         this.timer.elapsedTime = 0;
         this.timer.startTime = null;
         this.timer.currentSubject = null;
-        this.timer.goalReached = false;
+        
         this.updateTimerDisplay();
         this.updateTimerButtons();
         this.showToast('Timer reset!', 'info');
@@ -516,8 +553,10 @@ class AcademicHub {
     updateTimerDisplay() {
         const timerDisplay = document.getElementById('timerDisplay');
         if (timerDisplay) {
-            timerDisplay.textContent = this.formatTime(this.timer.elapsedTime);
+            const time = this.formatTime(this.timer.elapsedTime);
+            timerDisplay.textContent = time;
         }
+
         const timerCircle = document.querySelector('.timer-circle');
         if (timerCircle) {
             timerCircle.classList.toggle('active', this.timer.isRunning);
@@ -534,42 +573,6 @@ class AcademicHub {
         if (resetBtn) resetBtn.disabled = false;
     }
 
-    checkTimerGoals() {
-        if (this.timer.targetDuration > 0 && this.timer.elapsedTime >= this.timer.targetDuration && !this.timer.goalReached) {
-            this.timer.goalReached = true;
-            this.showTimerCompletionNotification();
-            this.pauseTimer();
-            if (this.timer.breakDuration > 0) {
-                this.suggestBreak();
-            }
-        }
-    }
-
-    showTimerCompletionNotification() {
-        if (Notification.permission === 'granted') {
-            new Notification('Study Session Complete!', {
-                body: `You've completed your ${Math.round(this.timer.targetDuration / 60000)}-minute study session.`,
-                icon: 'icon-192.png'
-            });
-        }
-        this.showToast('🎉 Study session completed!', 'success');
-    }
-
-    suggestBreak() {
-        const breakMinutes = Math.round(this.timer.breakDuration / 60000);
-        if (confirm(`Great job! Take a ${breakMinutes}-minute break?`)) {
-            this.startBreakTimer();
-        }
-    }
-
-    startBreakTimer() {
-        this.timer.isBreakTime = true;
-        this.timer.elapsedTime = 0;
-        this.timer.targetDuration = this.timer.breakDuration;
-        this.startTimer();
-        this.showToast(`Break time! ${Math.round(this.timer.breakDuration / 60000)} minutes`, 'info');
-    }
-
     saveStudySession() {
         if (this.timer.elapsedTime > 0 && this.timer.currentSubject) {
             const session = {
@@ -577,9 +580,9 @@ class AcademicHub {
                 subject: this.timer.currentSubject,
                 duration: this.timer.elapsedTime,
                 date: new Date().toISOString(),
-                endTime: new Date().toISOString(),
-                type: this.timer.isBreakTime ? 'break' : 'study'
+                endTime: new Date().toISOString()
             };
+
             this.storage.sessions.push(session);
             this.saveSessions();
             this.updateStats();
@@ -596,20 +599,23 @@ class AcademicHub {
             new Date(session.date).toDateString() === today
         );
 
-        sessionsList.innerHTML = todaySessions.length === 0
-            ? `
+        if (todaySessions.length === 0) {
+            sessionsList.innerHTML = `
                 <div class="empty-state">
                     <p>No study sessions today</p>
                     <small>Start a timer to track your study time</small>
                 </div>
-            `
-            : todaySessions.map(session => `
-                <div class="session-item">
-                    <div class="session-subject">${this.getSubjectName(session.subject)}</div>
-                    <div class="session-duration">${this.formatTime(session.duration)}</div>
-                    <div class="session-time">${new Date(session.endTime).toLocaleTimeString()}</div>
-                </div>
-            `).join('');
+            `;
+            return;
+        }
+
+        sessionsList.innerHTML = todaySessions.map(session => `
+            <div class="session-item">
+                <div class="session-subject">${this.getSubjectName(session.subject)}</div>
+                <div class="session-duration">${this.formatTime(session.duration)}</div>
+                <div class="session-time">${new Date(session.endTime).toLocaleTimeString()}</div>
+            </div>
+        `).join('');
     }
 
     // Assignment Management
@@ -637,7 +643,7 @@ class AcademicHub {
         const dueDate = new Date(assignment.dueDate);
         const isOverdue = dueDate < new Date() && !assignment.completed;
         const dueDateFormatted = dueDate.toLocaleDateString();
-
+        
         return `
             <div class="assignment-card ${assignment.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
                 <div class="assignment-header">
@@ -673,7 +679,9 @@ class AcademicHub {
             this.saveAssignments();
             this.updateAssignmentsDisplay();
             this.updateStats();
-            this.showToast(`Assignment ${assignment.completed ? 'completed' : 'marked as pending'}!`, 'success');
+            
+            const status = assignment.completed ? 'completed' : 'marked as pending';
+            this.showToast(`Assignment ${status}!`, 'success');
         }
     }
 
@@ -689,47 +697,64 @@ class AcademicHub {
     }
 
     filterAssignments(filter) {
+        // Implementation for filtering assignments
+        const assignments = this.storage.assignments;
+        let filtered;
+
+        switch (filter) {
+            case 'pending':
+                filtered = assignments.filter(a => !a.completed && new Date(a.dueDate) >= new Date());
+                break;
+            case 'completed':
+                filtered = assignments.filter(a => a.completed);
+                break;
+            case 'overdue':
+                filtered = assignments.filter(a => !a.completed && new Date(a.dueDate) < new Date());
+                break;
+            default:
+                filtered = assignments;
+        }
+
+        this.displayFilteredAssignments(filtered);
+    }
+
+    displayFilteredAssignments(assignments) {
         const assignmentsList = document.getElementById('assignmentsList');
         if (!assignmentsList) return;
 
-        let filtered;
-        switch (filter) {
-            case 'pending':
-                filtered = this.storage.assignments.filter(a => !a.completed && new Date(a.dueDate) >= new Date());
-                break;
-            case 'completed':
-                filtered = this.storage.assignments.filter(a => a.completed);
-                break;
-            case 'overdue':
-                filtered = this.storage.assignments.filter(a => !a.completed && new Date(a.dueDate) < new Date());
-                break;
-            default:
-                filtered = this.storage.assignments;
-        }
-
-        assignmentsList.innerHTML = filtered.length === 0
-            ? `
+        if (assignments.length === 0) {
+            assignmentsList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📝</div>
                     <h3>No assignments found</h3>
                     <p>No assignments match the current filter</p>
                 </div>
-            `
-            : filtered.map(assignment => this.createAssignmentCard(assignment)).join('');
+            `;
+            return;
+        }
+
+        assignmentsList.innerHTML = assignments.map(assignment => 
+            this.createAssignmentCard(assignment)
+        ).join('');
     }
 
     updateActiveFilter(activeBtn) {
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
         activeBtn.classList.add('active');
     }
 
     // Notifications
     setupNotifications() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
         this.checkUpcomingDeadlines();
-        setInterval(() => this.checkUpcomingDeadlines(), 60000);
+        this.checkStudyReminders();
+        
+        // Check every minute
+        setInterval(() => {
+            this.checkUpcomingDeadlines();
+            this.checkStudyReminders();
+        }, 60000);
     }
 
     checkUpcomingDeadlines() {
@@ -739,6 +764,7 @@ class AcademicHub {
         this.storage.assignments.forEach(assignment => {
             if (!assignment.completed && !assignment.notified) {
                 const dueDate = new Date(assignment.dueDate);
+                
                 if (dueDate <= tomorrow && dueDate > now) {
                     this.addNotification({
                         type: 'deadline',
@@ -747,6 +773,7 @@ class AcademicHub {
                         timestamp: new Date().toISOString(),
                         read: false
                     });
+                    
                     assignment.notified = true;
                     this.saveAssignments();
                 }
@@ -754,18 +781,66 @@ class AcademicHub {
         });
     }
 
+    checkStudyReminders() {
+        const now = new Date();
+        const currentDay = now.toLocaleDateString('en', { weekday: 'short' }).toLowerCase();
+        const currentTime = now.toTimeString().slice(0, 5);
+
+        this.storage.alarms.forEach(alarm => {
+            if (alarm.active && alarm.days.includes(currentDay)) {
+                const alarmTime = alarm.time;
+                const timeDiff = Math.abs(new Date(`1970/01/01 ${currentTime}`) - new Date(`1970/01/01 ${alarmTime}`));
+                
+                if (timeDiff < 60000 && !alarm.triggeredToday) {
+                    this.triggerAlarm(alarm);
+                    alarm.triggeredToday = true;
+                    this.saveAlarms();
+                }
+            }
+        });
+
+        if (currentTime === '00:00') {
+            this.storage.alarms.forEach(alarm => {
+                alarm.triggeredToday = false;
+            });
+            this.saveAlarms();
+        }
+    }
+
+    triggerAlarm(alarm) {
+        this.addNotification({
+            type: 'alarm',
+            title: 'Study Reminder',
+            message: alarm.name,
+            timestamp: new Date().toISOString(),
+            read: false
+        });
+
+        if (Notification.permission === 'granted') {
+            new Notification('Study Reminder', {
+                body: alarm.name,
+                icon: 'icon-192.png'
+            });
+        }
+
+        this.showToast(`⏰ ${alarm.name}`, 'info');
+    }
+
     addNotification(notification) {
         notification.id = Date.now();
         this.storage.notifications.unshift(notification);
+        
         this.storage.notifications = this.storage.notifications.slice(0, 50);
+        
         this.saveNotifications();
         this.updateNotificationBadge();
     }
 
     updateNotificationBadge() {
         const badge = document.getElementById('notificationBadge');
+        const unreadCount = this.storage.notifications.filter(n => !n.read).length;
+        
         if (badge) {
-            const unreadCount = this.storage.notifications.filter(n => !n.read).length;
             badge.textContent = unreadCount;
             badge.style.display = unreadCount > 0 ? 'block' : 'none';
         }
@@ -783,17 +858,20 @@ class AcademicHub {
         const notificationsList = document.getElementById('notificationsList');
         if (!notificationsList) return;
 
-        notificationsList.innerHTML = this.storage.notifications.length === 0
-            ? '<div class="empty-state"><p>No notifications</p></div>'
-            : this.storage.notifications.map(notification => `
-                <div class="notification-item ${notification.read ? 'read' : 'unread'}" onclick="academicHub.markNotificationRead('${notification.id}')">
-                    <div class="notification-content">
-                        <h4>${notification.title}</h4>
-                        <p>${notification.message}</p>
-                        <span class="notification-time">${this.formatRelativeTime(notification.timestamp)}</span>
-                    </div>
+        if (this.storage.notifications.length === 0) {
+            notificationsList.innerHTML = '<div class="empty-state"><p>No notifications</p></div>';
+            return;
+        }
+
+        notificationsList.innerHTML = this.storage.notifications.map(notification => `
+            <div class="notification-item ${notification.read ? 'read' : 'unread'}" onclick="academicHub.markNotificationRead('${notification.id}')">
+                <div class="notification-content">
+                    <h4>${notification.title}</h4>
+                    <p>${notification.message}</p>
+                    <span class="notification-time">${this.formatRelativeTime(notification.timestamp)}</span>
                 </div>
-            `).join('');
+            </div>
+        `).join('');
     }
 
     markNotificationRead(id) {
@@ -819,65 +897,31 @@ class AcademicHub {
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
-        setInterval(() => this.checkStudyReminders(), 60000);
-    }
-
-    checkStudyReminders() {
-        const now = new Date();
-        const currentDay = now.toLocaleDateString('en', { weekday: 'short' }).toLowerCase();
-        const currentTime = now.toTimeString().slice(0, 5);
-
-        this.storage.alarms.forEach(alarm => {
-            if (alarm.active && alarm.days.includes(currentDay)) {
-                if (currentTime === alarm.time && !alarm.triggeredToday) {
-                    this.triggerAlarm(alarm);
-                    alarm.triggeredToday = true;
-                    this.saveAlarms();
-                }
-            }
-        });
-
-        if (currentTime === '00:00') {
-            this.storage.alarms.forEach(alarm => alarm.triggeredToday = false);
-            this.saveAlarms();
-        }
-    }
-
-    triggerAlarm(alarm) {
-        this.addNotification({
-            type: 'alarm',
-            title: 'Study Reminder',
-            message: alarm.name,
-            timestamp: new Date().toISOString(),
-            read: false
-        });
-
-        if (Notification.permission === 'granted') {
-            new Notification('Study Reminder', {
-                body: alarm.name,
-                icon: 'icon-192.png'
-            });
-        }
-        this.showToast(`⏰ ${alarm.name}`, 'info');
     }
 
     updateAlarmsDisplay() {
         const alarmsList = document.getElementById('alarmsList');
         if (!alarmsList) return;
 
-        alarmsList.innerHTML = this.storage.alarms.length === 0
-            ? `
+        if (this.storage.alarms.length === 0) {
+            alarmsList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">⏰</div>
                     <h3>No alarms set</h3>
                     <p>Set study alarms to stay on track</p>
                 </div>
-            `
-            : this.storage.alarms.map(alarm => this.createAlarmCard(alarm)).join('');
+            `;
+            return;
+        }
+
+        alarmsList.innerHTML = this.storage.alarms.map(alarm => 
+            this.createAlarmCard(alarm)
+        ).join('');
     }
 
     createAlarmCard(alarm) {
         const daysText = alarm.days.map(day => day.charAt(0).toUpperCase() + day.slice(1)).join(', ');
+        
         return `
             <div class="alarm-card ${alarm.active ? 'active' : 'inactive'}">
                 <div class="alarm-header">
@@ -908,20 +952,9 @@ class AcademicHub {
             alarm.active = !alarm.active;
             this.saveAlarms();
             this.updateAlarmsDisplay();
-            this.showToast(`Alarm ${alarm.active ? 'enabled' : 'disabled'}!`, 'success');
-        }
-    }
-
-    editAlarm(id) {
-        const alarm = this.storage.alarms.find(a => a.id == id);
-        if (alarm) {
-            document.getElementById('alarmName').value = alarm.name;
-            document.getElementById('alarmTime').value = alarm.time;
-            document.getElementById('alarmSubject').value = alarm.subject || '';
-            document.querySelectorAll('.day-option input').forEach(cb => {
-                cb.checked = alarm.days.includes(cb.value);
-            });
-            this.showModal('alarmModal');
+            
+            const status = alarm.active ? 'enabled' : 'disabled';
+            this.showToast(`Alarm ${status}!`, 'success');
         }
     }
 
@@ -974,7 +1007,8 @@ class AcademicHub {
     }
 
     calculateDailyAverage() {
-        return this.calculateWeeklyHours() / 7;
+        const weeklyHours = this.calculateWeeklyHours();
+        return weeklyHours / 7;
     }
 
     calculateGoalProgress() {
@@ -984,44 +1018,45 @@ class AcademicHub {
     }
 
     createProgressCharts() {
-        if (typeof Chart === 'undefined') return;
         this.createWeeklyChart();
         this.createSubjectChart();
     }
 
     createWeeklyChart() {
         const canvas = document.getElementById('weeklyChart');
-        if (!canvas) return;
+        if (!canvas || typeof Chart === 'undefined') return;
 
+        const ctx = canvas.getContext('2d');
+        
         const days = [];
         const hours = [];
+        
         for (let i = 6; i >= 0; i--) {
             const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
             const dayName = date.toLocaleDateString('en', { weekday: 'short' });
             const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
             const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-
+            
             const dayHours = this.storage.sessions
                 .filter(session => {
                     const sessionDate = new Date(session.date);
                     return sessionDate >= dayStart && sessionDate < dayEnd;
                 })
                 .reduce((total, session) => total + session.duration, 0) / (60 * 60 * 1000);
-
+            
             days.push(dayName);
             hours.push(dayHours);
         }
 
-        ```chartjs
-        {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: days,
                 datasets: [{
                     label: 'Study Hours',
                     data: hours,
-                    backgroundColor: '#667eea',
-                    borderColor: '#4c51bf',
+                    backgroundColor: 'rgba(0, 122, 255, 0.8)',
+                    borderColor: 'rgba(0, 122, 255, 1)',
                     borderWidth: 1
                 }]
             },
@@ -1029,23 +1064,655 @@ class AcademicHub {
                 responsive: true,
                 scales: {
                     y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Hours'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Day'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
+                        beginAtZero: true
                     }
                 }
             }
+        });
+    }
+
+    createSubjectChart() {
+        const canvas = document.getElementById('subjectChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const ctx = canvas.getContext('2d');
+        
+        const subjectTime = {};
+        this.storage.sessions.forEach(session => {
+            if (!subjectTime[session.subject]) {
+                subjectTime[session.subject] = 0;
+            }
+            subjectTime[session.subject] += session.duration;
+        });
+
+        const subjects = Object.keys(subjectTime);
+        const times = subjects.map(subject => subjectTime[subject] / (60 * 60 * 1000));
+        const colors = [
+            '#667eea', '#43e97b', '#4facfe', '#f093fb', 
+            '#fa709a', '#a8edea', '#ffecd2'
+        ];
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: subjects.map(subject => this.getSubjectName(subject)),
+                datasets: [{
+                    data: times,
+                    backgroundColor: colors.slice(0, subjects.length),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    // Dashboard
+    updateDashboard() {
+        this.updateDashboardStats();
+        this.updateRecentActivity();
+        this.updateUpcomingDeadlines();
+    }
+
+    updateDashboardStats() {
+        const stats = {
+            totalSubjects: 7,
+            completedTasks: this.storage.assignments.filter(a => a.completed).length,
+            totalStudyTime: this.storage.sessions.reduce((total, session) => total + session.duration, 0),
+            overallProgress: this.calculateOverallProgress()
+        };
+
+        const elements = {
+            totalSubjects: document.getElementById('totalSubjects'),
+            completedTasks: document.getElementById('completedTasks'),
+            totalStudyTime: document.getElementById('totalStudyTime'),
+            overallProgress: document.getElementById('overallProgress')
+        };
+
+        if (elements.totalSubjects) elements.totalSubjects.textContent = stats.totalSubjects;
+        if (elements.completedTasks) elements.completedTasks.textContent = stats.completedTasks;
+        if (elements.totalStudyTime) elements.totalStudyTime.textContent = this.formatTime(stats.totalStudyTime);
+        if (elements.overallProgress) elements.overallProgress.textContent = `${stats.overallProgress}%`;
+    }
+
+    calculateOverallProgress() {
+        const totalAssignments = this.storage.assignments.length;
+        const completedAssignments = this.storage.assignments.filter(a => a.completed).length;
+        
+        if (totalAssignments === 0) return 0;
+        return Math.round((completedAssignments / totalAssignments) * 100);
+    }
+
+    updateRecentActivity() {
+        const activityList = document.getElementById('activityList');
+        if (!activityList) return;
+
+        const recentSessions = this.storage.sessions
+            .slice(-5)
+            .reverse()
+            .map(session => ({
+                type: 'study',
+                title: `Studied ${this.getSubjectName(session.subject)}`,
+                subtitle: `${this.formatTime(session.duration)} session`,
+                time: this.formatRelativeTime(session.endTime)
+            }));
+
+        const recentAssignments = this.storage.assignments
+            .filter(a => a.completed && a.completedDate)
+            .slice(-3)
+            .reverse()
+            .map(assignment => ({
+                type: 'assignment',
+                title: `Completed ${assignment.title}`,
+                subtitle: this.getSubjectName(assignment.subject),
+                time: this.formatRelativeTime(assignment.completedDate)
+            }));
+
+        const allActivity = [...recentSessions, ...recentAssignments]
+            .sort((a, b) => new Date(b.time) - new Date(a.time))
+            .slice(0, 5);
+
+        if (allActivity.length === 0) {
+            activityList.innerHTML = `
+                <div class="empty-state">
+                    <p>No recent activity</p>
+                    <small>Start studying to see your progress here</small>
+                </div>
+            `;
+            return;
         }
+
+        activityList.innerHTML = allActivity.map(activity => `
+            <div class="activity-item ${activity.type}">
+                <div class="activity-content">
+                    <h4>${activity.title}</h4>
+                    <p>${activity.subtitle}</p>
+                    <span class="activity-time">${activity.time}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    updateUpcomingDeadlines() {
+        const deadlineList = document.getElementById('deadlineList');
+        if (!deadlineList) return;
+
+        const upcomingDeadlines = this.storage.assignments
+            .filter(a => !a.completed && new Date(a.dueDate) >= new Date())
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .slice(0, 5);
+
+        if (upcomingDeadlines.length === 0) {
+            deadlineList.innerHTML = `
+                <div class="empty-state">
+                    <p>No upcoming deadlines</p>
+                    <small>Add assignments to track deadlines</small>
+                </div>
+            `;
+            return;
+        }
+
+        deadlineList.innerHTML = upcomingDeadlines.map(assignment => {
+            const dueDate = new Date(assignment.dueDate);
+            const daysLeft = Math.ceil((dueDate - new Date()) / (24 * 60 * 60 * 1000));
+            
+            return `
+                <div class="deadline-item ${daysLeft <= 1 ? 'urgent' : ''}">
+                    <div class="deadline-content">
+                        <h4>${assignment.title}</h4>
+                        <p>${this.getSubjectName(assignment.subject)}</p>
+                        <span class="deadline-time">
+                            ${daysLeft === 0 ? 'Due today' : daysLeft === 1 ? 'Due tomorrow' : `${daysLeft} days left`}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Modal Management
+    showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+        }
+    }
+
+    hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+    }
+
+    // Update displays
+    updateAllDisplays() {
+        this.updateStats();
+        this.updateMaterialsDisplay();
+        this.updateAssignmentsDisplay();
+        this.updateAlarmsDisplay();
+        this.updateNotificationBadge();
+        this.updateTodaySessions();
+    }
+
+    updateStats() {
+        const materialsCount = this.storage.materials.length;
+        const assignmentsCount = this.storage.assignments.filter(a => !a.completed).length;
+        const totalStudyTime = this.storage.sessions.reduce((total, session) => total + session.duration, 0);
+
+        const elements = {
+            materials: document.getElementById('materials'),
+            assignments: document.getElementById('assignments'),
+            studyHours: document.getElementById('studyHours'),
+            assignmentCount: document.getElementById('assignmentCount')
+        };
+
+        if (elements.materials) elements.materials.textContent = materialsCount;
+        if (elements.assignments) elements.assignments.textContent = assignmentsCount;
+        if (elements.studyHours) elements.studyHours.textContent = this.formatTime(totalStudyTime);
+        if (elements.assignmentCount) elements.assignmentCount.textContent = assignmentsCount;
+    }
+
+    updateGreeting() {
+        const greetingElement = document.getElementById('greetingText');
+        if (!greetingElement) return;
+
+        const hour = new Date().getHours();
+        let greeting;
+
+        if (hour < 12) {
+            greeting = 'Good morning, Prakash!';
+        } else if (hour < 17) {
+            greeting = 'Good afternoon, Prakash!';
+        } else {
+            greeting = 'Good evening, Prakash!';
+        }
+
+        greetingElement.textContent = greeting;
+    }
+
+    syncData() {
+        const syncBtn = document.getElementById('syncBtn');
+        if (syncBtn) {
+            syncBtn.style.animation = 'spin 1s linear';
+            setTimeout(() => {
+                syncBtn.style.animation = '';
+                this.showToast('Data synced successfully!', 'success');
+            }, 1000);
+        }
+    }
+
+    // Utility Functions
+    getFileIcon(type) {
+        if (type.includes('pdf')) return '📄';
+        if (type.includes('word') || type.includes('document')) return '📝';
+        if (type.includes('powerpoint') || type.includes('presentation')) return '📊';
+        if (type.includes('image')) return '🖼️';
+        if (type.includes('text')) return '📃';
+        if (type.includes('video')) return '🎥';
+        if (type.includes('audio')) return '🎵';
+        return '📁';
+    }
+
+    getSubjectName(subject) {
+        const subjects = {
+            'math': 'Mathematics',
+            'dsa': 'Data Structures',
+            'coa': 'Computer Organization',
+            'programming': 'Advanced Programming',
+            'os': 'Operating Systems',
+            'uhv': 'Universal Human Values',
+            'ethics': 'Professional Ethics'
+        };
+        return subjects[subject] || 'General';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    formatTime(milliseconds) {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        if (hours > 0) {
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        } else {
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+
+    formatTime12Hour(time24) {
+        const [hours, minutes] = time24.split(':');
+        const hour12 = hours % 12 || 12;
+        const ampm = hours < 12 ? 'AM' : 'PM';
+        return `${hour12}:${minutes} ${ampm}`;
+    }
+
+    formatRelativeTime(timestamp) {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffMs = now - time;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMs < 1000 * 60) return 'Just now';
+        if (diffMs < 1000 * 60 * 60) return `${Math.floor(diffMs / (1000 * 60))}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return time.toLocaleDateString();
+    }
+
+    truncateText(text, length) {
+        return text.length > length ? text.substring(0, length) + '...' : text;
+    }
+
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        const container = document.getElementById('toastContainer');
+        if (container) {
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (container.contains(toast)) {
+                        container.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    }
+
+    // Storage Functions
+    saveMaterials() {
+        localStorage.setItem('academic_hub_materials', JSON.stringify(this.storage.materials));
+    }
+
+    saveAssignments() {
+        localStorage.setItem('academic_hub_assignments', JSON.stringify(this.storage.assignments));
+    }
+
+    saveSessions() {
+        localStorage.setItem('academic_hub_sessions', JSON.stringify(this.storage.sessions));
+    }
+
+    saveAlarms() {
+        localStorage.setItem('academic_hub_alarms', JSON.stringify(this.storage.alarms));
+    }
+
+    saveNotifications() {
+        localStorage.setItem('academic_hub_notifications', JSON.stringify(this.storage.notifications));
+    }
+
+    saveSettings() {
+        localStorage.setItem('academic_hub_settings', JSON.stringify(this.storage.settings));
+    }
+}
+
+// Global Functions for HTML onclick handlers
+function openMaterials(subject) {
+    academicHub.showSection('materials');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelector('[data-section="materials"]').classList.add('active');
+    
+    const subjectFilter = document.getElementById('subjectFilter');
+    if (subjectFilter) {
+        subjectFilter.value = subject;
+        academicHub.filterMaterials(subject);
+    }
+}
+
+function startStudying(subject) {
+    academicHub.showSection('timer');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelector('[data-section="timer"]').classList.add('active');
+    
+    const timerSubject = document.getElementById('timerSubject');
+    if (timerSubject) {
+        timerSubject.value = subject;
+        academicHub.timer.currentSubject = subject;
+    }
+    
+    academicHub.showToast(`Ready to study ${academicHub.getSubjectName(subject)}!`, 'success');
+}
+
+// Assignment Modal Functions
+function showAddAssignmentModal() {
+    academicHub.showModal('assignmentModal');
+}
+
+function hideAddAssignmentModal() {
+    academicHub.hideModal('assignmentModal');
+}
+
+function saveAssignment() {
+    const title = document.getElementById('assignmentTitle').value;
+    const subject = document.getElementById('assignmentSubject').value;
+    const dueDate = document.getElementById('assignmentDueDate').value;
+    const description = document.getElementById('assignmentDescription').value;
+
+    if (!title || !subject || !dueDate) {
+        academicHub.showToast('Please fill in all required fields', 'error');
+        return;
+    }
+
+    const assignment = {
+        id: Date.now(),
+        title,
+        subject,
+        dueDate,
+        description,
+        completed: false,
+        createdDate: new Date().toISOString()
+    };
+
+    academicHub.storage.assignments.push(assignment);
+    academicHub.saveAssignments();
+    academicHub.updateAssignmentsDisplay();
+    academicHub.updateStats();
+    academicHub.buildSearchIndex();
+    
+    // Clear form
+    document.getElementById('assignmentTitle').value = '';
+    document.getElementById('assignmentSubject').value = 'math';
+    document.getElementById('assignmentDueDate').value = '';
+    document.getElementById('assignmentDescription').value = '';
+    
+    academicHub.hideModal('assignmentModal');
+    academicHub.showToast('Assignment added successfully!', 'success');
+}
+
+// Alarm Modal Functions
+function showAddAlarmModal() {
+    academicHub.showModal('alarmModal');
+}
+
+function hideAddAlarmModal() {
+    academicHub.hideModal('alarmModal');
+}
+
+function saveAlarm() {
+    const name = document.getElementById('alarmName').value;
+    const time = document.getElementById('alarmTime').value;
+    const subject = document.getElementById('alarmSubject').value;
+    
+    const dayCheckboxes = document.querySelectorAll('.day-option input:checked');
+    const days = Array.from(dayCheckboxes).map(cb => cb.value);
+
+    if (!name || !time || days.length === 0) {
+        academicHub.showToast('Please fill in all required fields', 'error');
+        return;
+    }
+
+    const alarm = {
+        id: Date.now(),
+        name,
+        time,
+        days,
+        subject,
+        active: true,
+        createdDate: new Date().toISOString()
+    };
+
+    academicHub.storage.alarms.push(alarm);
+    academicHub.saveAlarms();
+    academicHub.updateAlarmsDisplay();
+    
+    // Clear form
+    document.getElementById('alarmName').value = '';
+    document.getElementById('alarmTime').value = '';
+    document.getElementById('alarmSubject').value = '';
+    document.querySelectorAll('.day-option input').forEach(cb => cb.checked = false);
+    
+    academicHub.hideModal('alarmModal');
+    academicHub.showToast('Alarm created successfully!', 'success');
+}
+
+// File Modal Functions
+function closeFileModal() {
+    academicHub.hideModal('fileModal');
+}
+
+function downloadCurrentFile() {
+    if (academicHub.currentFile) {
+        academicHub.downloadFile(academicHub.currentFile.id);
+        closeFileModal();
+    }
+}
+
+function deleteCurrentFile() {
+    if (academicHub.currentFile && confirm('Are you sure you want to delete this file?')) {
+        academicHub.deleteFile(academicHub.currentFile.id);
+        closeFileModal();
+    }
+}
+
+function clearAllNotifications() {
+    academicHub.clearAllNotifications();
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    window.academicHub = new AcademicHub();
+    
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent-blue);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .notification-panel {
+            position: fixed;
+            top: 64px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-heavy);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification-panel.show {
+            transform: translateX(0);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        .notification-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .notification-item.unread {
+            background: rgba(0, 122, 255, 0.05);
+            border-left: 3px solid var(--accent-blue);
+        }
+        
+        .days-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .day-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .assignment-card, .alarm-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .assignment-card.completed {
+            opacity: 0.7;
+        }
+        
+        .assignment-card.overdue {
+            border-color: var(--accent-red);
+        }
+        
+        .alarm-card.inactive {
+            opacity: 0.6;
+        }
+    `;
+    document.head.appendChild(style);
+});
