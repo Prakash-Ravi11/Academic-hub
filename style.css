@@ -1168,4 +1168,18 @@ body {
     gap: 12px;
     margin-top: 16px;
 }
+.page-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.semester-badge {
+    background: #2d2e36;
+    color: #8e8e93;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
 
