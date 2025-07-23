@@ -1,10 +1,15 @@
 /* Synchronized Academic Hub Styles */
 :root {
-    --primary: #6366f1;
+    --primary: #0284c7;
     --secondary: #8b5cf6;
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
+    --academia-blue: #0284c7;
+    --academia-light: #f0f9ff;
+    --academia-dark: #0c4a6e;
+    --academia-gradient: linear-gradient(135deg, #0284c7, #0369a1);
+    
     
     --bg-primary: #ffffff;
     --bg-secondary: #f8fafc;
