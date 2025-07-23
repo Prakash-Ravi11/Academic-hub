@@ -1994,4 +1994,132 @@ document.getElementById('searchBox')?.addEventListener('input', function () {
     });
   });
 });
+// Add these functions to your main StudyBuddyApp class
+
+// ============ File Upload Integration ============
+initializeFileUpload() {
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    
+    // Drag and drop events
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+    
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+    
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        this.handleFileUpload(Array.from(e.dataTransfer.files));
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        this.handleFileUpload(Array.from(e.target.files));
+    });
+}
+
+async handleFileUpload(files) {
+    if (!this.currentUser) {
+        this.showNotification('Please sign in to upload files', 'error');
+        return;
+    }
+    
+    const processingStatus = document.getElementById('processingStatus');
+    const processingText = document.getElementById('processingText');
+    
+    processingStatus.classList.remove('hidden');
+    
+    try {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            processingText.textContent = `Processing ${file.name}... (${i + 1}/${files.length})`;
+            
+            const processedFile = await storage.uploadFile(file, this.currentUser.email);
+            
+            // Add extracted tasks to user's task list
+            processedFile.extractedTasks.forEach(task => {
+                this.tasks.push({
+                    ...task,
+                    id: Date.now().toString() + Math.random(),
+                    createdAt: new Date().toISOString()
+                });
+            });
+            
+            this.showNotification(`Extracted ${processedFile.extractedTasks.length} tasks from ${file.name}`, 'success');
+        }
+        
+        this.renderTasks();
+        this.updateStats();
+        this.saveUserData();
+        this.loadUploadedFiles();
+        
+    } catch (error) {
+        this.showNotification(`Upload error: ${error.message}`, 'error');
+    } finally {
+        processingStatus.classList.add('hidden');
+        document.getElementById('fileInput').value = '';
+    }
+}
+
+async loadUploadedFiles() {
+    if (!this.currentUser) return;
+    
+    try {
+        const files = await storage.getFilesByUser(this.currentUser.email);
+        const filesList = document.getElementById('filesList');
+        
+        if (files.length === 0) {
+            filesList.innerHTML = '<p class="text-muted">No uploaded files yet</p>';
+            return;
+        }
+        
+        filesList.innerHTML = '';
+        files.forEach(file => {
+            const preview = storage.createFilePreview(file);
+            filesList.appendChild(preview);
+        });
+        
+    } catch (error) {
+        console.error('Error loading files:', error);
+    }
+}
+
+// Import/Export functions
+function showImportDialog() {
+    document.getElementById('importModal').classList.remove('hidden');
+}
+
+function closeImportDialog() {
+    document.getElementById('importModal').classList.add('hidden');
+}
+
+async function importBackup() {
+    const fileInput = document.getElementById('importFileInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        app.showNotification('Please select a backup file', 'error');
+        return;
+    }
+    
+    try {
+        const result = await storage.importUserData(file, app.currentUser.email);
+        app.showNotification(`Import successful! ${result.tasksImported} tasks and ${result.filesImported} files imported.`, 'success');
+        
+        // Reload app data
+        app.loadUserData();
+        app.renderTasks();
+        app.updateStats();
+        app.loadUploadedFiles();
+        
+        closeImportDialog();
+    } catch (error) {
+        app.showNotification(`Import failed: ${error.message}`, 'error');
+    }
+}
 
