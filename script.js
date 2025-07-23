@@ -1,2125 +1,867 @@
-// Academic Hub - Complete Implementation with All Features
-class AcademicHub {
+// ============ ACADEMIA HUB COMPLETE JAVASCRIPT ============
+
+// Global Variables
+let currentUser = null;
+let isLoggedIn = false;
+let tasks = [];
+let completedTasks = [];
+let studyStats = {
+    totalStudyTime: 0,
+    studyStreak: 0,
+    tasksCompleted: 0,
+    focusTime: 0
+};
+
+// Voice Recognition
+let recognition = null;
+let isListening = false;
+let voices = [];
+let selectedVoice = null;
+
+// AI Chat
+let chatHistory = [];
+let isTyping = false;
+
+// Theme Management
+let currentTheme = 'light';
+
+// Academia Hub Application Class
+class AcademiaHub {
     constructor() {
-        // Initialize all data storage
-        this.storage = {
-            materials: JSON.parse(localStorage.getItem('academic_hub_materials') || '[]'),
-            assignments: JSON.parse(localStorage.getItem('academic_hub_assignments') || '[]'),
-            sessions: JSON.parse(localStorage.getItem('academic_hub_sessions') || '[]'),
-            alarms: JSON.parse(localStorage.getItem('academic_hub_alarms') || '[]'),
-            notifications: JSON.parse(localStorage.getItem('academic_hub_notifications') || '[]'),
-            settings: JSON.parse(localStorage.getItem('academic_hub_settings') || '{"theme": "dark"}')
-        };
-
-        // Timer state
-        this.timer = {
-            isRunning: false,
-            startTime: null,
-            elapsedTime: 0,
-            interval: null,
-            currentSubject: null
-        };
-
-        // App state
-        this.currentFile = null;
-        this.searchIndex = [];
-
         this.init();
     }
 
     init() {
-        this.setupEventListeners();
-        this.setupNavigation();
-        this.setupTheme();
-        this.setupSearch();
-        this.setupFileUpload();
-        this.setupTimer();
-        this.setupNotifications();
-        this.setupAlarms();
-        this.updateAllDisplays();
-        this.updateGreeting();
-        this.buildSearchIndex();
+        console.log('🎓 Initializing Academia Hub...');
+        this.initializeEventListeners();
+        this.initializeVoiceRecognition();
+        this.initializeTextToSpeech();
+        this.loadSavedData();
+        this.showAuthModal();
+        this.loadQuotes();
+        console.log('✅ Academia Hub initialized successfully!');
     }
 
-    // NAVIGATION SYSTEM
-    setupNavigation() {
-        this.showSection('dashboard');
-    }
-
-    setupEventListeners() {
-        // Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showSection(link.dataset.section);
-                this.updateActiveNav(link);
-            });
-        });
-
-        // Header buttons
-        const themeBtn = document.getElementById('themeBtn');
-        if (themeBtn) {
-            themeBtn.addEventListener('click', () => this.toggleTheme());
+    // ============ EVENT LISTENERS ============
+    initializeEventListeners() {
+        // Authentication
+        const authForm = document.getElementById('authForm');
+        if (authForm) {
+            authForm.addEventListener('submit', this.handleAuthentication.bind(this));
         }
 
-        const notificationBtn = document.getElementById('notificationBtn');
-        if (notificationBtn) {
-            notificationBtn.addEventListener('click', () => this.toggleNotificationPanel());
+        const authSwitchLink = document.getElementById('authSwitchLink');
+        if (authSwitchLink) {
+            authSwitchLink.addEventListener('click', this.toggleAuthMode.bind(this));
         }
 
-        const syncBtn = document.getElementById('syncBtn');
-        if (syncBtn) {
-            syncBtn.addEventListener('click', () => this.syncData());
+        // Voice Controls
+        const voiceBtn = document.getElementById('voiceBtn');
+        if (voiceBtn) {
+            voiceBtn.addEventListener('click', this.toggleVoiceRecognition.bind(this));
         }
 
-        const alarmBtn = document.getElementById('alarmBtn');
-        if (alarmBtn) {
-            alarmBtn.addEventListener('click', () => this.showSection('alarms'));
-        }
-
-        // Assignment filters
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.filterAssignments(btn.dataset.filter);
-                this.updateActiveFilter(btn);
-            });
-        });
-
-        // Subject filter
-        const subjectFilter = document.getElementById('subjectFilter');
-        if (subjectFilter) {
-            subjectFilter.addEventListener('change', (e) => {
-                this.filterMaterials(e.target.value);
+        // Chat
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) {
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
             });
         }
 
-        // Modal close events
-        document.querySelectorAll('.modal-close').forEach(btn => {
+        const sendBtn = document.getElementById('sendBtn');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', this.sendMessage.bind(this));
+        }
+
+        // Task Input
+        const taskInput = document.getElementById('taskInput');
+        if (taskInput) {
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.createTask();
+                }
+            });
+        }
+
+        const createTaskBtn = document.getElementById('createTaskBtn');
+        if (createTaskBtn) {
+            createTaskBtn.addEventListener('click', this.createTask.bind(this));
+        }
+
+        // Theme buttons
+        document.querySelectorAll('.theme-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const modal = e.target.closest('.modal');
-                this.hideModal(modal.id);
+                const theme = e.target.textContent.toLowerCase();
+                this.setTheme(theme);
             });
         });
 
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.hideModal(modal.id);
-                }
-            });
-        });
-    }
-
-    showSection(sectionName) {
-        // Hide all sections
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.classList.remove('active');
-        });
-
-        // Show target section
-        const targetSection = document.getElementById(sectionName);
-        if (targetSection) {
-            targetSection.classList.add('active');
-        }
-
-        // Update navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        const activeLink = document.querySelector(`[data-section="${sectionName}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-
-        // Section-specific updates
-        setTimeout(() => {
-            switch (sectionName) {
-                case 'dashboard':
-                    this.updateDashboard();
-                    break;
-                case 'materials':
-                    this.updateMaterialsDisplay();
-                    this.setupFileUpload();
-                    break;
-                case 'assignments':
-                    this.updateAssignmentsDisplay();
-                    break;
-                case 'timer':
-                    this.updateTodaySessions();
-                    break;
-                case 'progress':
-                    this.updateProgressDisplay();
-                    break;
-                case 'alarms':
-                    this.updateAlarmsDisplay();
-                    break;
-            }
-        }, 100);
-    }
-
-    updateActiveNav(activeLink) {
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        activeLink.classList.add('active');
-    }
-
-    // THEME SYSTEM
-    setupTheme() {
-        const savedTheme = this.storage.settings.theme || 'dark';
-        this.applyTheme(savedTheme);
-    }
-
-    toggleTheme() {
-        const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        this.applyTheme(newTheme);
-        this.storage.settings.theme = newTheme;
-        this.saveSettings();
-        this.showToast(`Switched to ${newTheme} theme`, 'info');
-    }
-
-    applyTheme(theme) {
-        const themeBtn = document.getElementById('themeBtn');
-        if (theme === 'light') {
-            document.body.classList.add('light-theme');
-            document.body.classList.remove('dark-theme');
-            if (themeBtn) themeBtn.textContent = '☀️';
-        } else {
-            document.body.classList.remove('light-theme');
-            document.body.classList.add('dark-theme');
-            if (themeBtn) themeBtn.textContent = '🌙';
+        // Progress motivate button
+        const motivateBtn = document.getElementById('motivateBtn');
+        if (motivateBtn) {
+            motivateBtn.addEventListener('click', this.getMotivation.bind(this));
         }
     }
 
-    // SEARCH SYSTEM
-    setupSearch() {
-        const searchInput = document.getElementById('globalSearch');
-        const searchResults = document.querySelector('.search-results');
-
-        if (searchInput && searchResults) {
-            let searchTimeout;
-
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                const query = e.target.value.trim();
-
-                if (query.length === 0) {
-                    searchResults.classList.remove('show');
-                    return;
-                }
-
-                searchTimeout = setTimeout(() => {
-                    this.performSearch(query);
-                }, 300);
-            });
-
-            searchInput.addEventListener('focus', () => {
-                if (searchInput.value.trim().length > 0) {
-                    searchResults.classList.add('show');
-                }
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-                    searchResults.classList.remove('show');
-                }
-            });
-        }
-    }
-
-    buildSearchIndex() {
-        this.searchIndex = [];
-
-        // Index materials
-        this.storage.materials.forEach(material => {
-            this.searchIndex.push({
-                type: 'material',
-                title: material.name,
-                subtitle: this.getSubjectName(material.subject),
-                data: material,
-                keywords: [material.name, material.subject, this.getSubjectName(material.subject)]
-            });
-        });
-
-        // Index assignments
-        this.storage.assignments.forEach(assignment => {
-            this.searchIndex.push({
-                type: 'assignment',
-                title: assignment.title,
-                subtitle: this.getSubjectName(assignment.subject),
-                data: assignment,
-                keywords: [assignment.title, assignment.subject, this.getSubjectName(assignment.subject)]
-            });
-        });
-
-        // Index subjects
-        const subjects = [
-            { id: 'math', name: 'Transforms and Boundary Value Problems', code: '21MAB201T' },
-            { id: 'dsa', name: 'Data Structures and Algorithms', code: '21CSC201J' },
-            { id: 'coa', name: 'Computer Organization and Architecture', code: '21CSS201T' },
-            { id: 'programming', name: 'Advanced Programming Practice', code: '21CSC203P' },
-            { id: 'os', name: 'Operating Systems', code: '21CSC202J' },
-            { id: 'uhv', name: 'Universal Human Values - II', code: '21LEM202T' },
-            { id: 'ethics', name: 'Professional Ethics', code: '21LEM201T' }
-        ];
-
-        subjects.forEach(subject => {
-            this.searchIndex.push({
-                type: 'subject',
-                title: subject.name,
-                subtitle: subject.code,
-                data: subject,
-                keywords: [subject.name, subject.code, subject.id]
-            });
-        });
-    }
-
-    performSearch(query) {
-        const results = this.searchIndex.filter(item => {
-            return item.keywords.some(keyword => 
-                keyword.toLowerCase().includes(query.toLowerCase())
-            );
-        }).slice(0, 5);
-
-        this.displaySearchResults(results);
-    }
-
-    displaySearchResults(results) {
-        const searchResults = document.querySelector('.search-results');
+    // ============ AUTHENTICATION ============
+    handleAuthentication(event) {
+        event.preventDefault();
         
-        if (results.length === 0) {
-            searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const nameInput = document.getElementById('nameInput');
+        
+        if (!emailInput || !passwordInput) {
+            this.showNotification('❌ Form inputs not found', 'error');
+            return;
+        }
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+        const name = nameInput ? nameInput.value.trim() : '';
+
+        if (!email || !password) {
+            this.showNotification('❌ Please fill in all required fields', 'error');
+            return;
+        }
+
+        // Simple authentication for demo
+        const isSignUp = document.getElementById('authTitle').textContent.includes('Create');
+        
+        if (isSignUp && !name) {
+            this.showNotification('❌ Please enter your name', 'error');
+            return;
+        }
+
+        // Create or authenticate user
+        currentUser = {
+            name: name || email.split('@')[0],
+            email: email,
+            id: Date.now().toString(),
+            createdAt: new Date()
+        };
+
+        isLoggedIn = true;
+        this.saveUserData();
+        this.hideAuthModal();
+        this.showMainApp();
+        this.showNotification(`🎓 Welcome to Academia Hub, ${currentUser.name}!`, 'success');
+    }
+
+    toggleAuthMode() {
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authSwitchLink = document.getElementById('authSwitchLink');
+        const authBtn = document.getElementById('authSubmitBtn');
+        const nameInput = document.getElementById('nameInput');
+
+        const isLogin = authTitle.textContent.includes('Welcome');
+
+        if (isLogin) {
+            // Switch to Sign Up
+            authTitle.textContent = 'Create Account';
+            authSubtitle.textContent = 'Join the Academia Hub community';
+            authSwitchText.textContent = 'Already have an account?';
+            authSwitchLink.textContent = 'Sign In';
+            authBtn.textContent = 'Create Account';
+            if (nameInput) nameInput.style.display = 'block';
         } else {
-            searchResults.innerHTML = results.map(result => `
-                <div class="search-result-item" onclick="academicHub.handleSearchResult('${result.type}', '${result.data.id || result.data.name}')">
-                    <div class="search-result-title">${result.title}</div>
-                    <div class="search-result-subtitle">${result.subtitle}</div>
-                </div>
-            `).join('');
-        }
-
-        searchResults.classList.add('show');
-    }
-
-    handleSearchResult(type, id) {
-        const searchResults = document.querySelector('.search-results');
-        searchResults.classList.remove('show');
-        document.getElementById('globalSearch').value = '';
-
-        switch (type) {
-            case 'material':
-                this.showSection('materials');
-                break;
-            case 'assignment':
-                this.showSection('assignments');
-                break;
-            case 'subject':
-                this.showSection('subjects');
-                break;
+            // Switch to Login
+            authTitle.textContent = 'Welcome to Academia Hub';
+            authSubtitle.textContent = 'Access your personalized study workspace';
+            authSwitchText.textContent = "Don't have an account?";
+            authSwitchLink.textContent = 'Create Account';
+            authBtn.textContent = 'Sign In';
+            if (nameInput) nameInput.style.display = 'none';
         }
     }
 
-    // FILE MANAGEMENT SYSTEM
-    setupFileUpload() {
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-
-        if (!fileInput || !uploadArea) return;
-
-        // Remove existing listeners
-        const newFileInput = fileInput.cloneNode(true);
-        fileInput.parentNode.replaceChild(newFileInput, fileInput);
-
-        newFileInput.addEventListener('change', (e) => {
-            this.handleFiles(e.target.files);
-        });
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#007AFF';
-            uploadArea.style.backgroundColor = 'rgba(0, 122, 255, 0.1)';
-        });
-
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '';
-            uploadArea.style.backgroundColor = '';
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '';
-            uploadArea.style.backgroundColor = '';
-            this.handleFiles(e.dataTransfer.files);
-        });
-
-        uploadArea.addEventListener('click', () => {
-            newFileInput.click();
-        });
+    showAuthModal() {
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.classList.remove('hidden');
+        }
     }
 
-    async handleFiles(files) {
-        for (let file of files) {
-            await this.addFile(file);
+    hideAuthModal() {
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.classList.add('hidden');
         }
-        this.updateMaterialsDisplay();
+    }
+
+    showMainApp() {
+        const mainApp = document.getElementById('mainApp');
+        if (mainApp) {
+            mainApp.classList.remove('hidden');
+        }
+        
+        // Update user display
+        const userNameEl = document.getElementById('userName');
+        const userAvatarEl = document.getElementById('userAvatar');
+        
+        if (userNameEl && currentUser) {
+            userNameEl.textContent = currentUser.name;
+        }
+        
+        if (userAvatarEl && currentUser) {
+            userAvatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
+        }
+
+        // Load user data
+        this.loadUserTasks();
+        this.updateProgress();
         this.updateStats();
-        this.buildSearchIndex();
-        this.showToast(`${files.length} file(s) uploaded successfully!`, 'success');
     }
 
-    addFile(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const fileData = {
-                    id: Date.now() + Math.random(),
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    subject: 'math',
-                    uploadDate: new Date().toISOString(),
-                    data: e.target.result
-                };
-
-                this.storage.materials.push(fileData);
-                this.saveMaterials();
-                resolve(fileData);
+    // ============ VOICE RECOGNITION ============
+    initializeVoiceRecognition() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+                isListening = true;
+                this.updateVoiceStatus('🎤 Listening... Speak now!');
+                const voiceBtn = document.getElementById('voiceBtn');
+                if (voiceBtn) voiceBtn.classList.add('listening');
             };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    updateMaterialsDisplay() {
-        const grid = document.getElementById('materialsGrid');
-        const fileCount = document.getElementById('fileCount');
-        
-        if (!grid) return;
-
-        const filter = document.getElementById('subjectFilter')?.value || 'all';
-        let materials = [...this.storage.materials];
-
-        if (filter !== 'all') {
-            materials = materials.filter(m => m.subject === filter);
-        }
-
-        if (fileCount) {
-            fileCount.textContent = this.storage.materials.length;
-        }
-
-        if (materials.length === 0) {
-            grid.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📚</div>
-                    <h3>No materials found</h3>
-                    <p>Upload some study materials to get started</p>
-                </div>
-            `;
-            return;
-        }
-
-        grid.innerHTML = materials.map(file => this.createFileCard(file)).join('');
-    }
-
-    createFileCard(file) {
-        const fileIcon = this.getFileIcon(file.type);
-        const fileSize = this.formatFileSize(file.size);
-        const uploadDate = new Date(file.uploadDate).toLocaleDateString();
-        const subjectName = this.getSubjectName(file.subject);
-
-        return `
-            <div class="file-card" onclick="academicHub.previewFile('${file.id}')">
-                <div class="file-header">
-                    <div class="file-icon">${fileIcon}</div>
-                    <div class="file-info">
-                        <h4 title="${file.name}">${this.truncateText(file.name, 30)}</h4>
-                        <div class="file-subject">${subjectName}</div>
-                    </div>
-                </div>
-                <div class="file-meta">
-                    <span>${fileSize}</span>
-                    <span>${uploadDate}</span>
-                </div>
-                <div class="file-actions" onclick="event.stopPropagation()">
-                    <button class="btn btn-outline btn-sm" onclick="academicHub.downloadFile('${file.id}')">Download</button>
-                    <button class="btn btn-danger btn-sm" onclick="academicHub.deleteFile('${file.id}')">Delete</button>
-                </div>
-            </div>
-        `;
-    }
-
-    previewFile(id) {
-        const file = this.storage.materials.find(f => f.id == id);
-        if (!file) return;
-
-        this.currentFile = file;
-        document.getElementById('modalFileName').textContent = file.name;
-        
-        const modalBody = document.getElementById('modalBody');
-        if (file.type.includes('image')) {
-            modalBody.innerHTML = `<img src="${file.data}" style="max-width: 100%; height: auto;" alt="${file.name}">`;
+            
+            recognition.onend = () => {
+                isListening = false;
+                this.updateVoiceStatus('Click the microphone to start voice commands');
+                const voiceBtn = document.getElementById('voiceBtn');
+                if (voiceBtn) voiceBtn.classList.remove('listening');
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                this.processVoiceCommand(transcript);
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Voice recognition error:', event.error);
+                this.showNotification('❌ Voice recognition error. Please try again.', 'error');
+            };
         } else {
-            modalBody.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">${this.getFileIcon(file.type)}</div>
-                    <h3>${file.name}</h3>
-                    <p>Size: ${this.formatFileSize(file.size)}</p>
-                    <p>Subject: ${this.getSubjectName(file.subject)}</p>
-                    <p>Uploaded: ${new Date(file.uploadDate).toLocaleDateString()}</p>
-                </div>
-            `;
-        }
-        
-        this.showModal('fileModal');
-    }
-
-    downloadFile(id) {
-        const file = this.storage.materials.find(f => f.id == id);
-        if (!file) return;
-
-        const link = document.createElement('a');
-        link.href = file.data;
-        link.download = file.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        this.showToast(`${file.name} downloaded!`, 'success');
-    }
-
-    deleteFile(id) {
-        if (confirm('Are you sure you want to delete this file?')) {
-            this.storage.materials = this.storage.materials.filter(f => f.id != id);
-            this.saveMaterials();
-            this.updateMaterialsDisplay();
-            this.updateStats();
-            this.buildSearchIndex();
-            this.showToast('File deleted successfully!', 'success');
+            this.updateVoiceStatus('Voice recognition not supported in this browser');
         }
     }
 
-    filterMaterials(subject) {
-        this.updateMaterialsDisplay();
-    }
-
-    // TIMER SYSTEM
-    setupTimer() {
-        const startBtn = document.getElementById('startTimer');
-        const pauseBtn = document.getElementById('pauseTimer');
-        const resetBtn = document.getElementById('resetTimer');
-
-        if (startBtn) {
-            startBtn.addEventListener('click', () => this.startTimer());
-        }
-        if (pauseBtn) {
-            pauseBtn.addEventListener('click', () => this.pauseTimer());
-        }
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.resetTimer());
-        }
-
-        this.updateTimerDisplay();
-    }
-
-    startTimer() {
-        if (!this.timer.isRunning) {
-            const subjectSelect = document.getElementById('timerSubject');
-            this.timer.currentSubject = subjectSelect ? subjectSelect.value : 'math';
-            this.timer.startTime = Date.now() - this.timer.elapsedTime;
-            this.timer.isRunning = true;
-            
-            this.timer.interval = setInterval(() => {
-                this.timer.elapsedTime = Date.now() - this.timer.startTime;
-                this.updateTimerDisplay();
-            }, 1000);
-
-            this.updateTimerButtons();
-            this.showToast('Timer started!', 'success');
-        }
-    }
-
-    pauseTimer() {
-        if (this.timer.isRunning) {
-            clearInterval(this.timer.interval);
-            this.timer.isRunning = false;
-            
-            this.saveStudySession();
-            this.updateTimerButtons();
-            this.showToast('Timer paused and session saved!', 'info');
-        }
-    }
-
-    resetTimer() {
-        clearInterval(this.timer.interval);
-        
-        if (this.timer.elapsedTime > 60000) { // More than 1 minute
-            this.saveStudySession();
-        }
-        
-        this.timer = {
-            isRunning: false,
-            startTime: null,
-            elapsedTime: 0,
-            interval: null,
-            currentSubject: null
-        };
-        
-        this.updateTimerDisplay();
-        this.updateTimerButtons();
-        this.showToast('Timer reset!', 'info');
-    }
-
-    updateTimerDisplay() {
-        const timerDisplay = document.getElementById('timerDisplay');
-        if (timerDisplay) {
-            const time = this.formatTime(this.timer.elapsedTime);
-            timerDisplay.textContent = time;
-        }
-
-        const timerCircle = document.querySelector('.timer-circle');
-        if (timerCircle) {
-            timerCircle.classList.toggle('active', this.timer.isRunning);
-        }
-    }
-
-    updateTimerButtons() {
-        const startBtn = document.getElementById('startTimer');
-        const pauseBtn = document.getElementById('pauseTimer');
-        const resetBtn = document.getElementById('resetTimer');
-
-        if (startBtn) {
-            startBtn.disabled = this.timer.isRunning;
-            startBtn.textContent = this.timer.elapsedTime > 0 && !this.timer.isRunning ? 'Resume' : 'Start';
-        }
-        if (pauseBtn) pauseBtn.disabled = !this.timer.isRunning;
-        if (resetBtn) resetBtn.disabled = false;
-    }
-
-    saveStudySession() {
-        if (this.timer.elapsedTime > 0 && this.timer.currentSubject) {
-            const session = {
-                id: Date.now(),
-                subject: this.timer.currentSubject,
-                duration: this.timer.elapsedTime,
-                date: new Date().toISOString(),
-                endTime: new Date().toISOString()
+    initializeTextToSpeech() {
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = () => {
+                voices = speechSynthesis.getVoices();
+                this.selectDefaultVoice();
             };
-
-            this.storage.sessions.push(session);
-            this.saveSessions();
-            this.updateStats();
-            this.updateTodaySessions();
         }
     }
 
-    updateTodaySessions() {
-        const sessionsList = document.getElementById('sessionsList');
-        if (!sessionsList) return;
+    selectDefaultVoice() {
+        selectedVoice = voices.find(voice => 
+            voice.lang.includes('en') && voice.name.toLowerCase().includes('female')
+        ) || voices.find(voice => voice.lang.includes('en')) || voices[0];
+    }
 
-        const today = new Date().toDateString();
-        const todaySessions = this.storage.sessions
-            .filter(session => new Date(session.date).toDateString() === today)
-            .sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
-
-        if (todaySessions.length === 0) {
-            sessionsList.innerHTML = `
-                <div class="empty-state">
-                    <p>No study sessions today</p>
-                    <small>Start a timer to track your study time</small>
-                </div>
-            `;
+    toggleVoiceRecognition() {
+        if (!recognition) {
+            this.showNotification('❌ Voice recognition not supported', 'error');
             return;
         }
 
-        sessionsList.innerHTML = todaySessions.map(session => `
-            <div class="session-item">
-                <div class="session-icon">📚</div>
-                <div class="session-content">
-                    <div class="session-subject">${this.getSubjectName(session.subject)}</div>
-                    <div class="session-duration">${this.formatTime(session.duration)}</div>
-                    <div class="session-time">${new Date(session.endTime).toLocaleTimeString()}</div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    // ASSIGNMENT SYSTEM
-    updateAssignmentsDisplay() {
-        const assignmentsList = document.getElementById('assignmentsList');
-        if (!assignmentsList) return;
-
-        if (this.storage.assignments.length === 0) {
-            assignmentsList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📝</div>
-                    <h3>No assignments yet</h3>
-                    <p>Add your first assignment to get started</p>
-                </div>
-            `;
-            return;
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.start();
         }
-
-        assignmentsList.innerHTML = this.storage.assignments.map(assignment => 
-            this.createAssignmentCard(assignment)
-        ).join('');
     }
 
-    createAssignmentCard(assignment) {
-        const dueDate = new Date(assignment.dueDate);
-        const isOverdue = dueDate < new Date() && !assignment.completed;
-        const dueDateFormatted = dueDate.toLocaleDateString();
+    processVoiceCommand(transcript) {
+        console.log('Voice command received:', transcript);
         
-        return `
-            <div class="assignment-card ${assignment.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
-                <div class="assignment-header">
-                    <h4>${assignment.title}</h4>
-                    <div class="assignment-subject">${this.getSubjectName(assignment.subject)}</div>
-                </div>
-                <div class="assignment-content">
-                    <p>${assignment.description || 'No description provided'}</p>
-                    <div class="assignment-meta">
-                        <span class="due-date">Due: ${dueDateFormatted}</span>
-                        <span class="status ${assignment.completed ? 'completed' : (isOverdue ? 'overdue' : 'pending')}">
-                            ${assignment.completed ? 'Completed' : (isOverdue ? 'Overdue' : 'Pending')}
-                        </span>
-                    </div>
-                </div>
-                <div class="assignment-actions">
-                    <button class="btn btn-outline btn-sm" onclick="academicHub.toggleAssignmentStatus('${assignment.id}')">
-                        ${assignment.completed ? 'Mark Incomplete' : 'Mark Complete'}
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="academicHub.deleteAssignment('${assignment.id}')">Delete</button>
-                </div>
-            </div>
-        `;
-    }
-
-    toggleAssignmentStatus(id) {
-        const assignment = this.storage.assignments.find(a => a.id == id);
-        if (assignment) {
-            assignment.completed = !assignment.completed;
-            assignment.completedDate = assignment.completed ? new Date().toISOString() : null;
-            this.saveAssignments();
-            this.updateAssignmentsDisplay();
-            this.updateStats();
-            
-            const status = assignment.completed ? 'completed' : 'marked as pending';
-            this.showToast(`Assignment ${status}!`, 'success');
-        }
-    }
-
-    deleteAssignment(id) {
-        if (confirm('Are you sure you want to delete this assignment?')) {
-            this.storage.assignments = this.storage.assignments.filter(a => a.id != id);
-            this.saveAssignments();
-            this.updateAssignmentsDisplay();
-            this.updateStats();
-            this.buildSearchIndex();
-            this.showToast('Assignment deleted!', 'success');
-        }
-    }
-
-    filterAssignments(filter) {
-        const assignments = this.storage.assignments;
-        let filtered;
-
-        switch (filter) {
-            case 'pending':
-                filtered = assignments.filter(a => !a.completed && new Date(a.dueDate) >= new Date());
-                break;
-            case 'completed':
-                filtered = assignments.filter(a => a.completed);
-                break;
-            case 'overdue':
-                filtered = assignments.filter(a => !a.completed && new Date(a.dueDate) < new Date());
-                break;
-            default:
-                filtered = assignments;
-        }
-
-        this.displayFilteredAssignments(filtered);
-    }
-
-    displayFilteredAssignments(assignments) {
-        const assignmentsList = document.getElementById('assignmentsList');
-        if (!assignmentsList) return;
-
-        if (assignments.length === 0) {
-            assignmentsList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📝</div>
-                    <h3>No assignments found</h3>
-                    <p>No assignments match the current filter</p>
-                </div>
-            `;
-            return;
-        }
-
-        assignmentsList.innerHTML = assignments.map(assignment => 
-            this.createAssignmentCard(assignment)
-        ).join('');
-    }
-
-    updateActiveFilter(activeBtn) {
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        activeBtn.classList.add('active');
-    }
-
-    // NOTIFICATION SYSTEM
-    setupNotifications() {
-        this.requestNotificationPermission();
-        this.checkUpcomingDeadlines();
-        this.checkStudyReminders();
+        const lowerTranscript = transcript.toLowerCase();
         
-        // Check every minute
-        setInterval(() => {
-            this.checkUpcomingDeadlines();
-            this.checkStudyReminders();
-        }, 60000);
-    }
-
-    requestNotificationPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    this.showToast('Notifications enabled!', 'success');
-                }
-            });
-        }
-    }
-
-    checkUpcomingDeadlines() {
-        const now = new Date();
-        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
-        this.storage.assignments.forEach(assignment => {
-            if (!assignment.completed && !assignment.notified) {
-                const dueDate = new Date(assignment.dueDate);
-                
-                if (dueDate <= tomorrow && dueDate > now) {
-                    this.addNotification({
-                        type: 'deadline',
-                        title: 'Assignment Due Soon',
-                        message: `${assignment.title} is due ${dueDate.toLocaleDateString()}`,
-                        timestamp: new Date().toISOString(),
-                        read: false
-                    });
-                    
-                    assignment.notified = true;
-                    this.saveAssignments();
+        // Task creation
+        if (lowerTranscript.includes('create task') || lowerTranscript.includes('add task')) {
+            const taskText = transcript.replace(/(create|add)\s*task\s*/i, '').trim();
+            if (taskText) {
+                const taskInput = document.getElementById('taskInput');
+                if (taskInput) {
+                    taskInput.value = taskText;
+                    this.createTask();
                 }
             }
-        });
-    }
-
-    checkStudyReminders() {
-        const now = new Date();
-        const currentDay = now.toLocaleDateString('en', { weekday: 'short' }).toLowerCase();
-        const currentTime = now.toTimeString().slice(0, 5);
-
-        this.storage.alarms.forEach(alarm => {
-            if (alarm.active && alarm.days.includes(currentDay)) {
-                const alarmTime = alarm.time;
-                const timeDiff = Math.abs(new Date(`1970/01/01 ${currentTime}`) - new Date(`1970/01/01 ${alarmTime}`));
-                
-                if (timeDiff < 60000 && !alarm.triggeredToday) {
-                    this.triggerAlarm(alarm);
-                    alarm.triggeredToday = true;
-                    this.saveAlarms();
-                }
-            }
-        });
-
-        if (currentTime === '00:00') {
-            this.storage.alarms.forEach(alarm => {
-                alarm.triggeredToday = false;
-            });
-            this.saveAlarms();
-        }
-    }
-
-    triggerAlarm(alarm) {
-        this.addNotification({
-            type: 'alarm',
-            title: 'Study Reminder',
-            message: alarm.name,
-            timestamp: new Date().toISOString(),
-            read: false
-        });
-
-        if (Notification.permission === 'granted') {
-            new Notification('Study Reminder', {
-                body: alarm.name,
-                icon: 'icon-192.png'
-            });
-        }
-
-        this.showToast(`⏰ ${alarm.name}`, 'info');
-    }
-
-    addNotification(notification) {
-        notification.id = Date.now();
-        this.storage.notifications.unshift(notification);
-        
-        this.storage.notifications = this.storage.notifications.slice(0, 50);
-        
-        this.saveNotifications();
-        this.updateNotificationBadge();
-    }
-
-    updateNotificationBadge() {
-        const badge = document.getElementById('notificationBadge');
-        const unreadCount = this.storage.notifications.filter(n => !n.read).length;
-        
-        if (badge) {
-            badge.textContent = unreadCount;
-            badge.style.display = unreadCount > 0 ? 'block' : 'none';
-        }
-    }
-
-    toggleNotificationPanel() {
-        const panel = document.getElementById('notificationPanel');
-        if (panel) {
-            panel.classList.toggle('show');
-            this.updateNotificationsDisplay();
-        }
-    }
-
-    updateNotificationsDisplay() {
-        const notificationsList = document.getElementById('notificationsList');
-        if (!notificationsList) return;
-
-        if (this.storage.notifications.length === 0) {
-            notificationsList.innerHTML = '<div class="empty-state"><p>No notifications</p></div>';
             return;
         }
-
-        notificationsList.innerHTML = this.storage.notifications.map(notification => `
-            <div class="notification-item ${notification.read ? 'read' : 'unread'}" onclick="academicHub.markNotificationRead('${notification.id}')">
-                <div class="notification-content">
-                    <h4>${notification.title}</h4>
-                    <p>${notification.message}</p>
-                    <span class="notification-time">${this.formatRelativeTime(notification.timestamp)}</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    markNotificationRead(id) {
-        const notification = this.storage.notifications.find(n => n.id == id);
-        if (notification && !notification.read) {
-            notification.read = true;
-            this.saveNotifications();
-            this.updateNotificationBadge();
-            this.updateNotificationsDisplay();
-        }
-    }
-
-    clearAllNotifications() {
-        this.storage.notifications = [];
-        this.saveNotifications();
-        this.updateNotificationBadge();
-        this.updateNotificationsDisplay();
-        this.showToast('All notifications cleared!', 'info');
-    }
-
-    // ALARM SYSTEM
-    setupAlarms() {
-        this.requestNotificationPermission();
-    }
-
-    updateAlarmsDisplay() {
-        const alarmsList = document.getElementById('alarmsList');
-        if (!alarmsList) return;
-
-        if (this.storage.alarms.length === 0) {
-            alarmsList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">⏰</div>
-                    <h3>No alarms set</h3>
-                    <p>Set study alarms to stay on track</p>
-                </div>
-            `;
+        
+        // Theme changes
+        if (lowerTranscript.includes('dark theme') || lowerTranscript.includes('dark mode')) {
+            this.setTheme('dark');
+            this.speak('Switched to dark theme');
             return;
         }
-
-        alarmsList.innerHTML = this.storage.alarms.map(alarm => 
-            this.createAlarmCard(alarm)
-        ).join('');
-    }
-
-    createAlarmCard(alarm) {
-        const daysText = alarm.days.map(day => day.charAt(0).toUpperCase() + day.slice(1)).join(', ');
         
-        return `
-            <div class="alarm-card ${alarm.active ? 'active' : 'inactive'}">
-                <div class="alarm-header">
-                    <h4>${alarm.name}</h4>
-                    <div class="alarm-toggle">
-                        <label class="switch">
-                            <input type="checkbox" ${alarm.active ? 'checked' : ''} onchange="academicHub.toggleAlarm('${alarm.id}')">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="alarm-content">
-                    <div class="alarm-time">${this.formatTime12Hour(alarm.time)}</div>
-                    <div class="alarm-days">${daysText}</div>
-                    ${alarm.subject ? `<div class="alarm-subject">${this.getSubjectName(alarm.subject)}</div>` : ''}
-                </div>
-                <div class="alarm-actions">
-                    <button class="btn btn-outline btn-sm" onclick="academicHub.editAlarm('${alarm.id}')">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="academicHub.deleteAlarm('${alarm.id}')">Delete</button>
-                </div>
-            </div>
-        `;
+        if (lowerTranscript.includes('light theme') || lowerTranscript.includes('light mode')) {
+            this.setTheme('light');
+            this.speak('Switched to light theme');
+            return;
+        }
+        
+        // Help
+        if (lowerTranscript.includes('help')) {
+            const helpMessage = 'I can help you create tasks, change themes, and answer questions about studying. Try saying "create task study math" or "ask about biology".';
+            this.addChatMessage(helpMessage, 'ai');
+            this.speak(helpMessage);
+            return;
+        }
+        
+        // Default: send to chat
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) {
+            chatInput.value = transcript;
+            this.sendMessage();
+        }
     }
 
-    toggleAlarm(id) {
-        const alarm = this.storage.alarms.find(a => a.id == id);
-        if (alarm) {
-            alarm.active = !alarm.active;
-            this.saveAlarms();
-            this.updateAlarmsDisplay();
+    updateVoiceStatus(message) {
+        const voiceStatus = document.getElementById('voiceStatus');
+        if (voiceStatus) {
+            voiceStatus.textContent = message;
+        }
+    }
+
+    speak(text) {
+        if ('speechSynthesis' in window && selectedVoice && text) {
+            speechSynthesis.cancel();
             
-            const status = alarm.active ? 'enabled' : 'disabled';
-            this.showToast(`Alarm ${status}!`, 'success');
-        }
-    }
-
-    deleteAlarm(id) {
-        if (confirm('Are you sure you want to delete this alarm?')) {
-            this.storage.alarms = this.storage.alarms.filter(a => a.id != id);
-            this.saveAlarms();
-            this.updateAlarmsDisplay();
-            this.showToast('Alarm deleted!', 'success');
-        }
-    }
-
-    editAlarm(id) {
-        // Future implementation for editing alarms
-        this.showToast('Edit alarm feature coming soon!', 'info');
-    }
-
-    // PROGRESS SYSTEM
-    updateProgressDisplay() {
-        this.updateProgressStats();
-        this.createProgressCharts();
-    }
-
-    updateProgressStats() {
-        const weeklyHours = this.calculateWeeklyHours();
-        const monthlyHours = this.calculateMonthlyHours();
-        const dailyAverage = this.calculateDailyAverage();
-        const goalProgress = this.calculateGoalProgress();
-
-        const elements = {
-            weeklyHours: document.getElementById('weeklyHours'),
-            monthlyHours: document.getElementById('monthlyHours'),
-            dailyAverage: document.getElementById('dailyAverage'),
-            goalProgress: document.getElementById('goalProgress')
-        };
-
-        if (elements.weeklyHours) elements.weeklyHours.textContent = this.formatTime(weeklyHours);
-        if (elements.monthlyHours) elements.monthlyHours.textContent = this.formatTime(monthlyHours);
-        if (elements.dailyAverage) elements.dailyAverage.textContent = this.formatTime(dailyAverage);
-        if (elements.goalProgress) elements.goalProgress.textContent = `${goalProgress}%`;
-    }
-
-    calculateWeeklyHours() {
-        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        return this.storage.sessions
-            .filter(session => new Date(session.date) >= oneWeekAgo)
-            .reduce((total, session) => total + session.duration, 0);
-    }
-
-    calculateMonthlyHours() {
-        const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-        return this.storage.sessions
-            .filter(session => new Date(session.date) >= oneMonthAgo)
-            .reduce((total, session) => total + session.duration, 0);
-    }
-
-    calculateDailyAverage() {
-        const weeklyHours = this.calculateWeeklyHours();
-        return weeklyHours / 7;
-    }
-
-    calculateGoalProgress() {
-        const weeklyGoal = 20 * 60 * 60 * 1000; // 20 hours in milliseconds
-        const weeklyHours = this.calculateWeeklyHours();
-        return Math.min(Math.round((weeklyHours / weeklyGoal) * 100), 100);
-    }
-
-    createProgressCharts() {
-        // Simple chart implementation
-        const weeklyChart = document.getElementById('weeklyChart');
-        const subjectChart = document.getElementById('subjectChart');
-        
-        if (weeklyChart) {
-            weeklyChart.innerHTML = '<p>Weekly progress chart coming soon!</p>';
-        }
-        if (subjectChart) {
-            subjectChart.innerHTML = '<p>Subject distribution chart coming soon!</p>';
-        }
-    }
-
-    // DASHBOARD SYSTEM
-    updateDashboard() {
-        this.updateDashboardStats();
-        this.updateRecentActivity();
-        this.updateUpcomingDeadlines();
-    }
-
-    updateDashboardStats() {
-        const stats = {
-            totalSubjects: 7,
-            completedTasks: this.storage.assignments.filter(a => a.completed).length,
-            totalStudyTime: this.storage.sessions.reduce((total, session) => total + session.duration, 0),
-            overallProgress: this.calculateOverallProgress()
-        };
-
-        const elements = {
-            totalSubjects: document.getElementById('totalSubjects'),
-            completedTasks: document.getElementById('completedTasks'),
-            totalStudyTime: document.getElementById('totalStudyTime'),
-            overallProgress: document.getElementById('overallProgress')
-        };
-
-        if (elements.totalSubjects) elements.totalSubjects.textContent = stats.totalSubjects;
-        if (elements.completedTasks) elements.completedTasks.textContent = stats.completedTasks;
-        if (elements.totalStudyTime) elements.totalStudyTime.textContent = this.formatTime(stats.totalStudyTime);
-        if (elements.overallProgress) elements.overallProgress.textContent = `${stats.overallProgress}%`;
-    }
-
-    calculateOverallProgress() {
-        const totalAssignments = this.storage.assignments.length;
-        const completedAssignments = this.storage.assignments.filter(a => a.completed).length;
-        
-        if (totalAssignments === 0) return 0;
-        return Math.round((completedAssignments / totalAssignments) * 100);
-    }
-
-    updateRecentActivity() {
-        const activityList = document.getElementById('activityList');
-        if (!activityList) return;
-
-        const recentSessions = this.storage.sessions
-            .slice(-5)
-            .reverse()
-            .map(session => ({
-                type: 'study',
-                title: `Studied ${this.getSubjectName(session.subject)}`,
-                subtitle: `${this.formatTime(session.duration)} session`,
-                time: this.formatRelativeTime(session.endTime)
-            }));
-
-        const recentAssignments = this.storage.assignments
-            .filter(a => a.completed && a.completedDate)
-            .slice(-3)
-            .reverse()
-            .map(assignment => ({
-                type: 'assignment',
-                title: `Completed ${assignment.title}`,
-                subtitle: this.getSubjectName(assignment.subject),
-                time: this.formatRelativeTime(assignment.completedDate)
-            }));
-
-        const allActivity = [...recentSessions, ...recentAssignments]
-            .sort((a, b) => new Date(b.time) - new Date(a.time))
-            .slice(0, 5);
-
-        if (allActivity.length === 0) {
-            activityList.innerHTML = `
-                <div class="empty-state">
-                    <p>No recent activity</p>
-                    <small>Start studying to see your progress here</small>
-                </div>
-            `;
-            return;
-        }
-
-        activityList.innerHTML = allActivity.map(activity => `
-            <div class="activity-item ${activity.type}">
-                <div class="activity-content">
-                    <h4>${activity.title}</h4>
-                    <p>${activity.subtitle}</p>
-                    <span class="activity-time">${activity.time}</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    updateUpcomingDeadlines() {
-        const deadlineList = document.getElementById('deadlineList');
-        if (!deadlineList) return;
-
-        const upcomingDeadlines = this.storage.assignments
-            .filter(a => !a.completed && new Date(a.dueDate) >= new Date())
-            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-            .slice(0, 5);
-
-        if (upcomingDeadlines.length === 0) {
-            deadlineList.innerHTML = `
-                <div class="empty-state">
-                    <p>No upcoming deadlines</p>
-                    <small>Add assignments to track deadlines</small>
-                </div>
-            `;
-            return;
-        }
-
-        deadlineList.innerHTML = upcomingDeadlines.map(assignment => {
-            const dueDate = new Date(assignment.dueDate);
-            const daysLeft = Math.ceil((dueDate - new Date()) / (24 * 60 * 60 * 1000));
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = selectedVoice;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
             
-            return `
-                <div class="deadline-item ${daysLeft <= 1 ? 'urgent' : ''}">
-                    <div class="deadline-content">
-                        <h4>${assignment.title}</h4>
-                        <p>${this.getSubjectName(assignment.subject)}</p>
-                        <span class="deadline-time">
-                            ${daysLeft === 0 ? 'Due today' : daysLeft === 1 ? 'Due tomorrow' : `${daysLeft} days left`}
-                        </span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // MODAL SYSTEM
-    showModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('show');
-            modal.style.display = 'flex';
+            speechSynthesis.speak(utterance);
         }
     }
 
-    hideModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('show');
-            modal.style.display = 'none';
-        }
-    }
-
-    // UTILITY FUNCTIONS
-    updateAllDisplays() {
-        this.updateStats();
-        this.updateMaterialsDisplay();
-        this.updateAssignmentsDisplay();
-        this.updateAlarmsDisplay();
-        this.updateNotificationBadge();
-        this.updateTodaySessions();
-    }
-
-    updateStats() {
-        const materialsCount = this.storage.materials.length;
-        const assignmentsCount = this.storage.assignments.filter(a => !a.completed).length;
-        const totalStudyTime = this.storage.sessions.reduce((total, session) => total + session.duration, 0);
-
-        const elements = {
-            materials: document.getElementById('materials'),
-            assignments: document.getElementById('assignments'),
-            studyHours: document.getElementById('studyHours'),
-            assignmentCount: document.getElementById('assignmentCount')
-        };
-
-        if (elements.materials) elements.materials.textContent = materialsCount;
-        if (elements.assignments) elements.assignments.textContent = assignmentsCount;
-        if (elements.studyHours) elements.studyHours.textContent = this.formatTime(totalStudyTime);
-        if (elements.assignmentCount) elements.assignmentCount.textContent = assignmentsCount;
-    }
-
-    updateGreeting() {
-        const greetingElement = document.getElementById('greetingText');
-        if (!greetingElement) return;
-
-        const hour = new Date().getHours();
-        let greeting;
-
-        if (hour < 12) {
-            greeting = 'Good morning, Prakash!';
-        } else if (hour < 17) {
-            greeting = 'Good afternoon, Prakash!';
-        } else {
-            greeting = 'Good evening, Prakash!';
-        }
-
-        greetingElement.textContent = greeting;
-    }
-
-    syncData() {
-        const syncBtn = document.getElementById('syncBtn');
-        if (syncBtn) {
-            syncBtn.style.animation = 'spin 1s linear';
-            setTimeout(() => {
-                syncBtn.style.animation = '';
-                this.showToast('Data synced successfully!', 'success');
-            }, 1000);
-        }
-    }
-
-    getFileIcon(type) {
-        if (type.includes('pdf')) return '📄';
-        if (type.includes('word') || type.includes('document')) return '📝';
-        if (type.includes('powerpoint') || type.includes('presentation')) return '📊';
-        if (type.includes('image')) return '🖼️';
-        if (type.includes('text')) return '📃';
-        if (type.includes('video')) return '🎥';
-        if (type.includes('audio')) return '🎵';
-        return '📁';
-    }
-
-    getSubjectName(subject) {
-        const subjects = {
-            'math': 'Mathematics',
-            'dsa': 'Data Structures',
-            'coa': 'Computer Organization',
-            'programming': 'Advanced Programming',
-            'os': 'Operating Systems',
-            'uhv': 'Universal Human Values',
-            'ethics': 'Professional Ethics'
-        };
-        return subjects[subject] || 'General';
-    }
-
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    formatTime(milliseconds) {
-        const totalSeconds = Math.floor(milliseconds / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+    // ============ CHAT SYSTEM ============
+    sendMessage() {
+        const chatInput = document.getElementById('chatInput');
+        if (!chatInput) return;
         
-        if (hours > 0) {
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        } else {
-            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-    }
-
-    formatTime12Hour(time24) {
-        const [hours, minutes] = time24.split(':');
-        const hour12 = hours % 12 || 12;
-        const ampm = hours < 12 ? 'AM' : 'PM';
-        return `${hour12}:${minutes} ${ampm}`;
-    }
-
-    formatRelativeTime(timestamp) {
-        const now = new Date();
-        const time = new Date(timestamp);
-        const diffMs = now - time;
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffMs < 1000 * 60) return 'Just now';
-        if (diffMs < 1000 * 60 * 60) return `${Math.floor(diffMs / (1000 * 60))}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        return time.toLocaleDateString();
-    }
-
-    truncateText(text, length) {
-        return text.length > length ? text.substring(0, length) + '...' : text;
-    }
-
-    showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <div class="toast-content">
-                <span class="toast-message">${message}</span>
-                <button class="toast-close">&times;</button>
-            </div>
-        `;
-
-        const container = document.getElementById('toastContainer');
-        if (container) {
-            container.appendChild(toast);
-
-            const closeBtn = toast.querySelector('.toast-close');
-            closeBtn.addEventListener('click', () => {
-                this.removeToast(toast);
-            });
-
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => {
-                this.removeToast(toast);
-            }, 5000);
-        }
-    }
-
-    removeToast(toast) {
-        toast.classList.remove('show');
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        this.addChatMessage(message, 'user');
+        chatInput.value = '';
+        
+        // Show typing indicator
+        this.showTypingIndicator();
+        
+        // Simulate AI response
         setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
+            this.hideTypingIndicator();
+            const response = this.generateAIResponse(message);
+            this.addChatMessage(response, 'ai');
+            this.speak(response.substring(0, 150)); // Speak first 150 characters
+        }, 1500);
+    }
+
+    addChatMessage(message, sender) {
+        const chatMessages = document.getElementById('chatMessages');
+        if (!chatMessages) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        
+        if (sender === 'ai') {
+            messageDiv.innerHTML = `<strong>🎓 Academia AI:</strong> ${message}`;
+        } else {
+            messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
+        }
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Save to history
+        chatHistory.push({ sender, message, timestamp: new Date() });
+        this.saveChatHistory();
+    }
+
+    generateAIResponse(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Academic subject responses
+        if (lowerMessage.includes('math') || lowerMessage.includes('mathematics')) {
+            return "I'd love to help you with mathematics! Whether it's algebra, calculus, geometry, or statistics, I can explain concepts, solve problems step-by-step, and provide practice exercises. What specific math topic would you like to explore?";
+        }
+        
+        if (lowerMessage.includes('science') || lowerMessage.includes('biology') || lowerMessage.includes('chemistry') || lowerMessage.includes('physics')) {
+            return "Science is fascinating! I can help explain concepts in biology (cells, genetics, evolution), chemistry (atoms, reactions, bonds), physics (motion, energy, forces), and more. I can also help with lab reports and scientific method. What science topic interests you?";
+        }
+        
+        if (lowerMessage.includes('history')) {
+            return "History helps us understand our world! I can discuss different time periods, analyze historical events, explain cause and effect relationships, and help with essay writing. What historical period or topic would you like to explore?";
+        }
+        
+        if (lowerMessage.includes('english') || lowerMessage.includes('literature') || lowerMessage.includes('writing')) {
+            return "I love helping with English and literature! I can assist with essay writing, analyze poems and stories, explain literary devices, improve grammar, build vocabulary, and develop critical thinking skills. What would you like to work on?";
+        }
+        
+        if (lowerMessage.includes('study') || lowerMessage.includes('exam') || lowerMessage.includes('test')) {
+            return "Great question about studying! I can help you create effective study schedules, suggest memory techniques, explain active learning strategies, and provide test-taking tips. What subject are you preparing for, or what specific study challenge are you facing?";
+        }
+        
+        // Default academic response
+        return `That's an interesting question! As your AI study companion, I'm here to help you succeed academically. I can assist with any subject, provide study strategies, explain complex concepts, and support your learning journey. What specific topic or subject would you like to dive into?`;
+    }
+
+    showTypingIndicator() {
+        const chatMessages = document.getElementById('chatMessages');
+        if (!chatMessages) return;
+        
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = `
+            <span>🎓 Academia AI is thinking...</span>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        `;
+        
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    // ============ TASK MANAGEMENT ============
+    createTask() {
+        const taskInput = document.getElementById('taskInput');
+        if (!taskInput) return;
+        
+        const taskText = taskInput.value.trim();
+        if (!taskText) {
+            this.showNotification('❌ Please enter a task description', 'error');
+            return;
+        }
+        
+        const task = {
+            id: Date.now().toString(),
+            title: taskText,
+            completed: false,
+            createdAt: new Date(),
+            userId: currentUser?.id,
+            type: 'study' // Academic focus
+        };
+        
+        tasks.push(task);
+        taskInput.value = '';
+        
+        this.renderTasks();
+        this.updateProgress();
+        this.updateStats();
+        this.saveTaskData();
+        
+        this.showNotification(`✅ Study task created: "${task.title}"`, 'success');
+        this.speak(`Task created: ${task.title}`);
+    }
+
+    toggleTask(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        
+        task.completed = !task.completed;
+        task.completedAt = task.completed ? new Date() : null;
+        
+        if (task.completed) {
+            completedTasks.push({ ...task });
+            studyStats.tasksCompleted++;
+            this.showNotification('🎉 Great job completing your study task!', 'success');
+            this.speak('Excellent work! Task completed successfully!');
+        } else {
+            const index = completedTasks.findIndex(t => t.id === taskId);
+            if (index > -1) {
+                completedTasks.splice(index, 1);
+                studyStats.tasksCompleted = Math.max(0, studyStats.tasksCompleted - 1);
             }
-        }, 300);
-    }
-
-    // STORAGE FUNCTIONS
-    saveMaterials() {
-        localStorage.setItem('academic_hub_materials', JSON.stringify(this.storage.materials));
-    }
-
-    saveAssignments() {
-        localStorage.setItem('academic_hub_assignments', JSON.stringify(this.storage.assignments));
-    }
-
-    saveSessions() {
-        localStorage.setItem('academic_hub_sessions', JSON.stringify(this.storage.sessions));
-    }
-
-    saveAlarms() {
-        localStorage.setItem('academic_hub_alarms', JSON.stringify(this.storage.alarms));
-    }
-
-    saveNotifications() {
-        localStorage.setItem('academic_hub_notifications', JSON.stringify(this.storage.notifications));
-    }
-
-    saveSettings() {
-        localStorage.setItem('academic_hub_settings', JSON.stringify(this.storage.settings));
-    }
-}
-
-// GLOBAL FUNCTIONS FOR HTML ONCLICK HANDLERS
-function openMaterials(subject) {
-    academicHub.showSection('materials');
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    document.querySelector('[data-section="materials"]').classList.add('active');
-    
-    const subjectFilter = document.getElementById('subjectFilter');
-    if (subjectFilter) {
-        subjectFilter.value = subject;
-        academicHub.filterMaterials(subject);
-    }
-}
-
-function startStudying(subject) {
-    academicHub.showSection('timer');
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    document.querySelector('[data-section="timer"]').classList.add('active');
-    
-    const timerSubject = document.getElementById('timerSubject');
-    if (timerSubject) {
-        timerSubject.value = subject;
-        academicHub.timer.currentSubject = subject;
-    }
-    
-    academicHub.showToast(`Ready to study ${academicHub.getSubjectName(subject)}!`, 'success');
-}
-
-// ASSIGNMENT MODAL FUNCTIONS
-function showAddAssignmentModal() {
-    academicHub.showModal('assignmentModal');
-}
-
-function hideAddAssignmentModal() {
-    academicHub.hideModal('assignmentModal');
-}
-
-function saveAssignment() {
-    const title = document.getElementById('assignmentTitle').value;
-    const subject = document.getElementById('assignmentSubject').value;
-    const dueDate = document.getElementById('assignmentDueDate').value;
-    const description = document.getElementById('assignmentDescription').value;
-
-    if (!title || !subject || !dueDate) {
-        academicHub.showToast('Please fill in all required fields', 'error');
-        return;
-    }
-
-    const assignment = {
-        id: Date.now(),
-        title,
-        subject,
-        dueDate,
-        description,
-        completed: false,
-        createdDate: new Date().toISOString()
-    };
-
-    academicHub.storage.assignments.push(assignment);
-    academicHub.saveAssignments();
-    academicHub.updateAssignmentsDisplay();
-    academicHub.updateStats();
-    academicHub.buildSearchIndex();
-    
-    // Clear form
-    document.getElementById('assignmentTitle').value = '';
-    document.getElementById('assignmentSubject').value = 'math';
-    document.getElementById('assignmentDueDate').value = '';
-    document.getElementById('assignmentDescription').value = '';
-    
-    academicHub.hideModal('assignmentModal');
-    academicHub.showToast('Assignment added successfully!', 'success');
-}
-
-// ALARM MODAL FUNCTIONS
-function showAddAlarmModal() {
-    academicHub.showModal('alarmModal');
-}
-
-function hideAddAlarmModal() {
-    academicHub.hideModal('alarmModal');
-}
-
-function saveAlarm() {
-    const name = document.getElementById('alarmName').value;
-    const time = document.getElementById('alarmTime').value;
-    const subject = document.getElementById('alarmSubject').value;
-    
-    const dayCheckboxes = document.querySelectorAll('.day-option input:checked');
-    const days = Array.from(dayCheckboxes).map(cb => cb.value);
-
-    if (!name || !time || days.length === 0) {
-        academicHub.showToast('Please fill in all required fields', 'error');
-        return;
-    }
-
-    const alarm = {
-        id: Date.now(),
-        name,
-        time,
-        days,
-        subject,
-        active: true,
-        createdDate: new Date().toISOString()
-    };
-
-    academicHub.storage.alarms.push(alarm);
-    academicHub.saveAlarms();
-    academicHub.updateAlarmsDisplay();
-    
-    // Clear form
-    document.getElementById('alarmName').value = '';
-    document.getElementById('alarmTime').value = '';
-    document.getElementById('alarmSubject').value = '';
-    document.querySelectorAll('.day-option input').forEach(cb => cb.checked = false);
-    
-    academicHub.hideModal('alarmModal');
-    academicHub.showToast('Alarm created successfully!', 'success');
-}
-
-// FILE MODAL FUNCTIONS
-function closeFileModal() {
-    academicHub.hideModal('fileModal');
-}
-
-function downloadCurrentFile() {
-    if (academicHub.currentFile) {
-        academicHub.downloadFile(academicHub.currentFile.id);
-        closeFileModal();
-    }
-}
-
-function deleteCurrentFile() {
-    if (academicHub.currentFile && confirm('Are you sure you want to delete this file?')) {
-        academicHub.deleteFile(academicHub.currentFile.id);
-        closeFileModal();
-    }
-}
-
-function clearAllNotifications() {
-    academicHub.clearAllNotifications();
-}
-
-// INITIALIZE THE APPLICATION
-document.addEventListener('DOMContentLoaded', () => {
-    window.academicHub = new AcademicHub();
-    
-    // Add enhanced CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--bg-tertiary);
-            transition: .4s;
-            border-radius: 34px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background-color: var(--accent-blue);
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        
-        .notification-panel {
-            position: fixed;
-            top: 64px;
-            right: 20px;
-            width: 350px;
-            max-height: 500px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-heavy);
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-        
-        .notification-panel.show {
-            transform: translateX(0);
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .notifications-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .notification-item {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-        
-        .notification-item:hover {
-            background: var(--bg-tertiary);
-        }
-        
-        .notification-item.unread {
-            background: rgba(0, 122, 255, 0.05);
-            border-left: 3px solid var(--accent-blue);
-        }
-        
-        .days-selector {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .day-option {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-        }
-        
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        
-        .assignment-card, .alarm-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-        
-        .assignment-card.completed {
-            opacity: 0.7;
-        }
-        
-        .assignment-card.overdue {
-            border-color: var(--accent-red);
-        }
-        
-        .alarm-card.inactive {
-            opacity: 0.6;
-        }
-        
-        .toast {
-            animation: slideIn 0.3s ease;
-            margin-bottom: 8px;
-        }
-        
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        
-        .toast-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .toast-close {
-            background: none;
-            border: none;
-            color: inherit;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 0 0 0 10px;
-        }
-        
-        .session-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-        
-        .session-icon {
-            font-size: 20px;
-        }
-        
-        .session-content {
-            flex: 1;
-        }
-        
-        .session-subject {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .session-duration {
-            color: var(--accent-blue);
-            font-weight: 500;
-        }
-        
-        .session-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-    `;
-    document.head.appendChild(style);
-});
-
-// === Utility Functions ===
-function getFilesFromStorage(subject) {
-  const data = localStorage.getItem(`files_${subject}`);
-  return data ? JSON.parse(data) : [];
-}
-
-function saveFilesToStorage(subject, files) {
-  localStorage.setItem(`files_${subject}`, JSON.stringify(files));
-}
-
-function addFileToStorage(subject, fileObj) {
-  const files = getFilesFromStorage(subject);
-  files.push(fileObj);
-  saveFilesToStorage(subject, files);
-}
-
-// === Upload Handler ===
-document.getElementById('fileInput').addEventListener('change', function () {
-  const subject = document.getElementById('subjectSelect').value;
-  const files = Array.from(this.files);
-
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const fileData = {
-        name: prompt(`Enter name for "${file.name}"`) || file.name,
-        content: e.target.result,
-        uploaded: new Date().toISOString()
-      };
-      addFileToStorage(subject, fileData);
-      displayFile(subject, fileData);
-    };
-    reader.readAsDataURL(file);
-  });
-
-  this.value = '';
-});
-
-// === Display Function ===
-function displayFile(subject, fileData) {
-  const container = document.getElementById(`${subject.toLowerCase()}Files`);
-  const card = document.createElement('div');
-  card.className = 'file-card';
-  card.innerHTML = `
-    <strong>${fileData.name}</strong><br>
-    <small>${new Date(fileData.uploaded).toLocaleString()}</small><br>
-    <button onclick="viewFile('${fileData.content}')">📄 View</button>
-  `;
-  container.appendChild(card);
-}
-
-function viewFile(dataUrl) {
-  const newWindow = window.open();
-  newWindow.document.write(`<iframe src="${dataUrl}" style="width:100%;height:100%;border:none;"></iframe>`);
-}
-
-// === Initial Render (on load) ===
-window.onload = function () {
-  const subjects = ['Maths', 'Science', 'English', 'Others'];
-  subjects.forEach(subject => {
-    const files = getFilesFromStorage(subject);
-    files.forEach(file => displayFile(subject, file));
-  });
-};
-
-// === Assignment Storage ===
-function getAssignments() {
-  const data = localStorage.getItem('assignments');
-  return data ? JSON.parse(data) : [];
-}
-
-function saveAssignment(assignment) {
-  const assignments = getAssignments();
-  assignments.push(assignment);
-  localStorage.setItem('assignments', JSON.stringify(assignments));
-}
-
-function displayAssignment(assignment) {
-  const container = document.getElementById('assignmentList');
-  const card = document.createElement('div');
-  card.className = 'assignment-card';
-  card.innerHTML = `
-    <strong>${assignment.title}</strong><br>
-    <small>Due: ${assignment.dueDate}</small><br>
-    <p>${assignment.description}</p>
-  `;
-  container.appendChild(card);
-}
-
-// === Assignment Submit Handler ===
-document.getElementById('assignmentForm')?.addEventListener('submit', function (e) {
-  e.preventDefault();
-  const title = document.getElementById('assignmentTitle').value;
-  const description = document.getElementById('assignmentDesc').value;
-  const dueDate = document.getElementById('assignmentDue').value;
-
-  const newAssignment = { title, description, dueDate };
-  saveAssignment(newAssignment);
-  displayAssignment(newAssignment);
-  this.reset();
-});
-
-// === Render Assignments on Load ===
-window.addEventListener('load', function () {
-  const assignments = getAssignments();
-  assignments.forEach(displayAssignment);
-});
-
-// === Assignment Page Redirect ===
-document.getElementById('gcrLink')?.addEventListener('click', function () {
-  window.open('https://classroom.google.com', '_blank');
-});
-// === Utility Functions ===
-function getFilesFromStorage(subject) {
-  const data = localStorage.getItem(`files_${subject}`);
-  return data ? JSON.parse(data) : [];
-}
-
-function saveFilesToStorage(subject, files) {
-  localStorage.setItem(`files_${subject}`, JSON.stringify(files));
-}
-
-function addFileToStorage(subject, fileObj) {
-  const files = getFilesFromStorage(subject);
-  files.push(fileObj);
-  saveFilesToStorage(subject, files);
-}
-
-// === Upload Handler ===
-document.getElementById('fileInput')?.addEventListener('change', function () {
-  const subject = document.getElementById('subjectSelect').value;
-  const files = Array.from(this.files);
-
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const fileData = {
-        name: prompt(`Enter name for "${file.name}"`) || file.name,
-        content: e.target.result,
-        uploaded: new Date().toISOString()
-      };
-      addFileToStorage(subject, fileData);
-      displayFile(subject, fileData);
-    };
-    reader.readAsDataURL(file);
-  });
-
-  this.value = '';
-});
-
-// === Display Function ===
-function displayFile(subject, fileData) {
-  const container = document.getElementById(`${subject.toLowerCase()}Files`);
-  if (!container) return;
-
-  const card = document.createElement('div');
-  card.className = 'file-card';
-  card.innerHTML = `
-    <strong>${fileData.name}</strong><br>
-    <small>${new Date(fileData.uploaded).toLocaleString()}</small><br>
-    <button onclick="viewFile('${fileData.content}')">📄 View</button>
-  `;
-  container.appendChild(card);
-}
-
-function viewFile(dataUrl) {
-  const newWindow = window.open();
-  newWindow.document.write(`<iframe src="${dataUrl}" style="width:100%;height:100%;border:none;"></iframe>`);
-}
-
-// === Render Files on Load ===
-window.addEventListener('load', function () {
-  const subjects = ['Maths', 'Science', 'English', 'Others'];
-  subjects.forEach(subject => {
-    const files = getFilesFromStorage(subject);
-    files.forEach(file => displayFile(subject, file));
-  });
-
-  // Render Assignments
-  const assignments = getAssignments();
-  assignments.forEach(displayAssignment);
-});
-
-// === Assignment Storage ===
-function getAssignments() {
-  const data = localStorage.getItem('assignments');
-  return data ? JSON.parse(data) : [];
-}
-
-function saveAssignment(assignment) {
-  const assignments = getAssignments();
-  assignments.push(assignment);
-  localStorage.setItem('assignments', JSON.stringify(assignments));
-}
-
-function displayAssignment(assignment) {
-  const container = document.getElementById('assignmentList');
-  if (!container) return;
-
-  const card = document.createElement('div');
-  card.className = 'assignment-card';
-  card.innerHTML = `
-    <strong>${assignment.title}</strong><br>
-    <small>Due: ${assignment.dueDate}</small><br>
-    <p>${assignment.description}</p>
-  `;
-  container.appendChild(card);
-}
-
-// === Assignment Submit Handler ===
-document.getElementById('assignmentForm')?.addEventListener('submit', function (e) {
-  e.preventDefault();
-  const title = document.getElementById('assignmentTitle').value;
-  const description = document.getElementById('assignmentDesc').value;
-  const dueDate = document.getElementById('assignmentDue').value;
-
-  const newAssignment = { title, description, dueDate };
-  saveAssignment(newAssignment);
-  displayAssignment(newAssignment);
-  this.reset();
-});
-
-// === Google Classroom Link ===
-document.getElementById('gcrLink')?.addEventListener('click', function () {
-  window.open('https://classroom.google.com', '_blank');
-});
-
-// === Search Handler ===
-document.getElementById('searchBox')?.addEventListener('input', function () {
-  const query = this.value.toLowerCase();
-  const subjects = ['Maths', 'Science', 'English', 'Others'];
-
-  subjects.forEach(subject => {
-    const container = document.getElementById(`${subject.toLowerCase()}Files`);
-    if (!container) return;
-
-    const cards = container.querySelectorAll('.file-card');
-    cards.forEach(card => {
-      const name = card.querySelector('strong').textContent.toLowerCase();
-      card.style.display = name.includes(query) ? '' : 'none';
-    });
-  });
-});
-// Add these functions to your main StudyBuddyApp class
-
-// ============ File Upload Integration ============
-initializeFileUpload() {
-    const uploadZone = document.getElementById('uploadZone');
-    const fileInput = document.getElementById('fileInput');
-    
-    // Drag and drop events
-    uploadZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadZone.classList.add('dragover');
-    });
-    
-    uploadZone.addEventListener('dragleave', () => {
-        uploadZone.classList.remove('dragover');
-    });
-    
-    uploadZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadZone.classList.remove('dragover');
-        this.handleFileUpload(Array.from(e.dataTransfer.files));
-    });
-    
-    // File input change
-    fileInput.addEventListener('change', (e) => {
-        this.handleFileUpload(Array.from(e.target.files));
-    });
-}
-
-async handleFileUpload(files) {
-    if (!this.currentUser) {
-        this.showNotification('Please sign in to upload files', 'error');
-        return;
-    }
-    
-    const processingStatus = document.getElementById('processingStatus');
-    const processingText = document.getElementById('processingText');
-    
-    processingStatus.classList.remove('hidden');
-    
-    try {
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            processingText.textContent = `Processing ${file.name}... (${i + 1}/${files.length})`;
-            
-            const processedFile = await storage.uploadFile(file, this.currentUser.email);
-            
-            // Add extracted tasks to user's task list
-            processedFile.extractedTasks.forEach(task => {
-                this.tasks.push({
-                    ...task,
-                    id: Date.now().toString() + Math.random(),
-                    createdAt: new Date().toISOString()
-                });
-            });
-            
-            this.showNotification(`Extracted ${processedFile.extractedTasks.length} tasks from ${file.name}`, 'success');
         }
         
         this.renderTasks();
+        this.updateProgress();
         this.updateStats();
-        this.saveUserData();
-        this.loadUploadedFiles();
-        
-    } catch (error) {
-        this.showNotification(`Upload error: ${error.message}`, 'error');
-    } finally {
-        processingStatus.classList.add('hidden');
-        document.getElementById('fileInput').value = '';
+        this.saveTaskData();
     }
-}
 
-async loadUploadedFiles() {
-    if (!this.currentUser) return;
-    
-    try {
-        const files = await storage.getFilesByUser(this.currentUser.email);
-        const filesList = document.getElementById('filesList');
+    deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
         
-        if (files.length === 0) {
-            filesList.innerHTML = '<p class="text-muted">No uploaded files yet</p>';
+        tasks = tasks.filter(t => t.id !== taskId);
+        completedTasks = completedTasks.filter(t => t.id !== taskId);
+        
+        this.renderTasks();
+        this.updateProgress();
+        this.updateStats();
+        this.saveTaskData();
+        
+        this.showNotification('🗑️ Task deleted', 'info');
+    }
+
+    renderTasks() {
+        const tasksList = document.getElementById('tasksList');
+        if (!tasksList) return;
+        
+        if (tasks.length === 0) {
+            tasksList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <div class="empty-title">Ready to start studying!</div>
+                    <div class="empty-subtitle">Create your first study task above</div>
+                </div>
+            `;
             return;
         }
         
-        filesList.innerHTML = '';
-        files.forEach(file => {
-            const preview = storage.createFilePreview(file);
-            filesList.appendChild(preview);
+        tasksList.innerHTML = tasks.map(task => `
+            <div class="task-item ${task.completed ? 'completed' : ''}">
+                <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="academiaHub.toggleTask('${task.id}')">
+                    ${task.completed ? '✓' : ''}
+                </div>
+                <div class="task-content">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-meta">
+                        <span>📅 ${new Date(task.createdAt).toLocaleDateString()}</span>
+                        <span>📚 Study Task</span>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="academiaHub.deleteTask('${task.id}')" title="Delete Task">
+                    🗑️
+                </button>
+            </div>
+        `).join('');
+    }
+
+    // ============ PROGRESS & STATS ============
+    updateProgress() {
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.completed).length;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        // Update progress ring
+        const progressCircle = document.getElementById('progressCircle');
+        if (progressCircle) {
+            const circumference = 2 * Math.PI * 60;
+            const offset = circumference - (percentage / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+        }
+        
+        const progressPercent = document.getElementById('progressPercent');
+        if (progressPercent) {
+            progressPercent.textContent = `${percentage}%`;
+        }
+        
+        // Update daily message
+        const messages = {
+            100: "Perfect study day! 🎉 You're unstoppable!",
+            80: "Almost there! 🌟 Keep up the excellent work!",
+            60: "Great progress! 💪 You're building great study habits!",
+            40: "Good start! 🚀 Every step counts towards success!",
+            20: "Beginning your journey! ✨ You've got this!",
+            0: "Ready to achieve academic excellence! 🎯"
+        };
+        
+        const messageKey = Object.keys(messages).reverse().find(key => percentage >= key);
+        const dailyMessage = document.getElementById('dailyMessage');
+        if (dailyMessage) {
+            dailyMessage.textContent = messages[messageKey];
+        }
+        
+        // Update tasks summary
+        const tasksSummary = document.getElementById('tasksSummary');
+        if (tasksSummary) {
+            tasksSummary.textContent = total > 0 ? 
+                `${completed}/${total} study tasks completed today` : 
+                'Ready to start your study session';
+        }
+    }
+
+    updateStats() {
+        const totalTasksEl = document.getElementById('totalTasks');
+        const completedTasksEl = document.getElementById('completedTasks');
+        const completionRateEl = document.getElementById('completionRate');
+        const streakCountEl = document.getElementById('streakCount');
+        
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.completed).length;
+        const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        if (totalTasksEl) totalTasksEl.textContent = total;
+        if (completedTasksEl) completedTasksEl.textContent = completed;
+        if (completionRateEl) completionRateEl.textContent = `${rate}%`;
+        if (streakCountEl) streakCountEl.textContent = this.calculateStreak();
+    }
+
+    calculateStreak() {
+        // Simple streak calculation based on consecutive days with completed tasks
+        const today = new Date().toDateString();
+        const hasTasksToday = tasks.some(t => 
+            t.completed && new Date(t.completedAt).toDateString() === today
+        );
+        
+        return hasTasksToday ? studyStats.studyStreak + 1 : studyStats.studyStreak;
+    }
+
+    // ============ THEME MANAGEMENT ============
+    setTheme(theme) {
+        currentTheme = theme;
+        document.body.setAttribute('data-theme', theme);
+        
+        // Update active button
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.toLowerCase() === theme);
         });
         
-    } catch (error) {
-        console.error('Error loading files:', error);
+        this.showNotification(`🎨 Theme changed to ${theme}`, 'success');
+        this.saveTheme();
     }
-}
 
-// Import/Export functions
-function showImportDialog() {
-    document.getElementById('importModal').classList.remove('hidden');
-}
-
-function closeImportDialog() {
-    document.getElementById('importModal').classList.add('hidden');
-}
-
-async function importBackup() {
-    const fileInput = document.getElementById('importFileInput');
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        app.showNotification('Please select a backup file', 'error');
-        return;
-    }
-    
-    try {
-        const result = await storage.importUserData(file, app.currentUser.email);
-        app.showNotification(`Import successful! ${result.tasksImported} tasks and ${result.filesImported} files imported.`, 'success');
+    // ============ QUOTES SYSTEM ============
+    loadQuotes() {
+        const quotes = [
+            {
+                text: "Education is the most powerful weapon which you can use to change the world.",
+                author: "Nelson Mandela",
+                category: "Education"
+            },
+            {
+                text: "The beautiful thing about learning is that nobody can take it away from you.",
+                author: "B.B. King",
+                category: "Learning"
+            },
+            {
+                text: "Learning never exhausts the mind.",
+                author: "Leonardo da Vinci",
+                category: "Learning"
+            },
+            {
+                text: "The expert in anything was once a beginner.",
+                author: "Helen Hayes",
+                category: "Growth"
+            },
+            {
+                text: "Study hard what interests you the most in the most undisciplined, irreverent and original manner possible.",
+                author: "Richard Feynman",
+                category: "Study"
+            }
+        ];
         
-        // Reload app data
-        app.loadUserData();
-        app.renderTasks();
-        app.updateStats();
-        app.loadUploadedFiles();
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
         
-        closeImportDialog();
-    } catch (error) {
-        app.showNotification(`Import failed: ${error.message}`, 'error');
+        const quoteText = document.getElementById('quoteText');
+        const quoteAuthor = document.getElementById('quoteAuthor');
+        const quoteCategory = document.getElementById('quoteCategory');
+        
+        if (quoteText) quoteText.textContent = `"${randomQuote.text}"`;
+        if (quoteAuthor) quoteAuthor.textContent = `— ${randomQuote.author}`;
+        if (quoteCategory) quoteCategory.textContent = randomQuote.category;
+    }
+
+    getMotivation() {
+        const userName = currentUser?.name || 'Student';
+        const motivationalMessages = [
+            `${userName}, your dedication to learning is inspiring! Keep pushing forward!`,
+            `Great work today, ${userName}! Every study session brings you closer to your goals!`,
+            `${userName}, you're building incredible knowledge and skills! Stay focused!`,
+            `Amazing progress, ${userName}! Your hard work will definitely pay off!`,
+            `Keep it up, ${userName}! You're developing excellent study habits!`
+        ];
+        
+        const message = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        this.addChatMessage(message, 'ai');
+        this.speak(message);
+        this.loadQuotes(); // Load a new quote
+    }
+
+    // ============ DATA PERSISTENCE ============
+    saveUserData() {
+        if (currentUser) {
+            localStorage.setItem('academia-hub-user', JSON.stringify(currentUser));
+            localStorage.setItem('academia-hub-logged-in', 'true');
+        }
+    }
+
+    saveTaskData() {
+        localStorage.setItem('academia-hub-tasks', JSON.stringify(tasks));
+        localStorage.setItem('academia-hub-completed-tasks', JSON.stringify(completedTasks));
+        localStorage.setItem('academia-hub-stats', JSON.stringify(studyStats));
+    }
+
+    saveChatHistory() {
+        localStorage.setItem('academia-hub-chat', JSON.stringify(chatHistory.slice(-50))); // Keep last 50 messages
+    }
+
+    saveTheme() {
+        localStorage.setItem('academia-hub-theme', currentTheme);
+    }
+
+    loadSavedData() {
+        // Load user
+        const savedUser = localStorage.getItem('academia-hub-user');
+        const wasLoggedIn = localStorage.getItem('academia-hub-logged-in');
+        
+        if (savedUser && wasLoggedIn === 'true') {
+            currentUser = JSON.parse(savedUser);
+            isLoggedIn = true;
+        }
+
+        // Load tasks
+        const savedTasks = localStorage.getItem('academia-hub-tasks');
+        if (savedTasks) {
+            tasks = JSON.parse(savedTasks);
+        }
+
+        const savedCompletedTasks = localStorage.getItem('academia-hub-completed-tasks');
+        if (savedCompletedTasks) {
+            completedTasks = JSON.parse(savedCompletedTasks);
+        }
+
+        // Load stats
+        const savedStats = localStorage.getItem('academia-hub-stats');
+        if (savedStats) {
+            studyStats = { ...studyStats, ...JSON.parse(savedStats) };
+        }
+
+        // Load chat history
+        const savedChat = localStorage.getItem('academia-hub-chat');
+        if (savedChat) {
+            chatHistory = JSON.parse(savedChat);
+        }
+
+        // Load theme
+        const savedTheme = localStorage.getItem('academia-hub-theme');
+        if (savedTheme) {
+            this.setTheme(savedTheme);
+        }
+
+        // Auto-login if user was logged in
+        if (isLoggedIn && currentUser) {
+            this.hideAuthModal();
+            this.showMainApp();
+        }
+    }
+
+    loadUserTasks() {
+        this.renderTasks();
+        this.updateProgress();
+        this.updateStats();
+    }
+
+    // ============ NOTIFICATIONS ============
+    showNotification(message, type = 'info') {
+        const container = document.getElementById('notificationContainer') || this.createNotificationContainer();
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        const icon = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: '📘'
+        }[type] || '📘';
+        
+        notification.innerHTML = `
+            <span style="font-size: 18px;">${icon}</span>
+            <span style="flex: 1;">${message}</span>
+            <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 16px; padding: 4px;">×</button>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    createNotificationContainer() {
+        const container = document.createElement('div');
+        container.id = 'notificationContainer';
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // ============ LOGOUT ============
+    logout() {
+        if (confirm('Are you sure you want to sign out?')) {
+            currentUser = null;
+            isLoggedIn = false;
+            tasks = [];
+            completedTasks = [];
+            chatHistory = [];
+            
+            localStorage.removeItem('academia-hub-user');
+            localStorage.removeItem('academia-hub-logged-in');
+            localStorage.removeItem('academia-hub-tasks');
+            localStorage.removeItem('academia-hub-completed-tasks');
+            localStorage.removeItem('academia-hub-chat');
+            
+            this.showNotification('👋 Signed out successfully', 'success');
+            location.reload(); // Refresh the page
+        }
     }
 }
 
+// ============ INITIALIZE APPLICATION ============
+let academiaHub;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎓 Academia Hub - Ultimate Study Companion');
+    console.log('Initializing application...');
+    
+    academiaHub = new AcademiaHub();
+    
+    // Make globally available for HTML onclick handlers
+    window.academiaHub = academiaHub;
+    
+    // Global functions for HTML onclick handlers
+    window.sendMessage = () => academiaHub.sendMessage();
+    window.createTask = () => academiaHub.createTask();
+    window.getMotivation = () => academiaHub.getMotivation();
+    window.logout = () => academiaHub.logout();
+});
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js')
+            .then(function(registration) {
+                console.log('✅ SW registered:', registration.scope);
+            })
+            .catch(function(err) {
+                console.log('❌ SW registration failed:', err);
+            });
+    });
+}
