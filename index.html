@@ -3,173 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Hub - AI Learning Platform</title>
-    <meta name="description" content="Advanced AI-powered academic platform with subject-based storage and progress tracking">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.js"></script>
+    <title>Academic Hub - My Subjects Dashboard</title>
+    <meta name="description" content="Academic dashboard for BTech AIML Semester 3">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-
-        :root {
-            --bg-primary: linear-gradient(135deg, #0a0b1e 0%, #1a1b2e 50%, #2d3748 100%);
-            --bg-secondary: rgba(26, 32, 44, 0.95);
-            --bg-tertiary: rgba(45, 55, 72, 0.9);
-            --bg-card: rgba(30, 41, 59, 0.9);
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --text-muted: #64748b;
-            --primary-color: #4299e1;
-            --success-color: #48bb78;
-            --warning-color: #ed8936;
-            --danger-color: #f56565;
-            --border-color: rgba(160, 174, 192, 0.2);
-            --shadow-primary: 0 25px 50px rgba(0, 0, 0, 0.5);
-            --shadow-secondary: 0 10px 25px rgba(0, 0, 0, 0.3);
-            --academia-gradient: linear-gradient(135deg, #4299e1, #3182ce);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            background: #0a0b0f;
+            color: #ffffff;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Auth Modal */
-        .auth-modal {
+        /* Sidebar */
+        .sidebar {
             position: fixed;
-            top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #1a1b23;
+            border-right: 1px solid #2d2e36;
             z-index: 1000;
-        }
-
-        .auth-content {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 48px;
-            width: 400px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-primary);
-        }
-
-        .auth-logo {
-            width: 80px;
-            height: 80px;
-            background: var(--academia-gradient);
-            border-radius: 20px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0 auto 32px;
+            flex-direction: column;
         }
 
-        .auth-input {
-            width: 100%;
-            padding: 16px 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            margin-bottom: 16px;
-            outline: none;
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #2d2e36;
         }
 
-        .auth-btn {
-            width: 100%;
-            padding: 16px 32px;
-            background: var(--academia-gradient);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Main App */
-        .app-container {
-            display: none;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .app-title {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .app-logo {
-            width: 56px;
-            height: 56px;
-            background: var(--academia-gradient);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .app-name {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .user-profile {
+        .logo {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 16px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: #2d2e36;
+            border: 1px solid #3a3b42;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #8e8e93;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8e8e93;
+            font-size: 16px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #c7c7cc;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
             cursor: pointer;
         }
 
-        /* Subject Cards Grid */
-        .subjects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
+        .nav-item:hover {
+            background: #2d2e36;
+            color: #ffffff;
         }
 
-        .subject-card {
-            background: var(--bg-card);
+        .nav-item.active {
+            background: #667eea;
+            color: #ffffff;
+        }
+
+        .nav-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .ai-placeholder {
+            background: #2d2e36;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: auto;
+            text-align: center;
+            border: 2px dashed #3a3b42;
+        }
+
+        .ai-placeholder-text {
+            color: #8e8e93;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .ai-placeholder-icon {
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: #0a0b0f;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 40px;
+            border-bottom: 1px solid #2d2e36;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .semester-badge {
+            background: #2d2e36;
+            color: #8e8e93;
+            padding: 8px 16px;
             border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .subjects-container {
+            padding: 40px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        /* Subject Cards */
+        .subject-card {
+            background: #1a1b23;
+            border-radius: 16px;
             padding: 24px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-secondary);
+            border: 1px solid #2d2e36;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -182,676 +218,567 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--academia-gradient);
+            background: var(--accent-color);
         }
 
         .subject-card:hover {
             transform: translateY(-4px);
-            box-shadow: var(--shadow-primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: #3a3b42;
+        }
+
+        .subject-card.math {
+            --accent-color: #667eea;
+        }
+
+        .subject-card.cs {
+            --accent-color: #4ecdc4;
+        }
+
+        .subject-card.arch {
+            --accent-color: #45b7d1;
+        }
+
+        .subject-card.prog {
+            --accent-color: #f9ca24;
+        }
+
+        .subject-card.os {
+            --accent-color: #f0932b;
+        }
+
+        .subject-card.uhv {
+            --accent-color: #eb4d4b;
         }
 
         .subject-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 16px;
             margin-bottom: 20px;
         }
 
         .subject-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: var(--accent-color);
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .subject-info {
+            flex: 1;
         }
 
         .subject-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #ffffff;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .subject-code {
+            font-size: 12px;
+            color: #8e8e93;
+            font-weight: 500;
             margin-bottom: 8px;
         }
 
-        .subject-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
+        .subject-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
             margin-bottom: 20px;
         }
 
-        /* Progress Ring for Each Subject */
-        .subject-progress {
+        .detail-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 20px;
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .faculty-name {
+            color: var(--accent-color) !important;
+        }
+
+        .progress-section {
             margin-bottom: 20px;
-        }
-
-        .progress-ring {
-            width: 80px;
-            height: 80px;
-            position: relative;
-        }
-
-        .progress-ring svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-
-        .progress-ring circle {
-            fill: none;
-            stroke-width: 6;
-            stroke-linecap: round;
-        }
-
-        .progress-bg {
-            stroke: var(--border-color);
         }
 
         .progress-bar {
-            stroke: var(--primary-color);
-            stroke-dasharray: 188;
-            stroke-dashoffset: 188;
-            transition: stroke-dashoffset 1s ease;
+            width: 100%;
+            height: 8px;
+            background: #2d2e36;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 1s ease;
+            border-radius: 4px;
         }
 
         .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .progress-info {
-            flex: 1;
-        }
-
-        .progress-time {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .progress-target {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Subject Controls */
-        .subject-controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .control-btn {
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            cursor: pointer;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .control-btn:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .control-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        /* File Storage Area */
-        .file-storage {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 16px;
-            border: 2px dashed var(--border-color);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .file-storage:hover {
-            border-color: var(--primary-color);
-            background: rgba(66, 153, 225, 0.1);
-        }
-
-        .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .file-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .file-name {
-            font-size: 14px;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .file-size {
             font-size: 12px;
-            color: var(--text-secondary);
+            color: #8e8e93;
         }
 
-        .file-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .file-btn {
-            padding: 4px 8px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .file-btn:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        /* Timer Display */
-        .timer-display {
-            font-family: 'Courier New', monospace;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-align: center;
-            padding: 16px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            margin: 16px 0;
-            border: 1px solid var(--border-color);
-        }
-
-        .timer-controls {
+        .subject-actions {
             display: flex;
             gap: 12px;
-            justify-content: center;
-            margin-top: 16px;
-        }
-
-        .timer-btn {
-            padding: 12px 24px;
-            background: var(--academia-gradient);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .timer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.3);
-        }
-
-        .timer-btn.pause {
-            background: var(--warning-color);
-        }
-
-        .timer-btn.stop {
-            background: var(--danger-color);
-        }
-
-        /* AI Features Panel */
-        .ai-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-secondary);
-        }
-
-        .ai-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-area {
-            height: 300px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 16px;
-            overflow-y: auto;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        .message {
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-
-        .message.user {
-            background: var(--academia-gradient);
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .message.ai {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 12px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            outline: none;
         }
 
         .btn {
-            padding: 12px 24px;
-            background: var(--academia-gradient);
-            color: white;
+            padding: 12px 16px;
             border: none;
             border-radius: 8px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
-            z-index: 2000;
+            gap: 8px;
         }
 
-        .modal-content {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 32px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
+        .btn-primary {
+            background: #007AFF;
+            color: #ffffff;
+            flex: 1;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
+        .btn-primary:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
         }
 
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .btn-secondary {
+            background: #2d2e36;
+            color: #8e8e93;
+            border: 1px solid #3a3b42;
         }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 24px;
-            cursor: pointer;
+        .btn-secondary:hover {
+            background: #3a3b42;
+            color: #ffffff;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
             .subjects-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .app-container {
-                padding: 16px;
+
+            .top-bar {
+                padding: 20px;
             }
-            
-            .subject-controls {
-                grid-template-columns: 1fr;
+
+            .subjects-container {
+                padding: 20px;
             }
         }
 
-        .hidden { display: none !important; }
-        .show { display: flex !important; }
+        /* File Upload Area */
+        .file-upload-area {
+            border: 2px dashed #3a3b42;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+            text-align: center;
+            background: #2d2e36;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent-color);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-text {
+            color: #8e8e93;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .upload-subtext {
+            color: #6d6d70;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <!-- Authentication Modal -->
-    <div class="auth-modal" id="authModal">
-        <div class="auth-content">
-            <div class="auth-logo">AH</div>
-            <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 12px;">Academic Hub</h1>
-            <p style="color: var(--text-secondary); margin-bottom: 32px;">Access your AI-powered learning platform</p>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">AH</div>
+                <div class="logo-text">Academic Hub</div>
+            </div>
             
-            <input type="text" class="auth-input" id="nameInput" placeholder="Your Name" required>
-            <input type="password" class="auth-input" id="passwordInput" placeholder="Create Password" required>
-            <button class="auth-btn" onclick="login()">Access Platform</button>
-            
-            <div style="margin-top: 24px; color: var(--text-secondary); font-size: 14px;">
-                <span>New to Academic Hub? </span>
-                <span style="color: var(--primary-color); cursor: pointer;" onclick="toggleAuthMode()">Create Account</span>
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search subjects, materials...">
+            </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-title">Dashboard</div>
+                <div class="nav-item active">
+                    <span class="nav-icon">📚</span>
+                    <span>My Subjects</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Progress</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Schedule</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📁</span>
+                    <span>Materials</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Tools</div>
+                <div class="nav-item">
+                    <span class="nav-icon">⏱️</span>
+                    <span>Study Timer</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>Notes</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">🎯</span>
+                    <span>Goals</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Account</div>
+                <div class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">❓</span>
+                    <span>Help</span>
+                </div>
+            </div>
+
+            <div class="ai-placeholder">
+                <div class="ai-placeholder-text">AI Assistant</div>
+                <div class="ai-placeholder-icon">🤖</div>
+                <div style="font-size: 10px; color: #6d6d70; margin-top: 4px;">LLM Integration Coming Soon</div>
             </div>
         </div>
     </div>
 
-    <!-- Main Academic Hub App -->
-    <div class="app-container" id="mainApp">
-        <!-- Header -->
-        <div class="app-header">
-            <div class="app-title">
-                <div class="app-logo">AH</div>
-                <div>
-                    <div class="app-name">Academic Hub</div>
-                    <div style="font-size: 16px; color: var(--text-secondary);">AI-Powered Learning Platform</div>
-                </div>
-            </div>
-            <div class="user-profile" onclick="logout()">
-                <div style="width: 32px; height: 32px; background: var(--academia-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;" id="userAvatar">U</div>
-                <div id="userName">User</div>
-            </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">My Subjects</h1>
+            <div class="semester-badge">Semester 3 - BTech AI/ML</div>
         </div>
 
-        <!-- AI Assistant Panel -->
-        <div class="ai-panel">
-            <div class="ai-title">🧠 AI Academic Assistant</div>
-            <div class="chat-area" id="chatArea"></div>
-            <div class="input-group">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Ask about any subject or get help...">
-                <button class="btn" onclick="sendMessage()">Send</button>
-                <button class="btn" style="background: var(--success-color);" onclick="toggleVoice()">🎤</button>
-            </div>
-        </div>
+        <div class="subjects-container">
+            <div class="subjects-grid">
+                <!-- Transforms and Boundary Value Problems -->
+                <div class="subject-card math">
+                    <div class="subject-header">
+                        <div class="subject-icon">📐</div>
+                        <div class="subject-info">
+                            <div class="subject-title">Transforms and Boundary Value Problems</div>
+                            <div class="subject-code">21MAB201T</div>
+                        </div>
+                    </div>
 
-        <!-- Subjects Grid -->
-        <div class="subjects-grid" id="subjectsGrid">
-            <!-- Mathematics Subject -->
-            <div class="subject-card" data-subject="mathematics">
-                <div class="subject-icon">📐</div>
-                <div class="subject-title">Mathematics</div>
-                <div class="subject-subtitle">Algebra, Calculus, Geometry, Statistics</div>
-                
-                <div class="subject-progress">
-                    <div class="progress-ring">
-                        <svg>
-                            <circle class="progress-bg" cx="40" cy="40" r="30"></circle>
-                            <circle class="progress-bar" cx="40" cy="40" r="30" data-progress="0"></circle>
-                        </svg>
-                        <div class="progress-text">0%</div>
+                    <div class="subject-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Credits:</span>
+                            <span class="detail-value">4</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faculty:</span>
+                            <span class="detail-value faculty-name">Dr. V. Vidhya</span>
+                        </div>
                     </div>
-                    <div class="progress-info">
-                        <div class="progress-time">0h 0m</div>
-                        <div class="progress-target">of 4h daily goal</div>
-                    </div>
-                </div>
-                
-                <div class="subject-controls">
-                    <div class="control-btn" onclick="startStudying('mathematics')">📚 Study</div>
-                    <div class="control-btn" onclick="openFiles('mathematics')">📁 Files</div>
-                    <div class="control-btn" onclick="openNotes('mathematics')">📝 Notes</div>
-                </div>
-                
-                <div class="file-storage" onclick="uploadFile('mathematics')">
-                    <div>📎 Drop files here or click to upload</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">PDF, DOC, PPT, Images supported</div>
-                </div>
-                <div class="file-list" id="files-mathematics"></div>
-            </div>
 
-            <!-- Science Subject -->
-            <div class="subject-card" data-subject="science">
-                <div class="subject-icon">🔬</div>
-                <div class="subject-title">Science</div>
-                <div class="subject-subtitle">Physics, Chemistry, Biology</div>
-                
-                <div class="subject-progress">
-                    <div class="progress-ring">
-                        <svg>
-                            <circle class="progress-bg" cx="40" cy="40" r="30"></circle>
-                            <circle class="progress-bar" cx="40" cy="40" r="30" data-progress="0"></circle>
-                        </svg>
-                        <div class="progress-text">0%</div>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>0% Complete</span>
+                            <span>Basic Science</span>
+                        </div>
                     </div>
-                    <div class="progress-info">
-                        <div class="progress-time">0h 0m</div>
-                        <div class="progress-target">of 4h daily goal</div>
-                    </div>
-                </div>
-                
-                <div class="subject-controls">
-                    <div class="control-btn" onclick="startStudying('science')">📚 Study</div>
-                    <div class="control-btn" onclick="openFiles('science')">📁 Files</div>
-                    <div class="control-btn" onclick="openNotes('science')">📝 Notes</div>
-                </div>
-                
-                <div class="file-storage" onclick="uploadFile('science')">
-                    <div>📎 Drop files here or click to upload</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">PDF, DOC, PPT, Images supported</div>
-                </div>
-                <div class="file-list" id="files-science"></div>
-            </div>
 
-            <!-- History Subject -->
-            <div class="subject-card" data-subject="history">
-                <div class="subject-icon">📚</div>
-                <div class="subject-title">History</div>
-                <div class="subject-subtitle">World History, Ancient Civilizations</div>
-                
-                <div class="subject-progress">
-                    <div class="progress-ring">
-                        <svg>
-                            <circle class="progress-bg" cx="40" cy="40" r="30"></circle>
-                            <circle class="progress-bar" cx="40" cy="40" r="30" data-progress="0"></circle>
-                        </svg>
-                        <div class="progress-text">0%</div>
+                    <div class="file-upload-area" onclick="uploadFile('math')">
+                        <div class="upload-text">📎 Drop files here or click to upload</div>
+                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
                     </div>
-                    <div class="progress-info">
-                        <div class="progress-time">0h 0m</div>
-                        <div class="progress-target">of 4h daily goal</div>
-                    </div>
-                </div>
-                
-                <div class="subject-controls">
-                    <div class="control-btn" onclick="startStudying('history')">📚 Study</div>
-                    <div class="control-btn" onclick="openFiles('history')">📁 Files</div>
-                    <div class="control-btn" onclick="openNotes('history')">📝 Notes</div>
-                </div>
-                
-                <div class="file-storage" onclick="uploadFile('history')">
-                    <div>📎 Drop files here or click to upload</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">PDF, DOC, PPT, Images supported</div>
-                </div>
-                <div class="file-list" id="files-history"></div>
-            </div>
 
-            <!-- Literature Subject -->
-            <div class="subject-card" data-subject="literature">
-                <div class="subject-icon">📖</div>
-                <div class="subject-title">Literature</div>
-                <div class="subject-subtitle">English, Poetry, Creative Writing</div>
-                
-                <div class="subject-progress">
-                    <div class="progress-ring">
-                        <svg>
-                            <circle class="progress-bg" cx="40" cy="40" r="30"></circle>
-                            <circle class="progress-bar" cx="40" cy="40" r="30" data-progress="0"></circle>
-                        </svg>
-                        <div class="progress-text">0%</div>
-                    </div>
-                    <div class="progress-info">
-                        <div class="progress-time">0h 0m</div>
-                        <div class="progress-target">of 4h daily goal</div>
+                    <div class="subject-actions">
+                        <button class="btn btn-secondary" onclick="viewMaterials('math')">View Materials</button>
+                        <button class="btn btn-primary" onclick="startStudying('math')">Start Studying</button>
                     </div>
                 </div>
-                
-                <div class="subject-controls">
-                    <div class="control-btn" onclick="startStudying('literature')">📚 Study</div>
-                    <div class="control-btn" onclick="openFiles('literature')">📁 Files</div>
-                    <div class="control-btn" onclick="openNotes('literature')">📝 Notes</div>
-                </div>
-                
-                <div class="file-storage" onclick="uploadFile('literature')">
-                    <div>📎 Drop files here or click to upload</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">PDF, DOC, PPT, Images supported</div>
-                </div>
-                <div class="file-list" id="files-literature"></div>
-            </div>
 
-            <!-- Programming Subject -->
-            <div class="subject-card" data-subject="programming">
-                <div class="subject-icon">💻</div>
-                <div class="subject-title">Programming</div>
-                <div class="subject-subtitle">JavaScript, Python, Web Development</div>
-                
-                <div class="subject-progress">
-                    <div class="progress-ring">
-                        <svg>
-                            <circle class="progress-bg" cx="40" cy="40" r="30"></circle>
-                            <circle class="progress-bar" cx="40" cy="40" r="30" data-progress="0"></circle>
-                        </svg>
-                        <div class="progress-text">0%</div>
+                <!-- Data Structures and Algorithms -->
+                <div class="subject-card cs">
+                    <div class="subject-header">
+                        <div class="subject-icon">🌳</div>
+                        <div class="subject-info">
+                            <div class="subject-title">Data Structures and Algorithms</div>
+                            <div class="subject-code">21CSC201J</div>
+                        </div>
                     </div>
-                    <div class="progress-info">
-                        <div class="progress-time">0h 0m</div>
-                        <div class="progress-target">of 4h daily goal</div>
-                    </div>
-                </div>
-                
-                <div class="subject-controls">
-                    <div class="control-btn" onclick="startStudying('programming')">📚 Study</div>
-                    <div class="control-btn" onclick="openFiles('programming')">📁 Files</div>
-                    <div class="control-btn" onclick="openNotes('programming')">📝 Notes</div>
-                </div>
-                
-                <div class="file-storage" onclick="uploadFile('programming')">
-                    <div>📎 Drop files here or click to upload</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">PDF, DOC, PPT, Images supported</div>
-                </div>
-                <div class="file-list" id="files-programming"></div>
-            </div>
 
-            <!-- Languages Subject -->
-            <div class="subject-card" data-subject="languages">
-                <div class="subject-icon">🗣️</div>
-                <div class="subject-title">Languages</div>
-                <div class="subject-subtitle">Spanish, French, German</div>
-                
-                <div class="subject-progress">
-                    <div class="progress-ring">
-                        <svg>
-                            <circle class="progress-bg" cx="40" cy="40" r="30"></circle>
-                            <circle class="progress-bar" cx="40" cy="40" r="30" data-progress="0"></circle>
-                        </svg>
-                        <div class="progress-text">0%</div>
+                    <div class="subject-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Credits:</span>
+                            <span class="detail-value">4</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faculty:</span>
+                            <span class="detail-value faculty-name">Dr. Kalpana C</span>
+                        </div>
                     </div>
-                    <div class="progress-info">
-                        <div class="progress-time">0h 0m</div>
-                        <div class="progress-target">of 4h daily goal</div>
+
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>0% Complete</span>
+                            <span>Professional Core</span>
+                        </div>
+                    </div>
+
+                    <div class="file-upload-area" onclick="uploadFile('dsa')">
+                        <div class="upload-text">📎 Drop files here or click to upload</div>
+                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                    </div>
+
+                    <div class="subject-actions">
+                        <button class="btn btn-secondary" onclick="viewMaterials('dsa')">View Materials</button>
+                        <button class="btn btn-primary" onclick="startStudying('dsa')">Start Studying</button>
                     </div>
                 </div>
-                
-                <div class="subject-controls">
-                    <div class="control-btn" onclick="startStudying('languages')">📚 Study</div>
-                    <div class="control-btn" onclick="openFiles('languages')">📁 Files</div>
-                    <div class="control-btn" onclick="openNotes('languages')">📝 Notes</div>
-                </div>
-                
-                <div class="file-storage" onclick="uploadFile('languages')">
-                    <div>📎 Drop files here or click to upload</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">PDF, DOC, PPT, Images supported</div>
-                </div>
-                <div class="file-list" id="files-languages"></div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Study Timer Modal -->
-    <div class="modal" id="timerModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="timerSubject">Studying Mathematics</div>
-                <button class="close-btn" onclick="closeTimer()">&times;</button>
-            </div>
-            
-            <div class="timer-display" id="timerDisplay">00:00:00</div>
-            
-            <div class="timer-controls">
-                <button class="timer-btn" id="startBtn" onclick="startTimer()">▶️ Start</button>
-                <button class="timer-btn pause" id="pauseBtn" onclick="pauseTimer()" style="display: none;">⏸️ Pause</button>
-                <button class="timer-btn stop" id="stopBtn" onclick="stopTimer()" style="display: none;">⏹️ Stop</button>
-            </div>
-            
-            <div style="margin-top: 24px; text-align: center; color: var(--text-secondary);">
-                <div>Daily Goal: 4 hours</div>
-                <div id="sessionGoal">Session Goal: Focus and learn</div>
-            </div>
-        </div>
-    </div>
+                <!-- Computer Organization and Architecture -->
+                <div class="subject-card arch">
+                    <div class="subject-header">
+                        <div class="subject-icon">🏗️</div>
+                        <div class="subject-info">
+                            <div class="subject-title">Computer Organization and Architecture</div>
+                            <div class="subject-code">21CSS201T</div>
+                        </div>
+                    </div>
 
-    <!-- File Manager Modal -->
-    <div class="modal" id="fileModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="fileModalTitle">Subject Files</div>
-                <button class="close-btn" onclick="closeFileModal()">&times;</button>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <button class="btn" onclick="uploadFile(currentSubject)">📎 Upload New File</button>
-            </div>
-            
-            <div id="fileManagerContent">
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
-                    <div>No files uploaded yet</div>
+                    <div class="subject-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Credits:</span>
+                            <span class="detail-value">4</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faculty:</span>
+                            <span class="detail-value faculty-name">Dr. Meenakshi M</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>0% Complete</span>
+                            <span>Engineering Science</span>
+                        </div>
+                    </div>
+
+                    <div class="file-upload-area" onclick="uploadFile('coa')">
+                        <div class="upload-text">📎 Drop files here or click to upload</div>
+                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                    </div>
+
+                    <div class="subject-actions">
+                        <button class="btn btn-secondary" onclick="viewMaterials('coa')">View Materials</button>
+                        <button class="btn btn-primary" onclick="startStudying('coa')">Start Studying</button>
+                    </div>
+                </div>
+
+                <!-- Advanced Programming Practice -->
+                <div class="subject-card prog">
+                    <div class="subject-header">
+                        <div class="subject-icon">👨‍💻</div>
+                        <div class="subject-info">
+                            <div class="subject-title">Advanced Programming Practice</div>
+                            <div class="subject-code">21CSC203P</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Credits:</span>
+                            <span class="detail-value">4</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faculty:</span>
+                            <span class="detail-value faculty-name">Dr. Prince Chelladurai S</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>0% Complete</span>
+                            <span>Professional Core</span>
+                        </div>
+                    </div>
+
+                    <div class="file-upload-area" onclick="uploadFile('prog')">
+                        <div class="upload-text">📎 Drop files here or click to upload</div>
+                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                    </div>
+
+                    <div class="subject-actions">
+                        <button class="btn btn-secondary" onclick="viewMaterials('prog')">View Materials</button>
+                        <button class="btn btn-primary" onclick="startStudying('prog')">Start Studying</button>
+                    </div>
+                </div>
+
+                <!-- Operating Systems -->
+                <div class="subject-card os">
+                    <div class="subject-header">
+                        <div class="subject-icon">⚙️</div>
+                        <div class="subject-info">
+                            <div class="subject-title">Operating Systems</div>
+                            <div class="subject-code">21CSC202J</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Credits:</span>
+                            <span class="detail-value">4</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faculty:</span>
+                            <span class="detail-value faculty-name">Dr. G. Priyadharshini</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>0% Complete</span>
+                            <span>Professional Core</span>
+                        </div>
+                    </div>
+
+                    <div class="file-upload-area" onclick="uploadFile('os')">
+                        <div class="upload-text">📎 Drop files here or click to upload</div>
+                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                    </div>
+
+                    <div class="subject-actions">
+                        <button class="btn btn-secondary" onclick="viewMaterials('os')">View Materials</button>
+                        <button class="btn btn-primary" onclick="startStudying('os')">Start Studying</button>
+                    </div>
+                </div>
+
+                <!-- Universal Human Values - II -->
+                <div class="subject-card uhv">
+                    <div class="subject-header">
+                        <div class="subject-icon">🧠</div>
+                        <div class="subject-info">
+                            <div class="subject-title">Universal Human Values - II</div>
+                            <div class="subject-code">21LEM202T</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Credits:</span>
+                            <span class="detail-value">3</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faculty:</span>
+                            <span class="detail-value faculty-name">Dr. Caleb Theodar M</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>0% Complete</span>
+                            <span>Engineering Science</span>
+                        </div>
+                    </div>
+
+                    <div class="file-upload-area" onclick="uploadFile('uhv')">
+                        <div class="upload-text">📎 Drop files here or click to upload</div>
+                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                    </div>
+
+                    <div class="subject-actions">
+                        <button class="btn btn-secondary" onclick="viewMaterials('uhv')">View Materials</button>
+                        <button class="btn btn-primary" onclick="startStudying('uhv')">Start Studying</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -859,324 +786,27 @@
 
     <script>
         // Application State
-        let currentUser = null;
-        let isSignUpMode = false;
-        let currentSubject = null;
-        let studyTimers = {};
-        let studyProgress = {};
         let subjectFiles = {};
-        let isVoiceActive = false;
-        let recognition = null;
-
-        // Academic subjects data
-        const subjects = {
-            mathematics: {
-                name: 'Mathematics',
-                icon: '📐',
-                description: 'Algebra, Calculus, Geometry, Statistics',
-                dailyGoal: 4 * 60, // 4 hours in minutes
-                timeStudied: 0
-            },
-            science: {
-                name: 'Science',
-                icon: '🔬',
-                description: 'Physics, Chemistry, Biology',
-                dailyGoal: 4 * 60,
-                timeStudied: 0
-            },
-            history: {
-                name: 'History',
-                icon: '📚',
-                description: 'World History, Ancient Civilizations',
-                dailyGoal: 4 * 60,
-                timeStudied: 0
-            },
-            literature: {
-                name: 'Literature',
-                icon: '📖',
-                description: 'English, Poetry, Creative Writing',
-                dailyGoal: 4 * 60,
-                timeStudied: 0
-            },
-            programming: {
-                name: 'Programming',
-                icon: '💻',
-                description: 'JavaScript, Python, Web Development',
-                dailyGoal: 4 * 60,
-                timeStudied: 0
-            },
-            languages: {
-                name: 'Languages',
-                icon: '🗣️',
-                description: 'Spanish, French, German',
-                dailyGoal: 4 * 60,
-                timeStudied: 0
-            }
+        let studyProgress = {};
+        let currentUser = {
+            name: 'R R PRAKASHRAVI',
+            regNo: 'RA2411026011210',
+            program: 'B.Tech',
+            department: 'Computer Science and Engineering (AIML)',
+            semester: 3,
+            batch: 2
         };
-
-        // Users database
-        const users = JSON.parse(localStorage.getItem('academic-hub-users') || '{}');
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎓 Academic Hub Loading...');
-            
-            // Check existing session
-            const savedUser = localStorage.getItem('academic-hub-current-user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showMainApp();
-                loadUserData();
-            }
-            
-            // Initialize voice recognition
-            initializeVoiceRecognition();
-            
-            // Initialize file drag and drop
+            console.log('🎓 Academic Hub - SRM Edition Loading...');
+            loadUserData();
             initializeFileHandling();
-            
+            initializeSearch();
             console.log('✅ Academic Hub Ready!');
         });
 
-        // Authentication Functions
-        function login() {
-            const name = document.getElementById('nameInput').value.trim();
-            const password = document.getElementById('passwordInput').value.trim();
-            
-            if (!name || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-            
-            const userKey = name.toLowerCase();
-            
-            if (isSignUpMode) {
-                // Create Account
-                if (users[userKey]) {
-                    alert('Account already exists');
-                    return;
-                }
-                
-                const newUser = {
-                    name: name,
-                    password: password,
-                    createdAt: new Date().toISOString(),
-                    subjects: {...subjects},
-                    files: {}
-                };
-                
-                users[userKey] = newUser;
-                localStorage.setItem('academic-hub-users', JSON.stringify(users));
-                currentUser = newUser;
-                localStorage.setItem('academic-hub-current-user', JSON.stringify(currentUser));
-                
-                showMainApp();
-            } else {
-                // Sign In
-                if (users[userKey] && users[userKey].password === password) {
-                    currentUser = users[userKey];
-                    localStorage.setItem('academic-hub-current-user', JSON.stringify(currentUser));
-                    showMainApp();
-                    loadUserData();
-                } else {
-                    alert('Invalid credentials');
-                }
-            }
-        }
-
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            // Update UI for sign up/sign in mode
-        }
-
-        function showMainApp() {
-            document.getElementById('authModal').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            
-            if (currentUser) {
-                document.getElementById('userName').textContent = currentUser.name;
-                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
-                
-                // Welcome message
-                setTimeout(() => {
-                    addChatMessage(`🎓 Welcome back, ${currentUser.name}! I'm your AI academic assistant. I can help you with any subject, track your study progress, and manage your learning materials. What would you like to study today?`, 'ai');
-                }, 1000);
-            }
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to sign out?')) {
-                saveUserData();
-                currentUser = null;
-                localStorage.removeItem('academic-hub-current-user');
-                location.reload();
-            }
-        }
-
-        // Data Management
-        function loadUserData() {
-            if (currentUser) {
-                // Load subject progress
-                if (currentUser.subjects) {
-                    Object.assign(subjects, currentUser.subjects);
-                }
-                
-                // Load files
-                subjectFiles = currentUser.files || {};
-                
-                // Update UI
-                updateAllProgress();
-                renderAllFiles();
-            }
-        }
-
-        function saveUserData() {
-            if (currentUser) {
-                currentUser.subjects = subjects;
-                currentUser.files = subjectFiles;
-                
-                const userKey = currentUser.name.toLowerCase();
-                users[userKey] = currentUser;
-                
-                localStorage.setItem('academic-hub-users', JSON.stringify(users));
-                localStorage.setItem('academic-hub-current-user', JSON.stringify(currentUser));
-            }
-        }
-
-        // Study Timer Functions
-        function startStudying(subject) {
-            currentSubject = subject;
-            document.getElementById('timerSubject').textContent = `Studying ${subjects[subject].name}`;
-            document.getElementById('timerModal').style.display = 'flex';
-            
-            // Reset timer display
-            document.getElementById('timerDisplay').textContent = '00:00:00';
-            document.getElementById('startBtn').style.display = 'inline-block';
-            document.getElementById('pauseBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'none';
-        }
-
-        function startTimer() {
-            if (!currentSubject) return;
-            
-            const startTime = Date.now();
-            studyTimers[currentSubject] = {
-                startTime: startTime,
-                pausedTime: 0,
-                interval: setInterval(() => updateTimerDisplay(currentSubject), 1000)
-            };
-            
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('pauseBtn').style.display = 'inline-block';
-            document.getElementById('stopBtn').style.display = 'inline-block';
-            
-            showNotification('⏱️ Timer Started', `Study session for ${subjects[currentSubject].name} has begun!`);
-        }
-
-        function pauseTimer() {
-            if (studyTimers[currentSubject]) {
-                clearInterval(studyTimers[currentSubject].interval);
-                studyTimers[currentSubject].pausedTime = Date.now() - studyTimers[currentSubject].startTime;
-                
-                document.getElementById('startBtn').style.display = 'inline-block';
-                document.getElementById('pauseBtn').style.display = 'none';
-                
-                showNotification('⏸️ Timer Paused', 'Study session paused');
-            }
-        }
-
-        function stopTimer() {
-            if (studyTimers[currentSubject]) {
-                const totalTime = Math.floor((Date.now() - studyTimers[currentSubject].startTime) / 1000 / 60); // minutes
-                subjects[currentSubject].timeStudied += totalTime;
-                
-                clearInterval(studyTimers[currentSubject].interval);
-                delete studyTimers[currentSubject];
-                
-                closeTimer();
-                updateProgress(currentSubject);
-                saveUserData();
-                
-                showNotification('✅ Study Session Complete', `Great job! You studied ${subjects[currentSubject].name} for ${totalTime} minutes.`);
-                addChatMessage(`🎉 Excellent work! You just completed a ${totalTime}-minute study session in ${subjects[currentSubject].name}. Your daily progress has been updated. Keep up the great momentum! 💪`, 'ai');
-            }
-        }
-
-        function updateTimerDisplay(subject) {
-            if (!studyTimers[subject]) return;
-            
-            const elapsed = Date.now() - studyTimers[subject].startTime;
-            const totalSeconds = Math.floor(elapsed / 1000);
-            
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            
-            const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            document.getElementById('timerDisplay').textContent = display;
-        }
-
-        function closeTimer() {
-            document.getElementById('timerModal').style.display = 'none';
-            currentSubject = null;
-        }
-
-        // Progress Tracking
-        function updateProgress(subject) {
-            const subjectData = subjects[subject];
-            const percentage = Math.min((subjectData.timeStudied / subjectData.dailyGoal) * 100, 100);
-            
-            // Update progress ring
-            const card = document.querySelector(`[data-subject="${subject}"]`);
-            const progressBar = card.querySelector('.progress-bar');
-            const progressText = card.querySelector('.progress-text');
-            const progressTime = card.querySelector('.progress-time');
-            
-            const circumference = 2 * Math.PI * 30;
-            const offset = circumference - (percentage / 100) * circumference;
-            
-            progressBar.style.strokeDashoffset = offset;
-            progressText.textContent = Math.round(percentage) + '%';
-            
-            const hours = Math.floor(subjectData.timeStudied / 60);
-            const minutes = subjectData.timeStudied % 60;
-            progressTime.textContent = `${hours}h ${minutes}m`;
-        }
-
-        function updateAllProgress() {
-            Object.keys(subjects).forEach(subject => {
-                updateProgress(subject);
-            });
-        }
-
-        // File Management
-        function initializeFileHandling() {
-            // Add drag and drop support
-            document.querySelectorAll('.file-storage').forEach(storage => {
-                storage.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    storage.style.borderColor = 'var(--primary-color)';
-                    storage.style.background = 'rgba(66, 153, 225, 0.1)';
-                });
-                
-                storage.addEventListener('dragleave', (e) => {
-                    e.preventDefault();
-                    storage.style.borderColor = 'var(--border-color)';
-                    storage.style.background = 'var(--bg-tertiary)';
-                });
-                
-                storage.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const subject = storage.closest('[data-subject]').dataset.subject;
-                    const files = Array.from(e.dataTransfer.files);
-                    handleFileUpload(subject, files);
-                    
-                    storage.style.borderColor = 'var(--border-color)';
-                    storage.style.background = 'var(--bg-tertiary)';
-                });
-            });
-        }
-
+        // File Upload Functions
         function uploadFile(subject) {
             const input = document.createElement('input');
             input.type = 'file';
@@ -1197,10 +827,8 @@
             }
             
             files.forEach(file => {
-                // In a real app, you would upload to a server or cloud storage
-                // For this demo, we'll use localStorage with base64 encoding for small files
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit for demo
-                    showNotification('⚠️ File Too Large', `${file.name} is too large. Please upload files under 5MB.`);
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showNotification('File Too Large', `${file.name} is too large. Please upload files under 5MB.`);
                     return;
                 }
                 
@@ -1211,278 +839,167 @@
                         name: file.name,
                         size: file.size,
                         type: file.type,
-                        data: e.target.result, // base64 data
+                        data: e.target.result,
                         uploadedAt: new Date().toISOString()
                     };
                     
                     subjectFiles[subject].push(fileData);
-                    renderFiles(subject);
                     saveUserData();
-                    
-                    showNotification('✅ File Uploaded', `${file.name} has been saved to ${subjects[subject].name}`);
+                    showNotification('File Uploaded', `${file.name} has been saved successfully`);
                 };
                 reader.readAsDataURL(file);
             });
         }
 
-        function renderFiles(subject) {
-            const container = document.getElementById(`files-${subject}`);
-            const files = subjectFiles[subject] || [];
-            
-            if (files.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            container.innerHTML = files.map(file => `
-                <div class="file-item">
-                    <div>
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${formatFileSize(file.size)}</div>
-                    </div>
-                    <div class="file-actions">
-                        <button class="file-btn" onclick="downloadFile('${subject}', '${file.id}')">📥 Download</button>
-                        <button class="file-btn" onclick="deleteFile('${subject}', '${file.id}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `).join('');
+        function viewMaterials(subject) {
+            showNotification('Materials', `Opening materials for ${getSubjectName(subject)}`);
         }
 
-        function renderAllFiles() {
-            Object.keys(subjects).forEach(subject => {
-                renderFiles(subject);
+        function startStudying(subject) {
+            const subjectName = getSubjectName(subject);
+            showNotification('Study Session', `Starting study session for ${subjectName}`);
+            
+            // Update progress (simulate)
+            if (!studyProgress[subject]) {
+                studyProgress[subject] = 0;
+            }
+            studyProgress[subject] = Math.min(studyProgress[subject] + 10, 100);
+            updateProgress(subject);
+            saveUserData();
+        }
+
+        function getSubjectName(subject) {
+            const names = {
+                'math': 'Transforms and Boundary Value Problems',
+                'dsa': 'Data Structures and Algorithms',
+                'coa': 'Computer Organization and Architecture',
+                'prog': 'Advanced Programming Practice',
+                'os': 'Operating Systems',
+                'uhv': 'Universal Human Values - II'
+            };
+            return names[subject] || subject;
+        }
+
+        function updateProgress(subject) {
+            const cards = document.querySelectorAll('.subject-card');
+            cards.forEach(card => {
+                const subjectCode = getSubjectCode(card);
+                if (subjectCode === subject) {
+                    const progressFill = card.querySelector('.progress-fill');
+                    const progressText = card.querySelector('.progress-text span');
+                    
+                    const progress = studyProgress[subject] || 0;
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = progress + '% Complete';
+                }
             });
         }
 
-        function downloadFile(subject, fileId) {
-            const file = subjectFiles[subject].find(f => f.id == fileId);
-            if (file) {
-                const link = document.createElement('a');
-                link.href = file.data;
-                link.download = file.name;
-                link.click();
+        function getSubjectCode(card) {
+            if (card.classList.contains('math')) return 'math';
+            if (card.classList.contains('cs')) return 'dsa';
+            if (card.classList.contains('arch')) return 'coa';
+            if (card.classList.contains('prog')) return 'prog';
+            if (card.classList.contains('os')) return 'os';
+            if (card.classList.contains('uhv')) return 'uhv';
+            return '';
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                filterSubjects(query);
+            });
+        }
+
+        function filterSubjects(query) {
+            const cards = document.querySelectorAll('.subject-card');
+            cards.forEach(card => {
+                const title = card.querySelector('.subject-title').textContent.toLowerCase();
+                const code = card.querySelector('.subject-code').textContent.toLowerCase();
+                const faculty = card.querySelector('.faculty-name').textContent.toLowerCase();
                 
-                showNotification('📥 Download Started', `Downloading ${file.name}`);
-            }
+                const matches = title.includes(query) || code.includes(query) || faculty.includes(query);
+                card.style.display = matches ? 'block' : 'none';
+            });
         }
 
-        function deleteFile(subject, fileId) {
-            if (confirm('Are you sure you want to delete this file?')) {
-                subjectFiles[subject] = subjectFiles[subject].filter(f => f.id != fileId);
-                renderFiles(subject);
-                saveUserData();
-                showNotification('🗑️ File Deleted', 'File has been removed');
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function openFiles(subject) {
-            currentSubject = subject;
-            document.getElementById('fileModalTitle').textContent = `${subjects[subject].name} Files`;
-            
-            const content = document.getElementById('fileManagerContent');
-            const files = subjectFiles[subject] || [];
-            
-            if (files.length === 0) {
-                content.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
-                        <div>No files uploaded yet</div>
-                        <div style="font-size: 14px; margin-top: 8px;">Upload study materials, notes, and resources</div>
-                    </div>
-                `;
-            } else {
-                content.innerHTML = `
-                    <div class="file-list">
-                        ${files.map(file => `
-                            <div class="file-item">
-                                <div>
-                                    <div class="file-name">${file.name}</div>
-                                    <div class="file-size">${formatFileSize(file.size)} • ${new Date(file.uploadedAt).toLocaleDateString()}</div>
-                                </div>
-                                <div class="file-actions">
-                                    <button class="file-btn" onclick="downloadFile('${subject}', '${file.id}')">📥 Download</button>
-                                    <button class="file-btn" onclick="deleteFile('${subject}', '${file.id}')">🗑️ Delete</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            
-            document.getElementById('fileModal').style.display = 'flex';
-        }
-
-        function closeFileModal() {
-            document.getElementById('fileModal').style.display = 'none';
-            currentSubject = null;
-        }
-
-        function openNotes(subject) {
-            addChatMessage(`📝 Opening notes for ${subjects[subject].name}. You can ask me to help you take notes, summarize topics, or create study guides for this subject!`, 'ai');
-        }
-
-        // Voice Recognition
-        function initializeVoiceRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
+        // File handling with drag and drop
+        function initializeFileHandling() {
+            document.querySelectorAll('.file-upload-area').forEach(area => {
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.style.borderColor = 'var(--accent-color)';
+                    area.style.background = 'rgba(102, 126, 234, 0.1)';
+                });
                 
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
+                area.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    area.style.borderColor = '#3a3b42';
+                    area.style.background = '#2d2e36';
+                });
                 
-                recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    processVoiceCommand(transcript);
-                };
-                
-                recognition.onend = () => {
-                    isVoiceActive = false;
-                };
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const files = Array.from(e.dataTransfer.files);
+                    const subject = getSubjectFromUploadArea(area);
+                    handleFileUpload(subject, files);
+                    
+                    area.style.borderColor = '#3a3b42';
+                    area.style.background = '#2d2e36';
+                });
+            });
+        }
+
+        function getSubjectFromUploadArea(area) {
+            const card = area.closest('.subject-card');
+            return getSubjectCode(card);
+        }
+
+        // Data persistence
+        function saveUserData() {
+            localStorage.setItem('academic-hub-files', JSON.stringify(subjectFiles));
+            localStorage.setItem('academic-hub-progress', JSON.stringify(studyProgress));
+        }
+
+        function loadUserData() {
+            const savedFiles = localStorage.getItem('academic-hub-files');
+            if (savedFiles) {
+                subjectFiles = JSON.parse(savedFiles);
+            }
+            
+            const savedProgress = localStorage.getItem('academic-hub-progress');
+            if (savedProgress) {
+                studyProgress = JSON.parse(savedProgress);
+                Object.keys(studyProgress).forEach(subject => {
+                    updateProgress(subject);
+                });
             }
         }
 
-        function toggleVoice() {
-            if (!recognition) {
-                showNotification('❌ Voice Not Supported', 'Voice recognition is not available in this browser');
-                return;
-            }
-            
-            if (isVoiceActive) {
-                recognition.stop();
-                isVoiceActive = false;
-            } else {
-                recognition.start();
-                isVoiceActive = true;
-                showNotification('🎤 Listening', 'Voice recognition activated');
-            }
-        }
-
-        function processVoiceCommand(transcript) {
-            console.log('Voice command:', transcript);
-            document.getElementById('chatInput').value = transcript;
-            sendMessage();
-        }
-
-        // AI Chat Functions
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            addChatMessage(message, 'user');
-            input.value = '';
-            
-            setTimeout(() => {
-                const response = generateAIResponse(message);
-                addChatMessage(response, 'ai');
-                speak(response.replace(/🎓|📚|🔬|💻/g, ''));
-            }, 1000);
-        }
-
-        function addChatMessage(message, sender) {
-            const chatArea = document.getElementById('chatArea');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.innerHTML = sender === 'ai' ? `<strong>🎓 Academic AI:</strong> ${message}` : `<strong>You:</strong> ${message}`;
-            
-            chatArea.appendChild(messageDiv);
-            chatArea.scrollTop = chatArea.scrollHeight;
-        }
-
-        function generateAIResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            const userName = currentUser ? currentUser.name : 'student';
-            
-            // Subject-specific responses
-            if (lowerMessage.includes('math') || lowerMessage.includes('mathematics')) {
-                return `📐 I can help you with mathematics, ${userName}! Whether it's algebra, calculus, geometry, or statistics, I'm here to explain concepts, solve problems step-by-step, and help you understand the fundamentals. What specific math topic would you like to explore?`;
-            }
-            
-            if (lowerMessage.includes('science') || lowerMessage.includes('physics') || lowerMessage.includes('chemistry') || lowerMessage.includes('biology')) {
-                return `🔬 Science is fascinating, ${userName}! I can assist with physics concepts like motion and energy, chemistry topics like molecular structures and reactions, and biology subjects like cellular processes and genetics. What scientific area interests you today?`;
-            }
-            
-            if (lowerMessage.includes('history')) {
-                return `📚 History helps us understand our world, ${userName}! I can discuss different civilizations, historical events, analyze causes and effects, and help you understand how past events shape our present. What historical period or topic would you like to explore?`;
-            }
-            
-            if (lowerMessage.includes('literature') || lowerMessage.includes('english') || lowerMessage.includes('writing')) {
-                return `📖 Literature opens new worlds, ${userName}! I can help analyze poems, novels, and plays, discuss literary devices and themes, assist with essay writing, and improve your reading comprehension. What literary work or writing project are you working on?`;
-            }
-            
-            if (lowerMessage.includes('programming') || lowerMessage.includes('coding') || lowerMessage.includes('computer')) {
-                return `💻 Programming is a powerful skill, ${userName}! I can help with JavaScript, Python, web development, algorithms, debugging, and software design principles. Whether you're a beginner or advanced, what coding challenge can I help you with?`;
-            }
-            
-            if (lowerMessage.includes('language') || lowerMessage.includes('spanish') || lowerMessage.includes('french') || lowerMessage.includes('german')) {
-                return `🗣️ Language learning is exciting, ${userName}! I can help with grammar, vocabulary, pronunciation, conversation practice, and cultural context. Which language are you studying, and what specific aspect would you like to work on?`;
-            }
-            
-            // Study-related responses
-            if (lowerMessage.includes('study') || lowerMessage.includes('learn') || lowerMessage.includes('exam') || lowerMessage.includes('test')) {
-                return `📚 Great question about studying, ${userName}! I can help you create effective study schedules, suggest memory techniques like active recall and spaced repetition, provide test-taking strategies, and help you stay motivated. What study challenge are you facing?`;
-            }
-            
-            // Progress-related responses
-            if (lowerMessage.includes('progress') || lowerMessage.includes('goal') || lowerMessage.includes('time')) {
-                const totalStudied = Object.values(subjects).reduce((sum, subject) => sum + subject.timeStudied, 0);
-                const totalGoal = Object.values(subjects).length * 4 * 60; // 4 hours per subject
-                const overallProgress = Math.round((totalStudied / totalGoal) * 100);
-                
-                return `📊 You're making excellent progress, ${userName}! You've studied ${Math.floor(totalStudied / 60)} hours and ${totalStudied % 60} minutes today across all subjects. Your overall daily progress is ${overallProgress}%. Remember, consistency is key to academic success. Keep up the great work!`;
-            }
-            
-            // General responses
-            const responses = [
-                `Hello ${userName}! I'm your AI academic assistant, ready to help you excel in your studies. I can assist with any subject, track your progress, help manage your study materials, and provide personalized learning guidance. What would you like to work on today?`,
-                `Great to see you learning, ${userName}! I'm here to support your academic journey with explanations, study strategies, progress tracking, and motivation. Whether you need help with specific subjects or study techniques, I'm ready to assist. How can I help you succeed?`,
-                `Welcome ${userName}! As your AI tutor, I can help you understand complex concepts, organize your study materials, track your daily progress toward your 4-hour goals, and keep you motivated. What academic challenge would you like to tackle together?`,
-                `Excellent, ${userName}! I'm designed to be your comprehensive academic companion. I can explain difficult topics, help with homework, manage your study schedule, and track your learning progress. What subject or study goal would you like to focus on?`
-            ];
-            
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Utility Functions
+        // Notification system
         function showNotification(title, message) {
-            // Create notification element
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: var(--bg-card);
-                color: var(--text-primary);
+                background: #1a1b23;
+                color: #ffffff;
                 padding: 16px 24px;
                 border-radius: 12px;
-                box-shadow: var(--shadow-primary);
+                border: 1px solid #2d2e36;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
                 z-index: 10000;
-                border: 1px solid var(--border-color);
                 max-width: 350px;
                 animation: slideIn 0.3s ease;
             `;
             
             notification.innerHTML = `
                 <div style="font-weight: 700; margin-bottom: 4px;">${title}</div>
-                <div style="font-size: 14px; color: var(--text-secondary);">${message}</div>
+                <div style="font-size: 14px; color: #8e8e93;">${message}</div>
             `;
             
             document.body.appendChild(notification);
@@ -1490,13 +1007,30 @@
             setTimeout(() => {
                 notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => notification.remove(), 300);
-            }, 4000);
+            }, 3000);
         }
 
-        // Auto-save progress every 5 minutes
-        setInterval(saveUserData, 5 * 60 * 1000);
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
 
-        console.log('🎓 Academic Hub Complete - Subject-based learning with progress tracking!');
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('🎓 Academic Hub - SRM BTech AIML Semester 3 Ready!');
     </script>
 </body>
 </html>
