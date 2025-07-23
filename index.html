@@ -346,6 +346,14 @@
             color: #8e8e93;
         }
 
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+
         .subject-actions {
             display: flex;
             gap: 12px;
@@ -387,34 +395,6 @@
             color: #ffffff;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .subjects-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .top-bar {
-                padding: 20px;
-            }
-
-            .subjects-container {
-                padding: 20px;
-            }
-        }
-
         /* File Upload Area */
         .file-upload-area {
             border: 2px dashed #3a3b42;
@@ -443,8 +423,181 @@
             font-size: 12px;
         }
 
+        /* Study Timer Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: #1a1b23;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #2d2e36;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 24px 0;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        .timer-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timer-btn.start {
+            background: #007AFF;
+            color: white;
+        }
+
+        .timer-btn.pause {
+            background: #f9ca24;
+            color: white;
+        }
+
+        .timer-btn.stop {
+            background: #eb4d4b;
+            color: white;
+        }
+
+        /* Materials Modal */
+        .materials-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #2d2e36;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #3a3b42;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .file-btn {
+            padding: 6px 12px;
+            background: #3a3b42;
+            border: 1px solid #4a4b52;
+            border-radius: 4px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .file-btn:hover {
+            background: #667eea;
+        }
+
+        /* Content Areas */
+        .content-area {
+            display: none;
+            padding: 40px;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        .content-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                padding: 20px;
+            }
+
+            .subjects-container {
+                padding: 20px;
+            }
+        }
+
         .hidden {
             display: none !important;
+        }
+
+        .show {
+            display: flex !important;
         }
     </style>
 </head>
@@ -459,26 +612,26 @@
             
             <div class="search-container">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" placeholder="Search subjects, materials...">
+                <input type="text" class="search-input" placeholder="Search subjects, materials..." id="searchInput">
             </div>
         </div>
 
         <div class="sidebar-nav">
             <div class="nav-section">
                 <div class="nav-title">Dashboard</div>
-                <div class="nav-item active">
+                <div class="nav-item active" data-content="subjects">
                     <span class="nav-icon">📚</span>
                     <span>My Subjects</span>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="progress">
                     <span class="nav-icon">📊</span>
                     <span>Progress</span>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="schedule">
                     <span class="nav-icon">📅</span>
                     <span>Schedule</span>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="materials">
                     <span class="nav-icon">📁</span>
                     <span>Materials</span>
                 </div>
@@ -486,15 +639,15 @@
 
             <div class="nav-section">
                 <div class="nav-title">Tools</div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="timer">
                     <span class="nav-icon">⏱️</span>
                     <span>Study Timer</span>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="notes">
                     <span class="nav-icon">📝</span>
                     <span>Notes</span>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="goals">
                     <span class="nav-icon">🎯</span>
                     <span>Goals</span>
                 </div>
@@ -502,11 +655,11 @@
 
             <div class="nav-section">
                 <div class="nav-title">Account</div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="settings">
                     <span class="nav-icon">⚙️</span>
                     <span>Settings</span>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" data-content="help">
                     <span class="nav-icon">❓</span>
                     <span>Help</span>
                 </div>
@@ -522,264 +675,346 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="top-bar">
-            <h1 class="page-title">My Subjects</h1>
-            <div class="semester-badge">Semester 3 - BTech AI/ML</div>
+        <!-- Subjects Content -->
+        <div class="content-area active" id="subjects-content">
+            <div class="top-bar">
+                <h1 class="page-title">My Subjects</h1>
+                <div class="semester-badge">Semester 3 - BTech AI/ML</div>
+            </div>
+
+            <div class="subjects-container">
+                <div class="subjects-grid">
+                    <!-- Transforms and Boundary Value Problems -->
+                    <div class="subject-card math" data-subject="math">
+                        <div class="subject-header">
+                            <div class="subject-icon">📐</div>
+                            <div class="subject-info">
+                                <div class="subject-title">Transforms and Boundary Value Problems</div>
+                                <div class="subject-code">21MAB201T</div>
+                            </div>
+                        </div>
+
+                        <div class="subject-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Credits:</span>
+                                <span class="detail-value">4</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Faculty:</span>
+                                <span class="detail-value faculty-name">Dr. V. Vidhya</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="time-display" id="time-math">Study Time: 0h 0m</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-math" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progress-text-math">0% Complete</span>
+                                <span>Basic Science</span>
+                            </div>
+                        </div>
+
+                        <div class="file-upload-area" onclick="uploadFile('math')">
+                            <div class="upload-text">📎 Drop files here or click to upload</div>
+                            <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                        </div>
+
+                        <div class="subject-actions">
+                            <button class="btn btn-secondary" onclick="viewMaterials('math')">View Materials</button>
+                            <button class="btn btn-primary" onclick="startStudying('math')">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Data Structures and Algorithms -->
+                    <div class="subject-card cs" data-subject="dsa">
+                        <div class="subject-header">
+                            <div class="subject-icon">🌳</div>
+                            <div class="subject-info">
+                                <div class="subject-title">Data Structures and Algorithms</div>
+                                <div class="subject-code">21CSC201J</div>
+                            </div>
+                        </div>
+
+                        <div class="subject-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Credits:</span>
+                                <span class="detail-value">4</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Faculty:</span>
+                                <span class="detail-value faculty-name">Dr. Kalpana C</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="time-display" id="time-dsa">Study Time: 0h 0m</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-dsa" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progress-text-dsa">0% Complete</span>
+                                <span>Professional Core</span>
+                            </div>
+                        </div>
+
+                        <div class="file-upload-area" onclick="uploadFile('dsa')">
+                            <div class="upload-text">📎 Drop files here or click to upload</div>
+                            <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                        </div>
+
+                        <div class="subject-actions">
+                            <button class="btn btn-secondary" onclick="viewMaterials('dsa')">View Materials</button>
+                            <button class="btn btn-primary" onclick="startStudying('dsa')">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Computer Organization and Architecture -->
+                    <div class="subject-card arch" data-subject="coa">
+                        <div class="subject-header">
+                            <div class="subject-icon">🏗️</div>
+                            <div class="subject-info">
+                                <div class="subject-title">Computer Organization and Architecture</div>
+                                <div class="subject-code">21CSS201T</div>
+                            </div>
+                        </div>
+
+                        <div class="subject-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Credits:</span>
+                                <span class="detail-value">4</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Faculty:</span>
+                                <span class="detail-value faculty-name">Dr. Meenakshi M</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="time-display" id="time-coa">Study Time: 0h 0m</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-coa" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progress-text-coa">0% Complete</span>
+                                <span>Engineering Science</span>
+                            </div>
+                        </div>
+
+                        <div class="file-upload-area" onclick="uploadFile('coa')">
+                            <div class="upload-text">📎 Drop files here or click to upload</div>
+                            <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                        </div>
+
+                        <div class="subject-actions">
+                            <button class="btn btn-secondary" onclick="viewMaterials('coa')">View Materials</button>
+                            <button class="btn btn-primary" onclick="startStudying('coa')">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Programming Practice -->
+                    <div class="subject-card prog" data-subject="prog">
+                        <div class="subject-header">
+                            <div class="subject-icon">👨‍💻</div>
+                            <div class="subject-info">
+                                <div class="subject-title">Advanced Programming Practice</div>
+                                <div class="subject-code">21CSC203P</div>
+                            </div>
+                        </div>
+
+                        <div class="subject-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Credits:</span>
+                                <span class="detail-value">4</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Faculty:</span>
+                                <span class="detail-value faculty-name">Dr. Prince Chelladurai S</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="time-display" id="time-prog">Study Time: 0h 0m</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-prog" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progress-text-prog">0% Complete</span>
+                                <span>Professional Core</span>
+                            </div>
+                        </div>
+
+                        <div class="file-upload-area" onclick="uploadFile('prog')">
+                            <div class="upload-text">📎 Drop files here or click to upload</div>
+                            <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                        </div>
+
+                        <div class="subject-actions">
+                            <button class="btn btn-secondary" onclick="viewMaterials('prog')">View Materials</button>
+                            <button class="btn btn-primary" onclick="startStudying('prog')">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Operating Systems -->
+                    <div class="subject-card os" data-subject="os">
+                        <div class="subject-header">
+                            <div class="subject-icon">⚙️</div>
+                            <div class="subject-info">
+                                <div class="subject-title">Operating Systems</div>
+                                <div class="subject-code">21CSC202J</div>
+                            </div>
+                        </div>
+
+                        <div class="subject-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Credits:</span>
+                                <span class="detail-value">4</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Faculty:</span>
+                                <span class="detail-value faculty-name">Dr. G. Priyadharshini</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="time-display" id="time-os">Study Time: 0h 0m</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-os" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progress-text-os">0% Complete</span>
+                                <span>Professional Core</span>
+                            </div>
+                        </div>
+
+                        <div class="file-upload-area" onclick="uploadFile('os')">
+                            <div class="upload-text">📎 Drop files here or click to upload</div>
+                            <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                        </div>
+
+                        <div class="subject-actions">
+                            <button class="btn btn-secondary" onclick="viewMaterials('os')">View Materials</button>
+                            <button class="btn btn-primary" onclick="startStudying('os')">Start Studying</button>
+                        </div>
+                    </div>
+
+                    <!-- Universal Human Values - II -->
+                    <div class="subject-card uhv" data-subject="uhv">
+                        <div class="subject-header">
+                            <div class="subject-icon">🧠</div>
+                            <div class="subject-info">
+                                <div class="subject-title">Universal Human Values - II</div>
+                                <div class="subject-code">21LEM202T</div>
+                            </div>
+                        </div>
+
+                        <div class="subject-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Credits:</span>
+                                <span class="detail-value">3</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Faculty:</span>
+                                <span class="detail-value faculty-name">Dr. Caleb Theodar M</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="time-display" id="time-uhv">Study Time: 0h 0m</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-uhv" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progress-text-uhv">0% Complete</span>
+                                <span>Engineering Science</span>
+                            </div>
+                        </div>
+
+                        <div class="file-upload-area" onclick="uploadFile('uhv')">
+                            <div class="upload-text">📎 Drop files here or click to upload</div>
+                            <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
+                        </div>
+
+                        <div class="subject-actions">
+                            <button class="btn btn-secondary" onclick="viewMaterials('uhv')">View Materials</button>
+                            <button class="btn btn-primary" onclick="startStudying('uhv')">Start Studying</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="subjects-container">
-            <div class="subjects-grid">
-                <!-- Transforms and Boundary Value Problems -->
-                <div class="subject-card math">
-                    <div class="subject-header">
-                        <div class="subject-icon">📐</div>
-                        <div class="subject-info">
-                            <div class="subject-title">Transforms and Boundary Value Problems</div>
-                            <div class="subject-code">21MAB201T</div>
-                        </div>
-                    </div>
+        <!-- Other Content Areas -->
+        <div class="content-area" id="progress-content">
+            <div class="content-title">📊 Study Progress</div>
+            <p style="color: #8e8e93;">Overall study progress and analytics will be displayed here.</p>
+        </div>
 
-                    <div class="subject-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Credits:</span>
-                            <span class="detail-value">4</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Faculty:</span>
-                            <span class="detail-value faculty-name">Dr. V. Vidhya</span>
-                        </div>
-                    </div>
+        <div class="content-area" id="schedule-content">
+            <div class="content-title">📅 Schedule</div>
+            <p style="color: #8e8e93;">Your class schedule and study timetable will be shown here.</p>
+        </div>
 
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>0% Complete</span>
-                            <span>Basic Science</span>
-                        </div>
-                    </div>
+        <div class="content-area" id="materials-content">
+            <div class="content-title">📁 All Materials</div>
+            <p style="color: #8e8e93;">All your uploaded study materials organized by subject.</p>
+        </div>
 
-                    <div class="file-upload-area" onclick="uploadFile('math')">
-                        <div class="upload-text">📎 Drop files here or click to upload</div>
-                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
-                    </div>
+        <div class="content-area" id="timer-content">
+            <div class="content-title">⏱️ Study Timer</div>
+            <p style="color: #8e8e93;">Dedicated study timer with Pomodoro technique support.</p>
+        </div>
 
-                    <div class="subject-actions">
-                        <button class="btn btn-secondary" onclick="viewMaterials('math')">View Materials</button>
-                        <button class="btn btn-primary" onclick="startStudying('math')">Start Studying</button>
-                    </div>
-                </div>
+        <div class="content-area" id="notes-content">
+            <div class="content-title">📝 Smart Notes</div>
+            <p style="color: #8e8e93;">Create and organize your study notes with AI assistance.</p>
+        </div>
 
-                <!-- Data Structures and Algorithms -->
-                <div class="subject-card cs">
-                    <div class="subject-header">
-                        <div class="subject-icon">🌳</div>
-                        <div class="subject-info">
-                            <div class="subject-title">Data Structures and Algorithms</div>
-                            <div class="subject-code">21CSC201J</div>
-                        </div>
-                    </div>
+        <div class="content-area" id="goals-content">
+            <div class="content-title">🎯 Study Goals</div>
+            <p style="color: #8e8e93;">Set and track your academic goals and milestones.</p>
+        </div>
 
-                    <div class="subject-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Credits:</span>
-                            <span class="detail-value">4</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Faculty:</span>
-                            <span class="detail-value faculty-name">Dr. Kalpana C</span>
-                        </div>
-                    </div>
+        <div class="content-area" id="settings-content">
+            <div class="content-title">⚙️ Settings</div>
+            <p style="color: #8e8e93;">Customize your Academic Hub experience and preferences.</p>
+        </div>
 
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>0% Complete</span>
-                            <span>Professional Core</span>
-                        </div>
-                    </div>
+        <div class="content-area" id="help-content">
+            <div class="content-title">❓ Help & Support</div>
+            <p style="color: #8e8e93;">Get help with using Academic Hub and troubleshooting.</p>
+        </div>
+    </div>
 
-                    <div class="file-upload-area" onclick="uploadFile('dsa')">
-                        <div class="upload-text">📎 Drop files here or click to upload</div>
-                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
-                    </div>
+    <!-- Study Timer Modal -->
+    <div class="modal" id="timerModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="timerSubject">Study Timer</h2>
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="timer-controls">
+                <button class="timer-btn start" id="startBtn" onclick="startTimer()">▶️ Start</button>
+                <button class="timer-btn pause hidden" id="pauseBtn" onclick="pauseTimer()">⏸️ Pause</button>
+                <button class="timer-btn stop hidden" id="stopBtn" onclick="stopTimer()">⏹️ Stop</button>
+                <button class="timer-btn" onclick="closeTimer()">❌ Close</button>
+            </div>
+            <div style="margin-top: 20px; color: #8e8e93;">
+                <p>Daily Goal: 4 hours per subject</p>
+                <p>Progress updates in real-time</p>
+            </div>
+        </div>
+    </div>
 
-                    <div class="subject-actions">
-                        <button class="btn btn-secondary" onclick="viewMaterials('dsa')">View Materials</button>
-                        <button class="btn btn-primary" onclick="startStudying('dsa')">Start Studying</button>
-                    </div>
-                </div>
-
-                <!-- Computer Organization and Architecture -->
-                <div class="subject-card arch">
-                    <div class="subject-header">
-                        <div class="subject-icon">🏗️</div>
-                        <div class="subject-info">
-                            <div class="subject-title">Computer Organization and Architecture</div>
-                            <div class="subject-code">21CSS201T</div>
-                        </div>
-                    </div>
-
-                    <div class="subject-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Credits:</span>
-                            <span class="detail-value">4</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Faculty:</span>
-                            <span class="detail-value faculty-name">Dr. Meenakshi M</span>
-                        </div>
-                    </div>
-
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>0% Complete</span>
-                            <span>Engineering Science</span>
-                        </div>
-                    </div>
-
-                    <div class="file-upload-area" onclick="uploadFile('coa')">
-                        <div class="upload-text">📎 Drop files here or click to upload</div>
-                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
-                    </div>
-
-                    <div class="subject-actions">
-                        <button class="btn btn-secondary" onclick="viewMaterials('coa')">View Materials</button>
-                        <button class="btn btn-primary" onclick="startStudying('coa')">Start Studying</button>
-                    </div>
-                </div>
-
-                <!-- Advanced Programming Practice -->
-                <div class="subject-card prog">
-                    <div class="subject-header">
-                        <div class="subject-icon">👨‍💻</div>
-                        <div class="subject-info">
-                            <div class="subject-title">Advanced Programming Practice</div>
-                            <div class="subject-code">21CSC203P</div>
-                        </div>
-                    </div>
-
-                    <div class="subject-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Credits:</span>
-                            <span class="detail-value">4</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Faculty:</span>
-                            <span class="detail-value faculty-name">Dr. Prince Chelladurai S</span>
-                        </div>
-                    </div>
-
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>0% Complete</span>
-                            <span>Professional Core</span>
-                        </div>
-                    </div>
-
-                    <div class="file-upload-area" onclick="uploadFile('prog')">
-                        <div class="upload-text">📎 Drop files here or click to upload</div>
-                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
-                    </div>
-
-                    <div class="subject-actions">
-                        <button class="btn btn-secondary" onclick="viewMaterials('prog')">View Materials</button>
-                        <button class="btn btn-primary" onclick="startStudying('prog')">Start Studying</button>
-                    </div>
-                </div>
-
-                <!-- Operating Systems -->
-                <div class="subject-card os">
-                    <div class="subject-header">
-                        <div class="subject-icon">⚙️</div>
-                        <div class="subject-info">
-                            <div class="subject-title">Operating Systems</div>
-                            <div class="subject-code">21CSC202J</div>
-                        </div>
-                    </div>
-
-                    <div class="subject-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Credits:</span>
-                            <span class="detail-value">4</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Faculty:</span>
-                            <span class="detail-value faculty-name">Dr. G. Priyadharshini</span>
-                        </div>
-                    </div>
-
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>0% Complete</span>
-                            <span>Professional Core</span>
-                        </div>
-                    </div>
-
-                    <div class="file-upload-area" onclick="uploadFile('os')">
-                        <div class="upload-text">📎 Drop files here or click to upload</div>
-                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
-                    </div>
-
-                    <div class="subject-actions">
-                        <button class="btn btn-secondary" onclick="viewMaterials('os')">View Materials</button>
-                        <button class="btn btn-primary" onclick="startStudying('os')">Start Studying</button>
-                    </div>
-                </div>
-
-                <!-- Universal Human Values - II -->
-                <div class="subject-card uhv">
-                    <div class="subject-header">
-                        <div class="subject-icon">🧠</div>
-                        <div class="subject-info">
-                            <div class="subject-title">Universal Human Values - II</div>
-                            <div class="subject-code">21LEM202T</div>
-                        </div>
-                    </div>
-
-                    <div class="subject-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Credits:</span>
-                            <span class="detail-value">3</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Faculty:</span>
-                            <span class="detail-value faculty-name">Dr. Caleb Theodar M</span>
-                        </div>
-                    </div>
-
-                    <div class="progress-section">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <span>0% Complete</span>
-                            <span>Engineering Science</span>
-                        </div>
-                    </div>
-
-                    <div class="file-upload-area" onclick="uploadFile('uhv')">
-                        <div class="upload-text">📎 Drop files here or click to upload</div>
-                        <div class="upload-subtext">PDF, DOC, PPT, Images supported</div>
-                    </div>
-
-                    <div class="subject-actions">
-                        <button class="btn btn-secondary" onclick="viewMaterials('uhv')">View Materials</button>
-                        <button class="btn btn-primary" onclick="startStudying('uhv')">Start Studying</button>
-                    </div>
-                </div>
+    <!-- Materials Modal -->
+    <div class="modal" id="materialsModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="materialsSubject">Subject Materials</h2>
+            <div class="materials-list" id="materialsList">
+                <p style="color: #8e8e93; text-align: center; padding: 40px;">No materials uploaded yet</p>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-primary" onclick="uploadFile(currentMaterialsSubject)">📎 Upload New File</button>
+                <button class="btn btn-secondary" onclick="closeMaterials()">❌ Close</button>
             </div>
         </div>
     </div>
@@ -787,250 +1022,57 @@
     <script>
         // Application State
         let subjectFiles = {};
-        let studyProgress = {};
-        let currentUser = {
-            name: 'R R PRAKASHRAVI',
-            regNo: 'RA2411026011210',
-            program: 'B.Tech',
-            department: 'Computer Science and Engineering (AIML)',
-            semester: 3,
-            batch: 2
+        let studyTimes = {}; // Track study time for each subject in seconds
+        let currentStudySubject = null;
+        let currentMaterialsSubject = null;
+        let studyTimer = null;
+        let startTime = null;
+        let pausedTime = 0;
+
+        // Subject data
+        const subjects = {
+            math: 'Transforms and Boundary Value Problems',
+            dsa: 'Data Structures and Algorithms',
+            coa: 'Computer Organization and Architecture',
+            prog: 'Advanced Programming Practice',
+            os: 'Operating Systems',
+            uhv: 'Universal Human Values - II'
         };
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎓 Academic Hub - SRM Edition Loading...');
+            console.log('🎓 Academic Hub Loading...');
             loadUserData();
-            initializeFileHandling();
+            initializeNavigation();
             initializeSearch();
+            initializeFileHandling();
+            updateAllProgress();
             console.log('✅ Academic Hub Ready!');
         });
 
-        // File Upload Functions
-        function uploadFile(subject) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = true;
-            input.accept = '.pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif';
-            
-            input.onchange = (e) => {
-                const files = Array.from(e.target.files);
-                handleFileUpload(subject, files);
-            };
-            
-            input.click();
-        }
-
-        function handleFileUpload(subject, files) {
-            if (!subjectFiles[subject]) {
-                subjectFiles[subject] = [];
-            }
-            
-            files.forEach(file => {
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                    showNotification('File Too Large', `${file.name} is too large. Please upload files under 5MB.`);
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const fileData = {
-                        id: Date.now() + Math.random(),
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        data: e.target.result,
-                        uploadedAt: new Date().toISOString()
-                    };
-                    
-                    subjectFiles[subject].push(fileData);
-                    saveUserData();
-                    showNotification('File Uploaded', `${file.name} has been saved successfully`);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function viewMaterials(subject) {
-            showNotification('Materials', `Opening materials for ${getSubjectName(subject)}`);
-        }
-
-        function startStudying(subject) {
-            const subjectName = getSubjectName(subject);
-            showNotification('Study Session', `Starting study session for ${subjectName}`);
-            
-            // Update progress (simulate)
-            if (!studyProgress[subject]) {
-                studyProgress[subject] = 0;
-            }
-            studyProgress[subject] = Math.min(studyProgress[subject] + 10, 100);
-            updateProgress(subject);
-            saveUserData();
-        }
-
-        function getSubjectName(subject) {
-            const names = {
-                'math': 'Transforms and Boundary Value Problems',
-                'dsa': 'Data Structures and Algorithms',
-                'coa': 'Computer Organization and Architecture',
-                'prog': 'Advanced Programming Practice',
-                'os': 'Operating Systems',
-                'uhv': 'Universal Human Values - II'
-            };
-            return names[subject] || subject;
-        }
-
-        function updateProgress(subject) {
-            const cards = document.querySelectorAll('.subject-card');
-            cards.forEach(card => {
-                const subjectCode = getSubjectCode(card);
-                if (subjectCode === subject) {
-                    const progressFill = card.querySelector('.progress-fill');
-                    const progressText = card.querySelector('.progress-text span');
-                    
-                    const progress = studyProgress[subject] || 0;
-                    progressFill.style.width = progress + '%';
-                    progressText.textContent = progress + '% Complete';
-                }
-            });
-        }
-
-        function getSubjectCode(card) {
-            if (card.classList.contains('math')) return 'math';
-            if (card.classList.contains('cs')) return 'dsa';
-            if (card.classList.contains('arch')) return 'coa';
-            if (card.classList.contains('prog')) return 'prog';
-            if (card.classList.contains('os')) return 'os';
-            if (card.classList.contains('uhv')) return 'uhv';
-            return '';
-        }
-
-        // Search functionality
-        function initializeSearch() {
-            const searchInput = document.querySelector('.search-input');
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                filterSubjects(query);
-            });
-        }
-
-        function filterSubjects(query) {
-            const cards = document.querySelectorAll('.subject-card');
-            cards.forEach(card => {
-                const title = card.querySelector('.subject-title').textContent.toLowerCase();
-                const code = card.querySelector('.subject-code').textContent.toLowerCase();
-                const faculty = card.querySelector('.faculty-name').textContent.toLowerCase();
-                
-                const matches = title.includes(query) || code.includes(query) || faculty.includes(query);
-                card.style.display = matches ? 'block' : 'none';
-            });
-        }
-
-        // File handling with drag and drop
-        function initializeFileHandling() {
-            document.querySelectorAll('.file-upload-area').forEach(area => {
-                area.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    area.style.borderColor = 'var(--accent-color)';
-                    area.style.background = 'rgba(102, 126, 234, 0.1)';
-                });
-                
-                area.addEventListener('dragleave', (e) => {
-                    e.preventDefault();
-                    area.style.borderColor = '#3a3b42';
-                    area.style.background = '#2d2e36';
-                });
-                
-                area.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const files = Array.from(e.dataTransfer.files);
-                    const subject = getSubjectFromUploadArea(area);
-                    handleFileUpload(subject, files);
-                    
-                    area.style.borderColor = '#3a3b42';
-                    area.style.background = '#2d2e36';
+        // Navigation Functions
+        function initializeNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const content = this.getAttribute('data-content');
+                    if (content) {
+                        switchContent(content);
+                        
+                        // Update active nav item
+                        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+                    }
                 });
             });
         }
 
-        function getSubjectFromUploadArea(area) {
-            const card = area.closest('.subject-card');
-            return getSubjectCode(card);
-        }
-
-        // Data persistence
-        function saveUserData() {
-            localStorage.setItem('academic-hub-files', JSON.stringify(subjectFiles));
-            localStorage.setItem('academic-hub-progress', JSON.stringify(studyProgress));
-        }
-
-        function loadUserData() {
-            const savedFiles = localStorage.getItem('academic-hub-files');
-            if (savedFiles) {
-                subjectFiles = JSON.parse(savedFiles);
-            }
+        function switchContent(contentId) {
+            // Hide all content areas
+            document.querySelectorAll('.content-area').forEach(area => {
+                area.classList.remove('active');
+            });
             
-            const savedProgress = localStorage.getItem('academic-hub-progress');
-            if (savedProgress) {
-                studyProgress = JSON.parse(savedProgress);
-                Object.keys(studyProgress).forEach(subject => {
-                    updateProgress(subject);
-                });
-            }
-        }
-
-        // Notification system
-        function showNotification(title, message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #1a1b23;
-                color: #ffffff;
-                padding: 16px 24px;
-                border-radius: 12px;
-                border: 1px solid #2d2e36;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-                z-index: 10000;
-                max-width: 350px;
-                animation: slideIn 0.3s ease;
-            `;
-            
-            notification.innerHTML = `
-                <div style="font-weight: 700; margin-bottom: 4px;">${title}</div>
-                <div style="font-size: 14px; color: #8e8e93;">${message}</div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Mobile sidebar toggle
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('open');
-        }
-
-        // Add CSS animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        console.log('🎓 Academic Hub - SRM BTech AIML Semester 3 Ready!');
-    </script>
-</body>
-</html>
+            // Show selected content
+            const targetContent = document.getElementById(contentId + '-content');
+            if (targetContent) {
+                targetContent
