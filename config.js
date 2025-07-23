@@ -1,19 +1,31 @@
-// Firebase Configuration
+// ============ Configuration with GitHub Secrets ============
+
+// Check if we're in GitHub Pages environment and have secrets
+const isProduction = window.location.hostname.includes('github.io');
+
+// Firebase Configuration - Using GitHub Secrets
 const FIREBASE_CONFIG = {
-    apiKey: "your-firebase-api-key",
-    authDomain: "flowstate-pro.firebaseapp.com",
-    projectId: "flowstate-pro",
-    storageBucket: "flowstate-pro.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+    apiKey: isProduction ? process.env.FIREBASE_API_KEY : "demo-key-for-local-testing",
+    authDomain: isProduction ? process.env.FIREBASE_AUTH_DOMAIN : "flowstate-pro-demo.firebaseapp.com",
+    projectId: isProduction ? process.env.FIREBASE_PROJECT_ID : "flowstate-pro-demo",
+    storageBucket: isProduction ? process.env.FIREBASE_STORAGE_BUCKET : "flowstate-pro-demo.appspot.com",
+    messagingSenderId: isProduction ? process.env.FIREBASE_MESSAGING_SENDER_ID : "123456789",
+    appId: isProduction ? process.env.FIREBASE_APP_ID : "1:123456789:web:demo"
 };
 
-// OpenRouter Configuration for ChatGPT
+// OpenRouter Configuration for Real ChatGPT - Using GitHub Secrets
 const OPENROUTER_CONFIG = {
-    apiKey: "your-openrouter-api-key",
+    apiKey: isProduction ? process.env.OPENROUTER_API_KEY : "demo-openrouter-key",
     baseURL: "https://openrouter.ai/api/v1",
-    model: "openai/gpt-3.5-turbo",
+    model: "openai/gpt-3.5-turbo-16k",
     fallbackModel: "anthropic/claude-3-haiku"
+};
+
+// Backup GitHub API Configuration
+const GITHUB_CONFIG = {
+    token: isProduction ? process.env.GITHUB_TOKEN : "demo-github-token",
+    repo: "flowstate-pro-data",
+    owner: "your-github-username"
 };
 
 // App Configuration
@@ -25,17 +37,10 @@ const APP_CONFIG = {
     enableNotifications: true,
     maxFileUploadSize: 10 * 1024 * 1024, // 10MB
     supportedFileTypes: ['.pdf', '.xlsx', '.xls', '.csv', '.txt', '.jpg', '.png', '.jpeg'],
-    defaultStudyDuration: 25, // minutes
-    defaultBreakDuration: 5, // minutes
+    defaultStudyDuration: 25,
+    defaultBreakDuration: 5,
     maxChatHistory: 50,
-    autoSaveInterval: 30000 // 30 seconds
-};
-
-// API Endpoints
-const API_ENDPOINTS = {
-    openrouter: "https://openrouter.ai/api/v1/chat/completions",
-    backup: "https://api.github.com/repos/your-username/flowstate-data",
-    analytics: "https://api.flowstate-pro.com/analytics"
+    autoSaveInterval: 30000
 };
 
 // Feature Flags
@@ -47,13 +52,35 @@ const FEATURES = {
     STUDY_ALARMS: true,
     BREAK_INTERVALS: true,
     ANALYTICS: true,
-    COLLABORATION: false, // Coming soon
-    PREMIUM_FEATURES: false
+    COLLABORATION: false
 };
 
-// Secrets Placeholder (Will be replaced by GitHub Secrets)
-const SECRETS = {
-    FIREBASE_API_KEY: process.env.FIREBASE_API_KEY || FIREBASE_CONFIG.apiKey,
-    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || OPENROUTER_CONFIG.apiKey,
-    FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || FIREBASE_CONFIG.projectId
-};
+// Secrets validation
+function validateSecrets() {
+    if (isProduction) {
+        const requiredSecrets = [
+            'FIREBASE_API_KEY',
+            'FIREBASE_PROJECT_ID',
+            'OPENROUTER_API_KEY'
+        ];
+        
+        const missingSecrets = requiredSecrets.filter(secret => !process.env[secret]);
+        
+        if (missingSecrets.length > 0) {
+            console.error('❌ Missing required secrets:', missingSecrets);
+            return false;
+        }
+    }
+    return true;
+}
+
+// Initialize configuration
+function initializeConfig() {
+    if (!validateSecrets()) {
+        showNotification('Configuration error. Some features may not work.', 'warning');
+        return false;
+    }
+    
+    console.log('✅ Configuration initialized');
+    return true;
+}
