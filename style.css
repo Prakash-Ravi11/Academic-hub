@@ -917,3 +917,255 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+/* AI Chat Styles */
+.ai-chat-container {
+    background: #2d2e36;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.ai-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.ai-status.online {
+    width: 8px;
+    height: 8px;
+    background: #4ecdc4;
+    border-radius: 50%;
+}
+
+.ai-chat-messages {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.ai-message, .user-message {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.message-content {
+    background: #3a3b42;
+    padding: 8px 12px;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.ai-input-container {
+    display: flex;
+    gap: 8px;
+}
+
+.ai-input {
+    flex: 1;
+    padding: 8px;
+    background: #3a3b42;
+    border: 1px solid #4a4b52;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 12px;
+}
+
+/* Analytics Styles */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.analytics-card {
+    background: #1a1b23;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #2d2e36;
+}
+
+.streak-display {
+    text-align: center;
+    padding: 20px;
+}
+
+.streak-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.streak-label {
+    color: #8e8e93;
+    font-size: 14px;
+}
+
+/* Goals Styles */
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.goal-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    background: #2d2e36;
+    border: 1px solid #3a3b42;
+    border-radius: 6px;
+    color: #8e8e93;
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    background: #667eea;
+    color: #ffffff;
+}
+
+/* Calendar Styles */
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #2d2e36;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+/* Notes Styles */
+.notes-header {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.notes-search {
+    flex: 1;
+}
+
+.notes-search input {
+    width: 100%;
+    padding: 8px 12px;
+    background: #2d2e36;
+    border: 1px solid #3a3b42;
+    border-radius: 6px;
+    color: #ffffff;
+}
+
+.notes-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    height: 600px;
+}
+
+.notes-sidebar {
+    background: #1a1b23;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.notes-editor {
+    background: #1a1b23;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    border-bottom: 1px solid #2d2e36;
+}
+
+.rich-text-editor {
+    flex: 1;
+    padding: 24px;
+    color: #ffffff;
+    outline: none;
+    overflow-y: auto;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: #2d2e36;
+    border: 1px solid #3a3b42;
+    border-radius: 6px;
+    color: #ffffff;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+/* Settings Styles */
+.settings-sections {
+    max-width: 600px;
+}
+
+.settings-section {
+    background: #1a1b23;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid #2d2e36;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #2d2e36;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
