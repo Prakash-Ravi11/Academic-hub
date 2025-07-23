@@ -3,801 +3,478 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Hub - SRM BTech AI/ML</title>
-    <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <title>FlowState Pro - Ultimate AI Productivity Companion</title>
+    <meta name="description" content="Ultimate AI productivity companion with real ChatGPT, cloud storage, voice AI, and intelligent task management">
+    <meta name="theme-color" content="#3b82f6">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- External CDNs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Internal Styles and Scripts -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="dark-theme">
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <div class="brand">
-                <img src="icon-192.png" alt="Academic Hub" class="logo">
-                <div class="brand-text">
-                    <h1>Academic Hub</h1>
-                    <span>BTech AI/ML • Semester 3</span>
-                </div>
+<body data-theme="light">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-logo">
+            <div class="app-logo">FS</div>
+            <h2>FlowState Pro</h2>
+            <div class="loading-spinner"></div>
+            <p>Initializing AI systems...</p>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="auth-modal hidden" id="authModal">
+        <div class="auth-content">
+            <div class="auth-logo">FS</div>
+            <div class="auth-title" id="authTitle">Welcome to FlowState Pro</div>
+            <div class="auth-subtitle" id="authSubtitle">Sign in to your account</div>
+            
+            <!-- Error/Success Messages -->
+            <div class="message-display hidden" id="messageDisplay">
+                <span id="messageText"></span>
+                <button onclick="dismissMessage()" class="message-close">×</button>
             </div>
             
-            <div class="search-container">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none">
-                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-                    <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <input type="text" placeholder="Search assignments, materials, subjects..." id="globalSearch">
-                <div class="search-results" id="searchResults"></div>
+            <!-- Authentication Form -->
+            <form class="auth-form" id="authForm">
+                <input type="text" class="auth-input" id="nameInput" placeholder="Full Name" style="display: none;">
+                <input type="number" class="auth-input" id="ageInput" placeholder="Age" min="13" max="120" style="display: none;">
+                
+                <div class="gender-selector" id="genderSelector" style="display: none;">
+                    <label class="input-label">Gender</label>
+                    <div class="gender-options">
+                        <label class="radio-option">
+                            <input type="radio" name="gender" value="male">
+                            <span>Male</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="gender" value="female">
+                            <span>Female</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="gender" value="other">
+                            <span>Other</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <input type="email" class="auth-input" id="emailInput" placeholder="Email Address" required>
+                <input type="password" class="auth-input" id="passwordInput" placeholder="Password" required>
+                
+                <button type="submit" class="auth-btn" id="authSubmitBtn">
+                    <span id="authButtonText">Sign In</span>
+                    <div id="authLoader" class="spinner hidden"></div>
+                </button>
+            </form>
+            
+            <div class="auth-switch">
+                <span id="authSwitchText">Don't have an account?</span>
+                <span class="auth-link" id="authSwitchLink">Create Account</span>
             </div>
             
-            <div class="header-actions">
-                <button class="action-btn notification-btn" id="notificationBtn">
-                    🔔
-                    <span class="badge" id="notificationBadge">0</span>
-                </button>
-                <button class="action-btn sync-btn" id="syncBtn">🔄</button>
-                <button class="action-btn alarm-btn" id="alarmBtn" title="Study Alarms">⏰</button>
-                <button class="action-btn theme-btn" id="themeBtn">🌙</button>
-                <div class="profile">
-                    <div class="profile-avatar">RP</div>
-                    <div class="profile-info">
-                        <span>R R PRAKASHRAVI</span>
-                        <small>RA2411026011210</small>
+            <div class="forgot-password">
+                <span class="auth-link" onclick="showResetDialog()">Forgot Password?</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container hidden" id="mainApp">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="app-title">
+                <div class="app-logo">FS</div>
+                <div>
+                    <div class="app-name">FlowState Pro</div>
+                    <div class="app-subtitle">Ultimate AI Productivity Companion</div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="theme-selector">
+                    <button class="theme-btn active" data-theme="light">Light</button>
+                    <button class="theme-btn" data-theme="dark">Dark</button>
+                    <button class="theme-btn" data-theme="elegant">Elegant</button>
+                </div>
+                
+                <div class="user-profile" id="userProfile">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-dropdown hidden" id="userDropdown">
+                        <div class="dropdown-item" onclick="showProfile()">
+                            <span>👤</span> Profile
+                        </div>
+                        <div class="dropdown-item" onclick="showStats()">
+                            <span>📊</span> Statistics
+                        </div>
+                        <div class="dropdown-item" onclick="exportData()">
+                            <span>📤</span> Export Data
+                        </div>
+                        <div class="dropdown-item" onclick="importData()">
+                            <span>📥</span> Import Data
+                        </div>
+                        <div class="dropdown-item" onclick="showSettings()">
+                            <span>⚙️</span> Settings
+                        </div>
+                        <div class="dropdown-item" onclick="logout()">
+                            <span>🚪</span> Sign Out
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
 
-    <div class="main-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <nav class="nav">
-                <div class="nav-section">
-                    <h3>OVERVIEW</h3>
-                    <a href="#dashboard" class="nav-link active" data-section="dashboard">
-                        <span class="nav-icon">📊</span>
-                        Dashboard
-                    </a>
-                    <a href="#subjects" class="nav-link" data-section="subjects">
-                        <span class="nav-icon">📚</span>
-                        My Subjects
-                        <span class="nav-badge">7</span>
-                    </a>
+        <!-- Voice Panel -->
+        <div class="voice-panel">
+            <div class="card-title">🎤 Voice AI Assistant</div>
+            <div class="card-subtitle">Talk naturally with your AI productivity coach</div>
+            
+            <div class="voice-controls">
+                <button class="voice-btn" id="voiceBtn">🎤</button>
+                
+                <div class="voice-settings">
+                    <div class="voice-setting">
+                        <label class="input-label">Voice Gender</label>
+                        <select id="voiceGender" class="voice-select">
+                            <option value="female">Female</option>
+                            <option value="male">Male</option>
+                        </select>
+                    </div>
+                    
+                    <div class="voice-setting">
+                        <label class="input-label">Voice Speed</label>
+                        <select id="voiceSpeed" class="voice-select">
+                            <option value="0.8">Slow</option>
+                            <option value="0.9" selected>Normal</option>
+                            <option value="1.0">Fast</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-secondary btn-small" onclick="testVoice()">Test Voice</button>
                 </div>
-
-                <div class="nav-section">
-                    <h3>ACADEMIC</h3>
-                    <a href="#assignments" class="nav-link" data-section="assignments">
-                        <span class="nav-icon">📝</span>
-                        Assignments
-                        <span class="nav-badge urgent" id="assignmentCount">0</span>
-                    </a>
-                    <a href="#materials" class="nav-link" data-section="materials">
-                        <span class="nav-icon">📄</span>
-                        Study Materials
-                    </a>
-                </div>
-
-                <div class="nav-section">
-                    <h3>TOOLS</h3>
-                    <a href="#timer" class="nav-link" data-section="timer">
-                        <span class="nav-icon">⏱️</span>
-                        Study Timer
-                    </a>
-                    <a href="#progress" class="nav-link" data-section="progress">
-                        <span class="nav-icon">📈</span>
-                        Progress
-                    </a>
-                    <a href="#alarms" class="nav-link" data-section="alarms">
-                        <span class="nav-icon">⏰</span>
-                        Study Alarms
-                    </a>
-                </div>
-            </nav>
-
-            <div class="quick-stats">
-                <h4>Quick Stats</h4>
-                <div class="stat-item">
-                    <span>Study Hours</span>
-                    <strong id="studyHours">0h</strong>
-                </div>
-                <div class="stat-item">
-                    <span>Assignments</span>
-                    <strong id="assignments">0</strong>
-                </div>
-                <div class="stat-item">
-                    <span>Materials</span>
-                    <strong id="materials">0</strong>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Dashboard Section -->
-            <section id="dashboard" class="content-section active">
-                <div class="section-header">
-                    <h1 id="greetingText">Good evening, Prakash!</h1>
-                    <p>Here's your academic overview for today</p>
-                </div>
-                <!-- File Upload & Management Section -->
-<div class="card fade-in">
-    <div class="card-header">
-        <h3>📁 File Upload & Task Extraction</h3>
-        <button class="btn btn-secondary btn-sm" onclick="storage.exportUserData(app.currentUser.email)">
-            <i class="fas fa-download"></i>
-            Export Data
-        </button>
-    </div>
-    
-    <!-- Upload Zone -->
-    <div class="upload-zone" id="uploadZone">
-        <div class="upload-icon">
-            <i class="fas fa-cloud-upload-alt text-6xl text-muted"></i>
-        </div>
-        <h4>Drop files here or click to upload</h4>
-        <p class="text-muted">Supports: TXT, JSON, CSV, PDF, Images (JPG, PNG)</p>
-        <input type="file" id="fileInput" multiple accept=".txt,.json,.csv,.pdf,.jpg,.jpeg,.png" class="hidden">
-        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-            <i class="fas fa-plus"></i>
-            Choose Files
-        </button>
-    </div>
-    
-    <!-- Processing Status -->
-    <div id="processingStatus" class="hidden">
-        <div class="flex items-center gap-3 p-4 bg-tertiary rounded-lg">
-            <div class="spinner"></div>
-            <div>
-                <h5>Processing files...</h5>
-                <p class="text-sm text-muted" id="processingText">Analyzing and extracting tasks</p>
+                
+                <div id="voiceStatus" class="voice-status">Voice AI ready - Click microphone to start</div>
             </div>
         </div>
-    </div>
-    
-    <!-- Uploaded Files List -->
-    <div id="uploadedFiles" class="mt-4">
-        <h5>Recent Uploads</h5>
-        <div id="filesList">
-            <!-- Files will be populated here -->
-        </div>
-    </div>
-    
-    <!-- Import/Export Options -->
-    <div class="flex gap-3 mt-4">
-        <button class="btn btn-secondary" onclick="showImportDialog()">
-            <i class="fas fa-upload"></i>
-            Import Backup
-        </button>
-        <button class="btn btn-secondary" onclick="storage.syncToCloud(app.currentUser.email)">
-            <i class="fas fa-cloud"></i>
-            Sync to Cloud
-        </button>
-        <button class="btn btn-secondary" onclick="storage.syncFromCloud(app.currentUser.email)">
-            <i class="fas fa-cloud-download-alt"></i>
-            Sync from Cloud
-        </button>
-    </div>
-</div>
 
-<!-- Import Dialog Modal -->
-<div id="importModal" class="modal hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Import Backup</h3>
-            <button onclick="closeImportDialog()" class="btn btn-secondary btn-sm">
-                <i class="fas fa-times"></i>
-            </button>
+        <!-- Dynamic Quote Display -->
+        <div class="quote-display" id="quoteDisplay">
+            <div class="quote-category" id="quoteCategory">Motivation</div>
+            <div class="quote-text" id="quoteText">
+                "The way to get started is to quit talking and begin doing."
+            </div>
+            <div class="quote-author" id="quoteAuthor">— Walt Disney</div>
         </div>
-        <div class="modal-body">
-            <p>Select a Study Buddy Pro backup file to import your data:</p>
-            <input type="file" id="importFileInput" accept=".json" class="form-input">
-            <div class="mt-3">
-                <button class="btn btn-primary" onclick="importBackup()">
-                    <i class="fas fa-upload"></i>
-                    Import Data
-                </button>
-                <button class="btn btn-secondary" onclick="closeImportDialog()">
-                    Cancel
-                </button>
+
+        <!-- Study Progress Section -->
+        <div class="study-progress">
+            <div class="card-title">📚 Study Progress Dashboard</div>
+            <div class="card-subtitle">Comprehensive tracking of your learning sessions</div>
+            
+            <div class="study-stats">
+                <div class="study-stat">
+                    <div class="study-stat-number" id="totalStudyTime">0h 0m</div>
+                    <div class="study-stat-label">Total Study Time</div>
+                </div>
+                <div class="study-stat">
+                    <div class="study-stat-number" id="studyStreak">0</div>
+                    <div class="study-stat-label">Study Streak (Days)</div>
+                </div>
+                <div class="study-stat">
+                    <div class="study-stat-number" id="breaksTaken">0</div>
+                    <div class="study-stat-label">Breaks Taken</div>
+                </div>
+            </div>
+
+            <!-- Study Timer -->
+            <div class="study-timer">
+                <div class="timer-display" id="studyTimerDisplay">25:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-primary" id="startStudyBtn">📚 Start Study</button>
+                    <button class="btn btn-secondary" id="pauseStudyBtn" disabled>⏸️ Pause</button>
+                    <button class="btn btn-secondary" id="resetStudyBtn">🔄 Reset</button>
+                </div>
+            </div>
+
+            <!-- Break Controls -->
+            <div class="break-controls">
+                <div class="break-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoBreakToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span>Auto Break Intervals</span>
+                </div>
+                <select id="breakInterval" class="voice-select">
+                    <option value="25">Every 25 min (Pomodoro)</option>
+                    <option value="45">Every 45 min</option>
+                    <option value="60">Every 60 min</option>
+                </select>
             </div>
         </div>
-    </div>
-</div>
 
-
-                <!-- Dashboard Stats -->
-                <div class="dashboard-stats">
-                    <div class="stat-card primary">
-                        <div class="stat-icon">📚</div>
-                        <div class="stat-content">
-                            <h3 id="totalSubjects">7</h3>
-                            <p>Total Subjects</p>
-                        </div>
+        <!-- Main Content Grid -->
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Real ChatGPT Integration -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🤖 Real ChatGPT Assistant</div>
+                        <div class="card-subtitle">Powered by OpenRouter - Ask anything!</div>
                     </div>
-                    <div class="stat-card success">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-content">
-                            <h3 id="completedTasks">0</h3>
-                            <p>Completed Tasks</p>
+                    
+                    <div class="chatgpt-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message ai">
+                                <strong>🤖 ChatGPT:</strong> Hello! I'm your real AI assistant powered by ChatGPT. I can help you with studying, productivity, coding, writing, and much more. What would you like to know?
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card warning">
-                        <div class="stat-icon">⏱️</div>
-                        <div class="stat-content">
-                            <h3 id="totalStudyTime">0h</h3>
-                            <p>Study Time</p>
+                        
+                        <div class="chat-input-container">
+                            <textarea class="chat-input" id="chatInput" placeholder="Ask ChatGPT anything..." rows="3"></textarea>
+                            <div class="chat-controls">
+                                <button class="btn btn-primary" onclick="sendChatGPTMessage()">
+                                    <span>🚀 Send</span>
+                                    <div class="spinner hidden" id="chatLoader"></div>
+                                </button>
+                                <button class="btn btn-secondary" onclick="startVoiceChatGPT()">🎤 Voice</button>
+                                <button class="btn btn-secondary" onclick="clearChat()">🗑️ Clear</button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card info">
-                        <div class="stat-icon">📈</div>
-                        <div class="stat-content">
-                            <h3 id="overallProgress">0%</h3>
-                            <p>Progress</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="dashboard-section">
-                    <h2>Recent Activity</h2>
-                    <div class="activity-list" id="activityList">
-                        <div class="empty-state">
-                            <p>No recent activity</p>
-                            <small>Start studying to see your progress here</small>
+                        
+                        <!-- Quick Prompts -->
+                        <div class="quick-prompts">
+                            <button class="quick-prompt" onclick="quickChatGPT('Explain this concept in simple terms')">📚 Explain Concept</button>
+                            <button class="quick-prompt" onclick="quickChatGPT('Help me study this topic effectively')">🎯 Study Help</button>
+                            <button class="quick-prompt" onclick="quickChatGPT('Create a study plan for this subject')">📋 Study Plan</button>
+                            <button class="quick-prompt" onclick="quickChatGPT('Give me motivation to keep studying')">💪 Motivation</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Upcoming Deadlines -->
-                <div class="dashboard-section">
-                    <h2>Upcoming Deadlines</h2>
-                    <div class="deadline-list" id="deadlineList">
-                        <div class="empty-state">
-                            <p>No upcoming deadlines</p>
-                            <small>Add assignments to track deadlines</small>
+                <!-- Advanced Task Creator -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🎯 Advanced Task Creator</div>
+                        <div class="card-subtitle">AI-powered task creation with voice and natural language</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <label class="input-label">Task Description</label>
+                            <input type="text" class="input-field" id="taskInput" placeholder="e.g., 'Study mathematics for 90 minutes at 7 PM tomorrow'">
+                        </div>
+                        <button class="btn btn-primary" onclick="createTaskWithAI()">🤖 Create</button>
+                        <button class="btn btn-secondary" onclick="startVoiceTaskCreation()">🎤 Voice</button>
+                    </div>
+
+                    <div class="quick-tasks">
+                        <button class="btn btn-secondary btn-small" onclick="quickTask('study')">📚 Quick Study</button>
+                        <button class="btn btn-secondary btn-small" onclick="quickTask('workout')">💪 Workout</button>
+                        <button class="btn btn-secondary btn-small" onclick="quickTask('break')">☕ Break</button>
+                        <button class="btn btn-secondary btn-small" onclick="quickTask('meeting')">💼 Meeting</button>
+                    </div>
+
+                    <div id="aiProcessing" class="ai-processing hidden">
+                        <div class="processing-indicator">
+                            <div class="spinner"></div>
+                            <span>AI is analyzing your request...</span>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Subjects Section -->
-            <section id="subjects" class="content-section">
-                <div class="section-header">
-                    <div class="header-left">
-                        <h1>My Subjects</h1>
+                <!-- File Upload & Task Extraction -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📁 File Upload & Task Extraction</div>
+                        <div class="card-subtitle">Upload documents to extract tasks automatically</div>
                     </div>
-                    <div class="header-right">
-                        <span>Semester 3 - BTech AI/ML</span>
-                    </div>
-                </div>
-
-                <div class="subjects-grid">
-                    <!-- Mathematics -->
-                    <div class="subject-card math" data-subject="math">
-                        <div class="card-header">
-                            <div class="subject-icon">📐</div>
-                            <div class="subject-info">
-                                <h3>Transforms and Boundary Value Problems</h3>
-                                <div class="subject-code">21MAB201T</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. V. Vidhya</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('math')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('math')">Start Studying</button>
-                        </div>
-                    </div>
-
-                    <!-- Data Structures -->
-                    <div class="subject-card dsa" data-subject="dsa">
-                        <div class="card-header">
-                            <div class="subject-icon">🌳</div>
-                            <div class="subject-info">
-                                <h3>Data Structures and Algorithms</h3>
-                                <div class="subject-code">21CSC201J</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. Kalpana C</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('dsa')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('dsa')">Start Studying</button>
-                        </div>
-                    </div>
-
-                    <!-- Computer Organization -->
-                    <div class="subject-card coa" data-subject="coa">
-                        <div class="card-header">
-                            <div class="subject-icon">💻</div>
-                            <div class="subject-info">
-                                <h3>Computer Organization and Architecture</h3>
-                                <div class="subject-code">21CSS201T</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. Meenakshi M</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('coa')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('coa')">Start Studying</button>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Programming -->
-                    <div class="subject-card programming" data-subject="programming">
-                        <div class="card-header">
-                            <div class="subject-icon">👨‍💻</div>
-                            <div class="subject-info">
-                                <h3>Advanced Programming Practice</h3>
-                                <div class="subject-code">21CSC203P</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. Prince Chelladurai S</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('programming')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('programming')">Start Studying</button>
-                        </div>
-                    </div>
-
-                    <!-- Operating Systems -->
-                    <div class="subject-card os" data-subject="os">
-                        <div class="card-header">
-                            <div class="subject-icon">⚙️</div>
-                            <div class="subject-info">
-                                <h3>Operating Systems</h3>
-                                <div class="subject-code">21CSC202J</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. G. Priyadharshini</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('os')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('os')">Start Studying</button>
-                        </div>
-                    </div>
-
-                    <!-- Universal Human Values -->
-                    <div class="subject-card uhv" data-subject="uhv">
-                        <div class="card-header">
-                            <div class="subject-icon">🧘</div>
-                            <div class="subject-info">
-                                <h3>Universal Human Values - II</h3>
-                                <div class="subject-code">21LEM202T</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>3</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. Caleb Theodar M</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('uhv')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('uhv')">Start Studying</button>
-                        </div>
-                    </div>
-
-                    <!-- Professional Ethics -->
-                    <div class="subject-card ethics" data-subject="ethics">
-                        <div class="card-header">
-                            <div class="subject-icon">⚖️</div>
-                            <div class="subject-info">
-                                <h3>Professional Ethics</h3>
-                                <div class="subject-code">21LEM201T</div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="subject-details">
-                                <div class="detail-row">
-                                    <span>Credits:</span>
-                                    <span>0 (Online)</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span>Faculty:</span>
-                                    <span>Dr. B. Monika Nair</span>
-                                </div>
-                            </div>
-                            <div class="progress-section">
-                                <div class="progress-text">0% Complete</div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-outline" onclick="openMaterials('ethics')">View Materials</button>
-                            <button class="btn btn-primary" onclick="startStudying('ethics')">Start Studying</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Assignments Section -->
-            <section id="assignments" class="content-section">
-                <div class="section-header">
-                    <h1>Assignments</h1>
-                    <button class="btn btn-primary" onclick="showAddAssignmentModal()">+ Add Assignment</button>
-                </div>
-
-                <div class="assignment-filters">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="pending">Pending</button>
-                    <button class="filter-btn" data-filter="completed">Completed</button>
-                    <button class="filter-btn" data-filter="overdue">Overdue</button>
-                </div>
-
-                <div class="assignments-list" id="assignmentsList">
-                    <div class="empty-state">
-                        <div class="empty-icon">📝</div>
-                        <h3>No assignments yet</h3>
-                        <p>Add your first assignment to get started</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Materials Section -->
-            <section id="materials" class="content-section">
-                <div class="section-header">
-                    <h1>Study Materials</h1>
-                    <p>Your digital study locker</p>
-                </div>
-
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-content">
+                    
+                    <div class="upload-zone" id="uploadZone">
                         <div class="upload-icon">📁</div>
-                        <h3>Drop files here or click to upload</h3>
-                        <p>Supports PDF, DOC, PPT, images and more</p>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt" hidden>
+                        <div class="upload-text">Drop files here or click to upload</div>
+                        <div class="upload-subtext">Supports PDF, Excel, CSV, Images (OCR), Text files</div>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv,.txt,.jpg,.png,.jpeg" style="display: none;">
                         <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                            Choose Files
+                            📤 Choose Files
                         </button>
                     </div>
-                </div>
-
-                <div class="materials-container">
-                    <div class="materials-header">
-                        <h3>Your Materials (<span id="fileCount">0</span>)</h3>
-                        <select id="subjectFilter">
-                            <option value="all">All Subjects</option>
-                            <option value="math">Mathematics</option>
-                            <option value="dsa">Data Structures</option>
-                            <option value="coa">Computer Organization</option>
-                            <option value="programming">Programming</option>
-                            <option value="os">Operating Systems</option>
-                            <option value="uhv">UHV</option>
-                            <option value="ethics">Ethics</option>
-                        </select>
+                    
+                    <div id="uploadProgress" class="upload-progress hidden">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="uploadProgressBar"></div>
+                        </div>
+                        <div class="progress-text" id="uploadProgressText">Uploading...</div>
                     </div>
+                    
+                    <div id="extractedTasksPreview" class="extracted-tasks hidden">
+                        <h4>📋 Extracted Tasks</h4>
+                        <div id="extractedTasksList"></div>
+                        <div class="extraction-controls">
+                            <button class="btn btn-primary" onclick="importExtractedTasks()">✅ Import All</button>
+                            <button class="btn btn-secondary" onclick="reviewTasks()">👁️ Review</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="materials-grid" id="materialsGrid">
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Today's Tasks -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📋 Today's Mission</div>
+                        <div class="card-subtitle" id="tasksSummary">Ready to conquer your goals</div>
+                    </div>
+                    
+                    <div id="tasksList">
                         <div class="empty-state">
-                            <div class="empty-icon">📚</div>
-                            <h3>No materials uploaded yet</h3>
-                            <p>Upload your first study material to get started</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Timer Section -->
-            <section id="timer" class="content-section">
-                <div class="section-header">
-                    <h1>Study Timer</h1>
-                    <p>Track your study time for each subject</p>
-                </div>
-
-                <div class="timer-container">
-                    <div class="timer-display">
-                        <div class="timer-circle">
-                            <span id="timerDisplay">00:00:00</span>
-                        </div>
-                    </div>
-
-                    <div class="timer-controls">
-                        <select id="timerSubject" class="subject-select">
-                            <option value="math">Mathematics</option>
-                            <option value="dsa">Data Structures</option>
-                            <option value="coa">Computer Organization</option>
-                            <option value="programming">Advanced Programming</option>
-                            <option value="os">Operating Systems</option>
-                            <option value="uhv">Universal Human Values</option>
-                            <option value="ethics">Professional Ethics</option>
-                        </select>
-
-                        <div class="timer-buttons">
-                            <button id="startTimer" class="btn btn-primary">Start</button>
-                            <button id="pauseTimer" class="btn btn-secondary" disabled>Pause</button>
-                            <button id="resetTimer" class="btn btn-outline">Reset</button>
+                            <div class="empty-icon">🎯</div>
+                            <div class="empty-title">Your productivity journey starts here!</div>
+                            <div class="empty-subtitle">Create your first task above</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="today-sessions" id="todaySessions">
-                    <h3>Today's Study Sessions</h3>
-                    <div class="sessions-list" id="sessionsList">
-                        <div class="empty-state">
-                            <p>No study sessions today</p>
-                            <small>Start a timer to track your study time</small>
+                <!-- Progress Ring -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🏆 Daily Achievement</div>
+                        <div class="card-subtitle">Your progress matters</div>
+                    </div>
+                    
+                    <div class="progress-ring-container">
+                        <div class="progress-ring">
+                            <svg>
+                                <circle class="background" cx="70" cy="70" r="60"></circle>
+                                <circle class="progress" cx="70" cy="70" r="60" id="progressCircle"></circle>
+                            </svg>
+                            <div class="progress-center">
+                                <div class="progress-percent" id="progressPercent">0%</div>
+                                <div class="progress-label">Complete</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-message" id="dailyMessage">Ready to achieve greatness!</div>
+                        <button class="btn btn-secondary btn-small" onclick="getPersonalMotivation()">🚀 Motivate Me</button>
+                    </div>
+                </div>
+
+                <!-- Analytics Dashboard -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📊 Advanced Analytics</div>
+                        <div class="card-subtitle">Comprehensive productivity insights</div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="completionRate">0%</div>
+                            <div class="stat-label">Completion Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalTime">0h</div>
+                            <div class="stat-label">Time Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="streakCount">0</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalTasks">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="progressChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Individual Task Timers -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⏱️ Task Timers</div>
+                        <div class="card-subtitle">Individual timers for each task</div>
+                    </div>
+                    
+                    <div id="taskTimers">
+                        <div class="no-timers">
+                            <div class="empty-icon">⏰</div>
+                            <div>No active timers</div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Progress Section -->
-            <section id="progress" class="content-section">
-                <div class="section-header">
-                    <h1>Progress Analytics</h1>
-                    <p>Your study progress and insights</p>
-                </div>
-
-                <div class="progress-cards">
-                    <div class="progress-card">
-                        <h3>Weekly Study Hours</h3>
-                        <canvas id="weeklyChart" width="400" height="200"></canvas>
+                <!-- Study Alarm System -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⏰ Study Alarm System</div>
+                        <div class="card-subtitle">Schedule your study sessions</div>
                     </div>
-                    <div class="progress-card">
-                        <h3>Subject Distribution</h3>
-                        <canvas id="subjectChart" width="400" height="200"></canvas>
+                    
+                    <div class="alarm-creator">
+                        <div class="input-group">
+                            <div class="input-wrapper">
+                                <label class="input-label">Study Subject</label>
+                                <input type="text" class="input-field" id="alarmSubject" placeholder="e.g., Mathematics">
+                            </div>
+                            <div class="input-wrapper">
+                                <label class="input-label">Time</label>
+                                <input type="time" class="input-field" id="alarmTime">
+                            </div>
+                            <div class="input-wrapper">
+                                <label class="input-label">Duration</label>
+                                <select class="input-field" id="alarmDuration">
+                                    <option value="25">25 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60">1 hour</option>
+                                    <option value="90">1.5 hours</option>
+                                    <option value="120">2 hours</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="createStudyAlarm()">⏰ Set Alarm</button>
                     </div>
+                    
+                    <div id="activeAlarms" class="active-alarms"></div>
                 </div>
-
-                <div class="progress-stats">
-                    <div class="progress-stat">
-                        <h4>This Week</h4>
-                        <div class="stat-value" id="weeklyHours">0h</div>
-                    </div>
-                    <div class="progress-stat">
-                        <h4>This Month</h4>
-                        <div class="stat-value" id="monthlyHours">0h</div>
-                    </div>
-                    <div class="progress-stat">
-                        <h4>Average/Day</h4>
-                        <div class="stat-value" id="dailyAverage">0h</div>
-                    </div>
-                    <div class="progress-stat">
-                        <h4>Goal Progress</h4>
-                        <div class="stat-value" id="goalProgress">0%</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Alarms Section -->
-            <section id="alarms" class="content-section">
-                <div class="section-header">
-                    <h1>Study Alarms</h1>
-                    <button class="btn btn-primary" onclick="showAddAlarmModal()">+ Add Alarm</button>
-                </div>
-
-                <div class="alarms-list" id="alarmsList">
-                    <div class="empty-state">
-                        <div class="empty-icon">⏰</div>
-                        <h3>No alarms set</h3>
-                        <p>Set study alarms to stay on track</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modals -->
-    <!-- Assignment Modal -->
-    <div id="assignmentModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Assignment</h3>
-                <button class="modal-close" onclick="hideAddAssignmentModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Assignment Title</label>
-                    <input type="text" id="assignmentTitle" placeholder="Enter assignment title">
-                </div>
-                <div class="form-group">
-                    <label>Subject</label>
-                    <select id="assignmentSubject">
-                        <option value="math">Mathematics</option>
-                        <option value="dsa">Data Structures</option>
-                        <option value="coa">Computer Organization</option>
-                        <option value="programming">Programming</option>
-                        <option value="os">Operating Systems</option>
-                        <option value="uhv">UHV</option>
-                        <option value="ethics">Ethics</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Due Date</label>
-                    <input type="datetime-local" id="assignmentDueDate">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="assignmentDescription" placeholder="Assignment details..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="hideAddAssignmentModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveAssignment()">Save Assignment</button>
             </div>
         </div>
     </div>
 
-    <!-- Alarm Modal -->
-    <div id="alarmModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Study Alarm</h3>
-                <button class="modal-close" onclick="hideAddAlarmModal()">&times;</button>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Study Alarm Notification -->
+    <div id="alarmNotification" class="alarm-notification hidden">
+        <div class="alarm-content">
+            <div class="alarm-icon">⏰</div>
+            <div class="alarm-text">
+                <h3 id="alarmTitle">Study Time!</h3>
+                <p id="alarmMessage">Time to study Mathematics</p>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Alarm Name</label>
-                    <input type="text" id="alarmName" placeholder="e.g., Study Math">
-                </div>
-                <div class="form-group">
-                    <label>Time</label>
-                    <input type="time" id="alarmTime">
-                </div>
-                <div class="form-group">
-                    <label>Days</label>
-                    <div class="days-selector">
-                        <label class="day-option"><input type="checkbox" value="mon"> Mon</label>
-                        <label class="day-option"><input type="checkbox" value="tue"> Tue</label>
-                        <label class="day-option"><input type="checkbox" value="wed"> Wed</label>
-                        <label class="day-option"><input type="checkbox" value="thu"> Thu</label>
-                        <label class="day-option"><input type="checkbox" value="fri"> Fri</label>
-                        <label class="day-option"><input type="checkbox" value="sat"> Sat</label>
-                        <label class="day-option"><input type="checkbox" value="sun"> Sun</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Subject</label>
-                    <select id="alarmSubject">
-                        <option value="">General</option>
-                        <option value="math">Mathematics</option>
-                        <option value="dsa">Data Structures</option>
-                        <option value="coa">Computer Organization</option>
-                        <option value="programming">Programming</option>
-                        <option value="os">Operating Systems</option>
-                        <option value="uhv">UHV</option>
-                        <option value="ethics">Ethics</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="hideAddAlarmModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveAlarm()">Save Alarm</button>
+            <div class="alarm-controls">
+                <button class="btn btn-primary" onclick="startStudySession()">📚 Start</button>
+                <button class="btn btn-secondary" onclick="snoozeAlarm()">😴 Snooze</button>
+                <button class="btn btn-secondary" onclick="dismissAlarm()">❌ Dismiss</button>
             </div>
         </div>
     </div>
 
-    <!-- File Preview Modal -->
-    <div id="fileModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalFileName">File Preview</h3>
-                <button class="modal-close" onclick="closeFileModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="downloadCurrentFile()">Download</button>
-                <button class="btn btn-danger" onclick="deleteCurrentFile()">Delete</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification Panel -->
-    <div id="notificationPanel" class="notification-panel">
-        <div class="panel-header">
-            <h3>Notifications</h3>
-            <button class="clear-all" onclick="clearAllNotifications()">Clear All</button>
-        </div>
-        <div class="notifications-list" id="notificationsList">
-            <div class="empty-state">
-                <p>No notifications</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <script src="script.js"></script>
+    <!-- Configuration Script -->
+    <script src="config.js"></script>
+    <!-- Main Application Script -->
+    <script src="app.js"></script>
 </body>
 </html>
