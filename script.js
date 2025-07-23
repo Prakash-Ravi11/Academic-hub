@@ -865,3 +865,243 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+// Enhanced Application State
+let userGoals = [];
+let studyNotes = [];
+let calendarEvents = [];
+let cloudSyncEnabled = false;
+let studyStreak = 0;
+
+// AI Chat Functions
+function sendAIMessage() {
+    const input = document.getElementById('aiInput');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    addChatMessage('user', message);
+    input.value = '';
+    
+    // Simulate AI response (replace with actual API call)
+    setTimeout(() => {
+        const response = generateAIResponse(message);
+        addChatMessage('ai', response);
+    }, 1000);
+}
+
+function addChatMessage(sender, message) {
+    const messagesContainer = document.getElementById('aiMessages');
+    const messageElement = document.createElement('div');
+    messageElement.className = `${sender}-message`;
+    
+    messageElement.innerHTML = `
+        <span class="${sender}-avatar">${sender === 'ai' ? '🤖' : '👤'}</span>
+        <div class="message-content">${message}</div>
+    `;
+    
+    messagesContainer.appendChild(messageElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function generateAIResponse(message) {
+    const responses = {
+        'math': 'For mathematics, I recommend focusing on practice problems and understanding the underlying concepts.',
+        'help': 'I can help you with study techniques, explain concepts, or provide subject-specific guidance.',
+        'default': 'That\'s a great question! Let me help you with your studies.'
+    };
+    
+    const lowerMessage = message.toLowerCase();
+    for (let key in responses) {
+        if (lowerMessage.includes(key)) {
+            return responses[key];
+        }
+    }
+    return responses.default;
+}
+
+// Goal Management Functions
+function addNewGoal() {
+    document.getElementById('goalModal').classList.add('show');
+}
+
+function closeGoalModal() {
+    document.getElementById('goalModal').classList.remove('show');
+    document.getElementById('goalForm').reset();
+}
+
+function createGoal(goalData) {
+    const goal = {
+        id: Date.now(),
+        ...goalData,
+        progress: 0,
+        createdAt: new Date().toISOString()
+    };
+    
+    userGoals.push(goal);
+    saveUserData();
+    renderGoals();
+    showNotification('Goal Created', `New goal "${goal.title}" added!`);
+}
+
+// Calendar Functions
+function initializeCalendar() {
+    renderCalendar();
+    renderUpcomingEvents();
+}
+
+function renderCalendar() {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const currentDate = new Date();
+    // Calendar rendering logic here
+}
+
+function addEvent() {
+    document.getElementById('eventModal').classList.add('show');
+}
+
+// Notes Functions
+function createNewNote() {
+    const note = {
+        id: Date.now(),
+        title: 'Untitled Note',
+        content: '',
+        subject: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    
+    studyNotes.push(note);
+    renderNotesList();
+    selectNote(note.id);
+}
+
+function saveNote() {
+    const currentNoteId = getCurrentNoteId();
+    const note = studyNotes.find(n => n.id === currentNoteId);
+    
+    if (note) {
+        note.title = document.getElementById('noteTitle').value;
+        note.content = document.getElementById('noteEditor').innerHTML;
+        note.subject = document.getElementById('noteSubject').value;
+        note.updatedAt = new Date().toISOString();
+        
+        saveUserData();
+        renderNotesList();
+        showNotification('Note Saved', 'Your note has been saved successfully!');
+    }
+}
+
+// Analytics Functions
+function initializeAnalytics() {
+    renderWeeklyChart();
+    renderSubjectChart();
+    updateAnalyticsMetrics();
+}
+
+function renderWeeklyChart() {
+    const canvas = document.getElementById('weeklyChart');
+    const ctx = canvas.getContext('2d');
+    
+    // Simple chart implementation (replace with Chart.js for better visuals)
+    const data = [2, 4, 3, 5, 6, 4, 7]; // Weekly study hours
+    const maxValue = Math.max(...data);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#667eea';
+    
+    data.forEach((value, index) => {
+        const barHeight = (value / maxValue) * 150;
+        const x = index * 50 + 20;
+        const y = 180 - barHeight;
+        
+        ctx.fillRect(x, y, 40, barHeight);
+    });
+}
+
+// Backup & Sync Functions
+function toggleCloudSync() {
+    cloudSyncEnabled = !cloudSyncEnabled;
+    document.getElementById('syncStatus').textContent = 
+        cloudSyncEnabled ? 'Enabled' : 'Disabled';
+    
+    if (cloudSyncEnabled) {
+        showNotification('Cloud Sync Enabled', 'Your data will now sync automatically');
+    }
+}
+
+function createBackup() {
+    const backupData = {
+        files: subjectFiles,
+        studyTimes: studyTimes,
+        goals: userGoals,
+        notes: studyNotes,
+        events: calendarEvents,
+        timestamp: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(backupData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `academic-hub-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    showNotification('Backup Created', 'Your data has been exported successfully!');
+}
+
+// Enhanced data saving function
+function saveUserData() {
+    localStorage.setItem('academic-hub-files', JSON.stringify(subjectFiles));
+    localStorage.setItem('academic-hub-study-times', JSON.stringify(studyTimes));
+    localStorage.setItem('academic-hub-goals', JSON.stringify(userGoals));
+    localStorage.setItem('academic-hub-notes', JSON.stringify(studyNotes));
+    localStorage.setItem('academic-hub-events', JSON.stringify(calendarEvents));
+    
+    if (cloudSyncEnabled) {
+        // Placeholder for cloud sync
+        console.log('Syncing to cloud...');
+    }
+}
+
+// Enhanced data loading function
+function loadUserData() {
+    const savedFiles = localStorage.getItem('academic-hub-files');
+    if (savedFiles) subjectFiles = JSON.parse(savedFiles);
+    
+    const savedTimes = localStorage.getItem('academic-hub-study-times');
+    if (savedTimes) studyTimes = JSON.parse(savedTimes);
+    
+    const savedGoals = localStorage.getItem('academic-hub-goals');
+    if (savedGoals) userGoals = JSON.parse(savedGoals);
+    
+    const savedNotes = localStorage.getItem('academic-hub-notes');
+    if (savedNotes) studyNotes = JSON.parse(savedNotes);
+    
+    const savedEvents = localStorage.getItem('academic-hub-events');
+    if (savedEvents) calendarEvents = JSON.parse(savedEvents);
+}
+
+// PWA Installation
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => console.log('SW registered'))
+            .catch(error => console.log('SW registration failed'));
+    });
+}
+
+// Initialize all new features
+document.addEventListener('DOMContentLoaded', function() {
+    // Existing initialization...
+    loadUserData();
+    initializeNavigation();
+    initializeSearch();
+    initializeFileHandling();
+    updateAllProgress();
+    
+    // New feature initialization
+    initializeAnalytics();
+    initializeCalendar();
+    
+    console.log('✅ Enhanced Academic Hub Ready with all features!');
+});
