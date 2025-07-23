@@ -3,78 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowState Pro - Ultimate AI Productivity Companion</title>
-    <meta name="description" content="Ultimate AI productivity companion with voice AI, task management, and study tracking">
-    <meta name="theme-color" content="#3b82f6">
+    <title>Academic Hub - AI Learning Platform</title>
+    <meta name="description" content="Advanced AI-powered academic platform with voice recognition and intelligent tutoring">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
     <style>
         :root {
-            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-secondary: rgba(255, 255, 255, 0.95);
-            --bg-tertiary: rgba(248, 250, 252, 0.9);
-            --text-primary: #1a202c;
-            --text-secondary: #64748b;
-            --border-color: rgba(0, 0, 0, 0.1);
-            --shadow-primary: 0 20px 40px rgba(0, 0, 0, 0.1);
-            --shadow-secondary: 0 8px 20px rgba(0, 0, 0, 0.06);
-            --primary-color: #667eea;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --accent-gradient: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            --bg-secondary: rgba(26, 26, 46, 0.95);
-            --bg-tertiary: rgba(22, 33, 62, 0.9);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --card-bg: rgba(26, 26, 46, 0.9);
-            --accent-gradient: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        [data-theme="elegant"] {
-            --bg-primary: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            --bg-secondary: rgba(255, 236, 210, 0.95);
-            --bg-tertiary: rgba(252, 182, 159, 0.9);
-            --text-primary: #8b4513;
-            --text-secondary: #d2691e;
-            --card-bg: rgba(255, 236, 210, 0.9);
-            --accent-gradient: linear-gradient(135deg, #ff9a9e, #fecfef);
+            /* Academic Hub Dark Theme (matching your image) */
+            --bg-primary: linear-gradient(135deg, #0a0e27 0%, #1a1d29 50%, #2d3748 100%);
+            --bg-secondary: rgba(26, 32, 44, 0.95);
+            --bg-tertiary: rgba(45, 55, 72, 0.9);
+            --bg-card: rgba(26, 32, 44, 0.8);
+            --glass-bg: rgba(26, 32, 44, 0.7);
+            
+            --text-primary: #f7fafc;
+            --text-secondary: #a0aec0;
+            --text-accent: #4299e1;
+            --text-muted: #64748b;
+            
+            --primary-color: #4299e1;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+            --info-color: #38b2ac;
+            
+            --border-color: rgba(113, 128, 150, 0.2);
+            --shadow-primary: 0 25px 50px rgba(0, 0, 0, 0.5);
+            --shadow-secondary: 0 10px 25px rgba(0, 0, 0, 0.3);
+            
+            --academia-gradient: linear-gradient(135deg, #4299e1, #3182ce);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
             background: var(--bg-primary);
-            min-height: 100vh;
             color: var(--text-primary);
             line-height: 1.6;
+            min-height: 100vh;
         }
 
-        /* Authentication Modal */
+        /* Authentication Modal (Fixed Version) */
         .auth-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 4000;
+            animation: fadeIn 0.4s ease;
         }
 
         .auth-modal.hidden {
@@ -82,95 +69,105 @@
         }
 
         .auth-content {
-            background: var(--bg-secondary);
-            border-radius: 20px;
-            padding: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border-radius: 24px;
+            padding: 48px;
             box-shadow: var(--shadow-primary);
-            max-width: 400px;
+            max-width: 480px;
             width: 90%;
             text-align: center;
-            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .auth-logo {
             width: 80px;
             height: 80px;
-            background: var(--accent-gradient);
+            background: var(--academia-gradient);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-size: 36px;
-            font-weight: bold;
-            margin: 0 auto 30px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            font-weight: 700;
+            margin: 0 auto 32px;
+            box-shadow: 0 12px 40px rgba(66, 153, 225, 0.3);
         }
 
         .auth-title {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 10px;
             color: var(--text-primary);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
         }
 
         .auth-subtitle {
             color: var(--text-secondary);
-            margin-bottom: 30px;
-            font-size: 16px;
+            margin-bottom: 40px;
+            font-size: 18px;
+            font-weight: 500;
         }
 
         .auth-form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
         .auth-input {
-            padding: 16px 20px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            background: var(--bg-tertiary);
+            padding: 18px 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            font-size: 17px;
+            background: var(--bg-secondary);
             color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
             transition: all 0.3s ease;
         }
 
         .auth-input:focus {
-            outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+            transform: translateY(-2px);
         }
 
         .auth-input::placeholder {
-            color: var(--text-secondary);
+            color: var(--text-muted);
         }
 
         .auth-btn {
-            padding: 16px 24px;
-            background: var(--accent-gradient);
+            padding: 18px 32px;
+            background: var(--academia-gradient);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 16px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.3);
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
         .auth-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(66, 153, 225, 0.4);
         }
 
-        .auth-btn:active {
-            transform: translateY(0);
+        .auth-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .auth-switch {
-            margin-top: 20px;
+            margin-top: 32px;
             color: var(--text-secondary);
+            font-size: 16px;
         }
 
         .auth-link {
@@ -193,25 +190,28 @@
         }
 
         .error-message {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(245, 101, 101, 0.1);
             color: var(--danger-color);
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(245, 101, 101, 0.2);
         }
 
         .success-message {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(72, 187, 120, 0.1);
             color: var(--success-color);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(72, 187, 120, 0.2);
         }
 
-        /* Main App */
+        /* Main App Container */
         .app-container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 20px;
-            background: var(--bg-secondary);
-            min-height: 100vh;
-            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border-radius: 28px;
+            padding: 40px;
+            box-shadow: var(--shadow-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: calc(100vh - 40px);
         }
 
         .app-header {
@@ -219,126 +219,96 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
-            padding: 20px 0;
-            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .app-title {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         .app-logo {
-            width: 50px;
-            height: 50px;
-            background: var(--accent-gradient);
-            border-radius: 12px;
+            width: 56px;
+            height: 56px;
+            background: var(--academia-gradient);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(66, 153, 225, 0.3);
         }
 
         .app-name {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 800;
             color: var(--text-primary);
+            letter-spacing: -0.02em;
         }
 
         .app-subtitle {
-            font-size: 16px;
+            font-size: 18px;
             color: var(--text-secondary);
             margin-left: 4px;
+            font-weight: 500;
         }
 
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 20px;
-        }
-
-        .theme-selector {
-            display: flex;
-            gap: 8px;
-            background: var(--bg-tertiary);
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .theme-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            background: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .theme-btn:hover {
-            background: var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .theme-btn.active {
-            background: var(--primary-color);
-            color: white;
+            gap: 24px;
         }
 
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
+            gap: 16px;
+            padding: 12px 20px;
             background: var(--bg-tertiary);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            border-radius: 16px;
             cursor: pointer;
+            border: 1px solid var(--border-color);
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--accent-gradient);
+            width: 40px;
+            height: 40px;
+            background: var(--academia-gradient);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 16px;
         }
 
         .user-name {
             font-weight: 600;
             color: var(--text-primary);
+            font-size: 16px;
         }
 
         /* Main Content Layout */
         .main-content {
             display: grid;
             grid-template-columns: 1fr 400px;
-            gap: 30px;
-        }
-
-        .left-panel, .right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+            gap: 40px;
         }
 
         .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow-secondary);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 28px;
             border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-secondary);
             transition: all 0.3s ease;
+            margin-bottom: 24px;
         }
 
         .card:hover {
@@ -347,40 +317,131 @@
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 16px;
             color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .card-subtitle {
-            font-size: 14px;
+            font-size: 16px;
             color: var(--text-secondary);
+            font-weight: 500;
             margin-bottom: 20px;
+        }
+
+        /* AI Chat */
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            padding: 16px 20px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: messageSlide 0.4s ease;
+        }
+
+        .message.user {
+            background: var(--academia-gradient);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 16px rgba(66, 153, 225, 0.3);
+        }
+
+        .message.ai {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: var(--shadow-secondary);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+        }
+
+        .btn {
+            padding: 16px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--academia-gradient);
+            color: white;
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
 
         /* Voice Controls */
         .voice-controls {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
         .voice-btn {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border: none;
             border-radius: 50%;
-            background: var(--accent-gradient);
+            background: var(--academia-gradient);
             color: white;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 24px;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 24px rgba(66, 153, 225, 0.3);
         }
 
         .voice-btn:hover {
@@ -392,145 +453,6 @@
             animation: pulse 2s infinite;
         }
 
-        .voice-status {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        /* Quote Display */
-        .quote-display {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 20px;
-            border-left: 4px solid var(--primary-color);
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .quote-text {
-            font-style: italic;
-            font-size: 16px;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-
-        .quote-author {
-            font-weight: 600;
-            color: var(--primary-color);
-            font-size: 14px;
-        }
-
-        .quote-category {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: var(--primary-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        /* AI Chat */
-        .chat-container {
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        .message {
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            border-radius: 16px;
-            max-width: 80%;
-            word-wrap: break-word;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .message.user {
-            background: var(--accent-gradient);
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .message.ai {
-            background: var(--card-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            margin-right: auto;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 12px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .send-btn {
-            padding: 12px 20px;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .send-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        .quick-action {
-            padding: 6px 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            font-size: 12px;
-            cursor: pointer;
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .quick-action:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
         /* Task Management */
         .task-input-container {
             display: flex;
@@ -540,243 +462,95 @@
 
         .task-input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 16px 20px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            background: var(--bg-tertiary);
+            background: var(--bg-secondary);
             color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
         }
 
-        .add-task-btn {
-            padding: 12px 20px;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .task-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
         }
 
         .task-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 16px;
+            gap: 16px;
+            padding: 20px;
             background: var(--bg-tertiary);
-            border-radius: 12px;
+            border-radius: 16px;
+            margin-bottom: 16px;
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
 
         .task-item:hover {
-            transform: translateX(4px);
+            background: var(--bg-card);
+            transform: translateX(8px);
             box-shadow: var(--shadow-secondary);
         }
 
         .task-checkbox {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 2px solid var(--primary-color);
-            border-radius: 4px;
+            border-radius: 50%;
             cursor: pointer;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
 
         .task-checkbox.checked {
             background: var(--primary-color);
-        }
-
-        .task-checkbox.checked::after {
-            content: '✓';
             color: white;
-            font-size: 12px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
 
-        .task-text {
+        .task-content {
             flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
             color: var(--text-primary);
-        }
-
-        .task-text.completed {
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        .task-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .delete-task-btn {
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        /* Progress Display */
-        .progress-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .progress-ring {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 16px;
-            position: relative;
-        }
-
-        .progress-ring svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-
-        .progress-ring circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-        }
-
-        .progress-ring .background {
-            stroke: var(--border-color);
-        }
-
-        .progress-ring .progress {
-            stroke: var(--primary-color);
-            stroke-dasharray: 283;
-            stroke-dashoffset: 283;
-            transition: stroke-dashoffset 0.5s ease;
-        }
-
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .progress-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        /* Study Statistics */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
             margin-bottom: 4px;
         }
 
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* ChatGPT Section */
-        .chatgpt-container {
-            margin-bottom: 20px;
-        }
-
-        .chatgpt-input {
-            width: 100%;
-            min-height: 100px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            resize: vertical;
-            margin-bottom: 12px;
-        }
-
-        .chatgpt-response {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 12px;
-            border: 1px solid var(--border-color);
-            display: none;
-        }
-
-        .chatgpt-response.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        /* Learning Hub */
-        .learning-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .learning-btn {
-            padding: 16px 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
-            color: var(--text-primary);
+        .task-meta {
             font-size: 14px;
-            font-weight: 600;
-        }
-
-        .learning-btn:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
         }
 
         /* Responsive Design */
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
@@ -784,52 +558,36 @@
 
         @media (max-width: 768px) {
             .app-container {
-                padding: 16px;
-            }
-            
-            .app-header {
-                flex-direction: column;
-                gap: 16px;
-            }
-            
-            .header-controls {
-                flex-direction: column;
-                gap: 12px;
+                padding: 20px;
+                border-radius: 20px;
+                margin: 10px;
             }
             
             .auth-content {
-                padding: 24px;
+                padding: 32px 24px;
             }
             
-            .main-content {
-                gap: 20px;
+            .app-name {
+                font-size: 28px;
             }
             
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .learning-grid {
-                grid-template-columns: 1fr;
+            .card {
+                padding: 20px;
             }
         }
 
         /* Utility Classes */
         .hidden { display: none !important; }
         .show { display: block !important; }
-        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
-        .btn-primary { background: var(--accent-gradient); color: white; }
-        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
-        .btn:hover { transform: translateY(-2px); }
     </style>
 </head>
-<body data-theme="light">
-    <!-- Authentication Modal -->
+<body>
+    <!-- Authentication Modal (Fixed) -->
     <div class="auth-modal" id="authModal">
         <div class="auth-content">
-            <div class="auth-logo">FS</div>
-            <div class="auth-title" id="authTitle">Welcome to FlowState Pro</div>
-            <div class="auth-subtitle" id="authSubtitle">Enter your credentials to continue</div>
+            <div class="auth-logo">AH</div>
+            <div class="auth-title" id="authTitle">Academic Hub</div>
+            <div class="auth-subtitle" id="authSubtitle">Access your executive AI analytics platform</div>
             
             <div class="error-message" id="errorMessage"></div>
             <div class="success-message" id="successMessage"></div>
@@ -837,7 +595,7 @@
             <form class="auth-form" id="authForm">
                 <input type="text" class="auth-input" id="nameInput" placeholder="Your Name" required>
                 <input type="password" class="auth-input" id="passwordInput" placeholder="Create Password" required>
-                <button type="submit" class="auth-btn" id="authSubmitBtn">Create Account</button>
+                <button type="submit" class="auth-btn" id="authSubmitBtn">Access Platform</button>
             </form>
             
             <div class="auth-switch">
@@ -847,23 +605,18 @@
         </div>
     </div>
 
-    <!-- Main Application -->
+    <!-- Main Academic Hub App -->
     <div class="app-container hidden" id="mainApp">
-        <!-- App Header -->
+        <!-- Header -->
         <div class="app-header">
             <div class="app-title">
-                <div class="app-logo">FS</div>
+                <div class="app-logo">AH</div>
                 <div>
-                    <div class="app-name">FlowState Pro</div>
-                    <div class="app-subtitle">Ultimate AI Productivity Companion</div>
+                    <div class="app-name">Academic Hub</div>
+                    <div class="app-subtitle">AI-Powered Learning Platform</div>
                 </div>
             </div>
             <div class="header-controls">
-                <div class="theme-selector">
-                    <button class="theme-btn active" onclick="setTheme('light')">Light</button>
-                    <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
-                    <button class="theme-btn" onclick="setTheme('elegant')">Elegant</button>
-                </div>
                 <div class="user-profile" onclick="logout()">
                     <div class="user-avatar" id="userAvatar">U</div>
                     <div class="user-name" id="userName">User</div>
@@ -871,147 +624,87 @@
             </div>
         </div>
 
-        <!-- Voice Controls -->
-        <div class="card">
-            <div class="card-title">🎤 Voice AI Assistant</div>
-            <div class="card-subtitle">Use voice commands to control your productivity</div>
-            <div class="voice-controls">
-                <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">🎤</button>
-                <div class="voice-status" id="voiceStatus">Click to start voice recognition</div>
-            </div>
-        </div>
-
-        <!-- Motivational Quote -->
-        <div class="quote-display" id="quoteDisplay">
-            <div class="quote-category" id="quoteCategory">Motivation</div>
-            <div class="quote-text" id="quoteText">"The way to get started is to quit talking and begin doing."</div>
-            <div class="quote-author" id="quoteAuthor">— Walt Disney</div>
-        </div>
-
-        <!-- Main Content Grid -->
+        <!-- Main Content -->
         <div class="main-content">
             <!-- Left Panel -->
             <div class="left-panel">
-                <!-- AI Chat Assistant -->
+                <!-- AI Tutor -->
                 <div class="card">
-                    <div class="card-title">🧠 Ultra AI Assistant</div>
-                    <div class="card-subtitle">Your personal productivity coach</div>
-                    <div class="chat-container">
-                        <div class="chat-messages" id="chatMessages"></div>
-                        <div class="chat-input-container">
-                            <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything...">
-                            <button class="send-btn" onclick="sendMessage()">Send</button>
-                        </div>
-                        <div class="quick-actions">
-                            <button class="quick-action" onclick="quickAction('motivation')">💪 Motivate</button>
-                            <button class="quick-action" onclick="quickAction('tips')">💡 Tips</button>
-                            <button class="quick-action" onclick="quickAction('quote')">✨ Quote</button>
-                            <button class="quick-action" onclick="quickAction('focus')">🎯 Focus</button>
-                        </div>
+                    <div class="card-title">🎓 AI Academic Tutor</div>
+                    <div class="card-subtitle">Your personal academic assistant for all subjects</div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Ask about any academic topic...">
+                        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
                     </div>
                 </div>
 
-                <!-- ChatGPT Integration -->
+                <!-- Voice Assistant -->
                 <div class="card">
-                    <div class="card-title">🤖 Ask Anything - ChatGPT</div>
-                    <div class="card-subtitle">Get instant answers to any question</div>
-                    <div class="chatgpt-container">
-                        <textarea class="chatgpt-input" id="chatgptInput" placeholder="Ask any question - academic, creative, technical..."></textarea>
-                        <div style="display: flex; gap: 12px;">
-                            <button class="btn btn-primary" onclick="askChatGPT()">Ask AI</button>
-                            <button class="btn btn-secondary" onclick="clearChatGPT()">Clear</button>
-                            <button class="btn btn-secondary" onclick="speakResponse()">🔊 Speak</button>
-                        </div>
-                        <div class="chatgpt-response" id="chatgptResponse">
-                            <div style="font-weight: 600; margin-bottom: 12px; color: var(--primary-color);">AI Response:</div>
-                            <div id="chatgptAnswer"></div>
-                        </div>
+                    <div class="card-title">🎤 Voice Study Assistant</div>
+                    <div class="card-subtitle">Talk naturally with your AI study coach</div>
+                    <div class="voice-controls">
+                        <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">🎤</button>
+                        <div id="voiceStatus">Click to start voice commands</div>
                     </div>
                 </div>
 
-                <!-- Smart Task Creator -->
+                <!-- Study Task Creator -->
                 <div class="card">
-                    <div class="card-title">🎯 Smart Task Creator</div>
-                    <div class="card-subtitle">AI-powered task creation with natural language</div>
+                    <div class="card-title">📚 Study Task Creator</div>
+                    <div class="card-subtitle">Create and manage your study goals</div>
                     <div class="task-input-container">
-                        <input type="text" class="task-input" id="taskInput" placeholder="Describe your task...">
-                        <button class="add-task-btn" onclick="addTask()">Add Task</button>
-                    </div>
-                </div>
-
-                <!-- Learning Hub -->
-                <div class="card">
-                    <div class="card-title">📚 Learning Hub</div>
-                    <div class="card-subtitle">Advanced learning tools and resources</div>
-                    <div class="learning-grid">
-                        <button class="learning-btn" onclick="openFeature('flashcards')">🃏 Flashcards</button>
-                        <button class="learning-btn" onclick="openFeature('timer')">⏱️ Study Timer</button>
-                        <button class="learning-btn" onclick="openFeature('notes')">📝 Smart Notes</button>
-                        <button class="learning-btn" onclick="openFeature('quiz')">❓ Quiz Mode</button>
+                        <input type="text" class="task-input" id="taskInput" placeholder="Add a study task...">
+                        <button class="btn btn-primary" onclick="addStudyTask()">Add</button>
                     </div>
                 </div>
             </div>
 
             <!-- Right Panel -->
             <div class="right-panel">
-                <!-- Today's Tasks -->
+                <!-- Study Tasks -->
                 <div class="card">
-                    <div class="card-title">📋 Today's Tasks</div>
+                    <div class="card-title">📋 Study Tasks</div>
                     <div class="card-subtitle" id="tasksSummary">No tasks yet</div>
-                    <div class="task-list" id="tasksList">
-                        <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                    <div id="tasksList">
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                             <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
-                            <div>Create your first task to get started!</div>
+                            <div>Create your first study task!</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Progress Display -->
+                <!-- Academic Resources */
                 <div class="card">
-                    <div class="card-title">🏆 Daily Progress</div>
-                    <div class="progress-container">
-                        <div class="progress-ring">
-                            <svg>
-                                <circle class="background" cx="60" cy="60" r="45"></circle>
-                                <circle class="progress" cx="60" cy="60" r="45" id="progressCircle"></circle>
-                            </svg>
-                            <div class="progress-text" id="progressText">0%</div>
-                        </div>
-                        <div class="progress-label">Tasks Completed</div>
-                        <button class="btn btn-primary" onclick="getMotivation()">🚀 Get Motivated</button>
+                    <div class="card-title">📖 Study Resources</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <button class="btn btn-secondary" onclick="openResource('flashcards')">🗂️ Flashcards</button>
+                        <button class="btn btn-secondary" onclick="openResource('timer')">⏱️ Study Timer</button>
+                        <button class="btn btn-secondary" onclick="openResource('notes')">📝 Smart Notes</button>
+                        <button class="btn btn-secondary" onclick="openResource('quiz')">❓ Quiz Mode</button>
                     </div>
                 </div>
 
-                <!-- Study Statistics -->
+                <!-- Study Statistics */
                 <div class="card">
                     <div class="card-title">📊 Study Statistics</div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalTasks">0</div>
-                            <div class="stat-label">Total Tasks</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--primary-color);" id="totalTasks">0</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Total Tasks</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="completedTasks">0</div>
-                            <div class="stat-label">Completed</div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--success-color);" id="completedTasks">0</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Completed</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="studyTime">0h</div>
-                            <div class="stat-label">Study Time</div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--warning-color);" id="studyTime">0h</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Study Time</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="streakDays">0</div>
-                            <div class="stat-label">Streak Days</div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--info-color);" id="studyStreak">0</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Study Streak</div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Additional Features -->
-                <div class="card">
-                    <div class="card-title">⚡ Quick Actions</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button class="btn btn-secondary" onclick="exportData()">📤 Export Data</button>
-                        <button class="btn btn-secondary" onclick="importData()">📥 Import Data</button>
-                        <button class="btn btn-secondary" onclick="showHelp()">❓ Help & Support</button>
                     </div>
                 </div>
             </div>
@@ -1019,58 +712,36 @@
     </div>
 
     <script>
+        // ============ ACADEMIC HUB - FIXED AUTHENTICATION ============
+        
         // Application State
         let currentUser = null;
         let isLoginMode = false;
         let tasks = [];
-        let completedTasks = [];
         let isListening = false;
         let recognition = null;
         let speechSynthesis = window.speechSynthesis;
-        let motivationCount = 0;
 
-        // User Database
-        const users = JSON.parse(localStorage.getItem('flowstate-users') || '{}');
+        // User Database (same structure as FlowState Pro)
+        const users = JSON.parse(localStorage.getItem('academic-hub-users') || '{}');
 
-        // Quotes Database
-        const quotes = {
-            motivation: [
-                { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
-                { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
-                { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
-                { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-                { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" }
-            ],
-            productivity: [
-                { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
-                { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
-                { text: "You don't have to be great to get started, but you have to get started to be great.", author: "Les Brown" }
-            ],
-            study: [
-                { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
-                { text: "The more that you read, the more things you will know.", author: "Dr. Seuss" },
-                { text: "Learning never exhausts the mind.", author: "Leonardo da Vinci" }
-            ]
+        // Academic Responses Database
+        const academicResponses = {
+            math: "I can help you with mathematics! Whether it's algebra, calculus, geometry, statistics, or any other math topic, I'll explain concepts step-by-step and solve problems with you. What specific math topic would you like to explore?",
+            science: "Science is fascinating! I can assist with physics (mechanics, thermodynamics, quantum), chemistry (organic, inorganic, physical), biology (molecular, cellular, ecology), and more. What scientific concept interests you?",
+            history: "History helps us understand our world! I can discuss different civilizations, historical events, analyze cause and effect, help with research, and provide context for historical developments. What historical period or topic would you like to explore?",
+            literature: "Literature opens new worlds! I can help analyze poems, novels, plays, discuss literary devices, themes, character development, and assist with essay writing. What literary work or concept would you like to discuss?",
+            programming: "Coding is a powerful skill! I can help with Python, JavaScript, Java, C++, algorithms, data structures, debugging, and software design principles. What programming challenge can I assist you with?",
+            language: "Language learning is exciting! I can help with grammar, vocabulary, pronunciation, conversation practice, and cultural context for many languages. Which language are you studying?",
+            study: "Effective studying is key to academic success! I can suggest study techniques like active recall, spaced repetition, the Feynman Technique, mind mapping, and help create study schedules. What study challenge are you facing?"
         };
-
-        // Motivational Messages
-        const motivationalMessages = [
-            "🔥 {name}, you're absolutely crushing it today! Keep up the amazing work!",
-            "💪 Hey {name}, remember that every small step builds something incredible!",
-            "🌟 {name}, your dedication to growth is truly inspiring!",
-            "⚡ You've got this, {name}! Your consistency is what makes champions!",
-            "🎯 {name}, you're not just completing tasks - you're designing your future!",
-            "🚀 Amazing progress, {name}! Your commitment is paying off beautifully!",
-            "💎 {name}, every challenge you overcome makes you stronger!",
-            "🏆 Outstanding effort, {name}! Stay focused on your extraordinary goals!"
-        ];
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 FlowState Pro Loading...');
+            console.log('🎓 Academic Hub Loading...');
             
             // Check if user is already logged in
-            const savedUser = localStorage.getItem('flowstate-current-user');
+            const savedUser = localStorage.getItem('academic-hub-current-user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showMainApp();
@@ -1086,30 +757,26 @@
             // Set up form handler
             document.getElementById('authForm').addEventListener('submit', handleAuth);
             
-            // Set up enter key for chat
+            // Set up enter key handlers
             document.getElementById('chatInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') sendMessage();
             });
             
-            // Set up enter key for tasks
             document.getElementById('taskInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') addTask();
+                if (e.key === 'Enter') addStudyTask();
             });
             
-            // Load theme
-            const savedTheme = localStorage.getItem('flowstate-theme') || 'light';
-            setTheme(savedTheme);
-            
-            // Show welcome message
+            // Welcome message
             setTimeout(() => {
-                addChatMessage("👋 Welcome to FlowState Pro! I'm your AI productivity assistant. How can I help you achieve your goals today?", 'ai');
-                showMotivationalQuote();
+                if (currentUser) {
+                    addChatMessage(`🎓 Welcome to Academic Hub, ${currentUser.name}! I'm your AI tutor ready to help with any subject. What would you like to study today?`, 'ai');
+                }
             }, 1000);
             
-            console.log('✅ FlowState Pro Ready!');
+            console.log('✅ Academic Hub Ready!');
         });
 
-        // Authentication Functions
+        // ============ AUTHENTICATION FUNCTIONS (FIXED) ============
         function handleAuth(event) {
             event.preventDefault();
             
@@ -1127,12 +794,13 @@
                 // Login
                 if (users[userKey] && users[userKey].password === password) {
                     currentUser = users[userKey];
-                    localStorage.setItem('flowstate-current-user', JSON.stringify(currentUser));
+                    localStorage.setItem('academic-hub-current-user', JSON.stringify(currentUser));
                     showSuccess(`Welcome back, ${currentUser.name}!`);
                     setTimeout(() => {
                         showMainApp();
                         updateUserDisplay();
                         loadUserData();
+                        speak(`Welcome back to Academic Hub, ${currentUser.name}! Ready to continue learning?`);
                     }, 1000);
                 } else {
                     showError('Invalid name or password');
@@ -1154,21 +822,21 @@
                         totalTasks: 0,
                         completedTasks: 0,
                         studyTime: 0,
-                        streakDays: 0
+                        studyStreak: 0
                     }
                 };
                 
                 users[userKey] = newUser;
-                localStorage.setItem('flowstate-users', JSON.stringify(users));
+                localStorage.setItem('academic-hub-users', JSON.stringify(users));
                 
                 currentUser = newUser;
-                localStorage.setItem('flowstate-current-user', JSON.stringify(currentUser));
+                localStorage.setItem('academic-hub-current-user', JSON.stringify(currentUser));
                 
-                showSuccess(`Account created successfully! Welcome, ${currentUser.name}!`);
+                showSuccess(`Account created successfully! Welcome to Academic Hub, ${currentUser.name}!`);
                 setTimeout(() => {
                     showMainApp();
                     updateUserDisplay();
-                    speak(`Welcome to FlowState Pro, ${currentUser.name}! Let's boost your productivity!`);
+                    speak(`Welcome to Academic Hub, ${currentUser.name}! Let's start your learning journey!`);
                 }, 1000);
             }
         }
@@ -1185,15 +853,15 @@
             
             if (isLoginMode) {
                 title.textContent = 'Welcome Back';
-                subtitle.textContent = 'Sign in to your account';
+                subtitle.textContent = 'Sign in to continue learning';
                 submitBtn.textContent = 'Sign In';
                 switchText.textContent = "Don't have an account?";
                 switchLink.textContent = 'Create Account';
                 passwordInput.placeholder = 'Your Password';
             } else {
-                title.textContent = 'Welcome to FlowState Pro';
-                subtitle.textContent = 'Create your productivity account';
-                submitBtn.textContent = 'Create Account';
+                title.textContent = 'Academic Hub';
+                subtitle.textContent = 'Access your executive AI analytics platform';
+                submitBtn.textContent = 'Access Platform';
                 switchText.textContent = 'Already have an account?';
                 switchLink.textContent = 'Sign In';
                 passwordInput.placeholder = 'Create Password';
@@ -1239,26 +907,27 @@
         }
 
         function logout() {
-            if (currentUser) {
-                saveUserData();
-                speak(`Goodbye, ${currentUser.name}! See you next time!`);
+            if (confirm('Are you sure you want to sign out?')) {
+                if (currentUser) {
+                    saveUserData();
+                    speak(`Goodbye, ${currentUser.name}! Keep up the great learning!`);
+                }
+                
+                currentUser = null;
+                tasks = [];
+                
+                localStorage.removeItem('academic-hub-current-user');
+                
+                // Reset form
+                document.getElementById('authForm').reset();
+                if (isLoginMode) toggleAuthMode();
+                
+                showAuthModal();
+                showToast('👋 Logged out successfully');
             }
-            
-            currentUser = null;
-            tasks = [];
-            completedTasks = [];
-            
-            localStorage.removeItem('flowstate-current-user');
-            
-            // Reset form
-            document.getElementById('authForm').reset();
-            if (isLoginMode) toggleAuthMode();
-            
-            showAuthModal();
-            showToast('👋 Logged out successfully');
         }
 
-        // Voice Recognition
+        // ============ VOICE RECOGNITION ============
         function initializeVoiceRecognition() {
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1276,17 +945,12 @@
                 recognition.onend = () => {
                     isListening = false;
                     document.getElementById('voiceBtn').classList.remove('listening');
-                    document.getElementById('voiceStatus').textContent = 'Click to start voice recognition';
+                    document.getElementById('voiceStatus').textContent = 'Click to start voice commands';
                 };
 
                 recognition.onresult = (event) => {
                     const transcript = event.results[0][0].transcript;
                     processVoiceCommand(transcript);
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    showToast('❌ Voice recognition error. Please try again.');
                 };
             }
         }
@@ -1307,14 +971,9 @@
         function processVoiceCommand(transcript) {
             console.log('Voice command:', transcript);
             
-            const userName = currentUser ? currentUser.name : 'friend';
-            
             if (transcript.toLowerCase().includes('create') || transcript.toLowerCase().includes('add task')) {
                 document.getElementById('taskInput').value = transcript.replace(/create|add task/gi, '').trim();
-                addTask();
-                speak(`Task created, ${userName}!`);
-            } else if (transcript.toLowerCase().includes('motivate')) {
-                getMotivation();
+                addStudyTask();
             } else {
                 document.getElementById('chatInput').value = transcript;
                 sendMessage();
@@ -1330,132 +989,7 @@
             }
         }
 
-        // Task Management
-        function addTask() {
-            const input = document.getElementById('taskInput');
-            const text = input.value.trim();
-            
-            if (!text) {
-                showToast('❌ Please enter a task');
-                return;
-            }
-            
-            const task = {
-                id: Date.now(),
-                text: text,
-                completed: false,
-                createdAt: new Date(),
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            };
-            
-            tasks.push(task);
-            input.value = '';
-            renderTasks();
-            updateStats();
-            saveUserData();
-            
-            const userName = currentUser ? currentUser.name : 'friend';
-            speak(`Task added successfully, ${userName}!`);
-            showToast('✅ Task added!');
-        }
-
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                
-                if (task.completed) {
-                    completedTasks.push({...task, completedAt: new Date()});
-                    const userName = currentUser ? currentUser.name : 'friend';
-                    speak(`Great job, ${userName}! Task completed!`);
-                    showToast('🎉 Task completed!');
-                }
-                
-                renderTasks();
-                updateStats();
-                updateProgress();
-                saveUserData();
-            }
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            renderTasks();
-            updateStats();
-            updateProgress();
-            saveUserData();
-            showToast('🗑️ Task deleted');
-        }
-
-        function renderTasks() {
-            const container = document.getElementById('tasksList');
-            const summary = document.getElementById('tasksSummary');
-            
-            if (tasks.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
-                        <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
-                        <div>Create your first task to get started!</div>
-                    </div>
-                `;
-                summary.textContent = 'No tasks yet';
-                return;
-            }
-            
-            const completedToday = tasks.filter(t => t.completed).length;
-            summary.textContent = `${completedToday}/${tasks.length} completed`;
-            
-            container.innerHTML = '';
-            
-            tasks.forEach(task => {
-                const taskElement = document.createElement('div');
-                taskElement.className = 'task-item';
-                
-                taskElement.innerHTML = `
-                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})"></div>
-                    <div class="task-text ${task.completed ? 'completed' : ''}">${task.text}</div>
-                    <div class="task-time">${task.time}</div>
-                    <button class="delete-task-btn" onclick="deleteTask(${task.id})">×</button>
-                `;
-                
-                container.appendChild(taskElement);
-            });
-        }
-
-        function updateProgress() {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.completed).length;
-            const percentage = total > 0 ? (completed / total) * 100 : 0;
-            
-            const circle = document.getElementById('progressCircle');
-            const circumference = 2 * Math.PI * 45;
-            const offset = circumference - (percentage / 100) * circumference;
-            
-            circle.style.strokeDashoffset = offset;
-            document.getElementById('progressText').textContent = `${Math.round(percentage)}%`;
-        }
-
-        function updateStats() {
-            if (!currentUser) return;
-            
-            const totalTasks = tasks.length + completedTasks.length;
-            const completed = tasks.filter(t => t.completed).length + completedTasks.length;
-            
-            document.getElementById('totalTasks').textContent = totalTasks;
-            document.getElementById('completedTasks').textContent = completed;
-            document.getElementById('studyTime').textContent = '0h';
-            document.getElementById('streakDays').textContent = Math.min(completed, 30);
-            
-            // Update user stats
-            currentUser.stats = {
-                totalTasks: totalTasks,
-                completedTasks: completed,
-                studyTime: 0,
-                streakDays: Math.min(completed, 30)
-            };
-        }
-
-        // AI Chat
+        // ============ ACADEMIC CHAT SYSTEM ============
         function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
@@ -1466,9 +1000,9 @@
             input.value = '';
             
             setTimeout(() => {
-                const response = generateAIResponse(message);
+                const response = generateAcademicResponse(message);
                 addChatMessage(response, 'ai');
-                speak(response.replace(/🎯|💪|✨|🚀|📚/g, ''));
+                speak(response.replace(/🎓|📚|🔬|📊/g, ''));
             }, 1000);
         }
 
@@ -1476,262 +1010,197 @@
             const container = document.getElementById('chatMessages');
             const div = document.createElement('div');
             div.className = `message ${sender}`;
-            div.textContent = message;
+            
+            if (sender === 'ai') {
+                div.innerHTML = `<strong>🎓 Academic AI:</strong> ${message}`;
+            } else {
+                div.innerHTML = `<strong>You:</strong> ${message}`;
+            }
             
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        function generateAIResponse(message) {
-            const userName = currentUser ? currentUser.name : 'friend';
+        function generateAcademicResponse(message) {
+            const userName = currentUser ? currentUser.name : 'student';
+            const lowerMessage = message.toLowerCase();
             
-            if (message.toLowerCase().includes('motivat')) {
-                const motivations = motivationalMessages.map(m => m.replace('{name}', userName));
-                return motivations[Math.floor(Math.random() * motivations.length)];
+            // Check for specific academic subjects
+            for (const [subject, response] of Object.entries(academicResponses)) {
+                if (lowerMessage.includes(subject)) {
+                    return response;
+                }
             }
             
-            if (message.toLowerCase().includes('task') || message.toLowerCase().includes('todo')) {
-                return `🎯 Great thinking, ${userName}! Break down your goal into smaller, actionable tasks. What specific step can you take right now?`;
-            }
-            
-            if (message.toLowerCase().includes('study') || message.toLowerCase().includes('learn')) {
-                return `📚 Excellent focus on learning, ${userName}! Try the Pomodoro Technique: 25 minutes of focused study, then a 5-minute break.`;
-            }
-            
-            if (message.toLowerCase().includes('focus') || message.toLowerCase().includes('concentrate')) {
-                return `🧘 ${userName}, try this: eliminate distractions, set a clear intention, and work in focused time blocks. You've got this!`;
-            }
-            
-            // Default responses
-            const responses = [
-                `Hi ${userName}! I'm here to help boost your productivity. What would you like to accomplish today?`,
-                `Great question, ${userName}! Remember, every small step forward is progress. How can I support your goals?`,
-                `${userName}, you're on the right track! Consistency beats perfection every time. What's your next priority?`,
-                `I'm here to help you succeed, ${userName}! What challenge can we tackle together today?`
+            // General academic responses
+            const generalResponses = [
+                `Great question, ${userName}! I'm here to help you understand any academic topic. What specific area would you like to explore?`,
+                `Excellent thinking, ${userName}! Learning is all about asking good questions. How can I assist your studies today?`,
+                `${userName}, that's an interesting topic! I can provide detailed explanations and help you master any subject. What would you like to focus on?`,
+                `Perfect, ${userName}! As your AI tutor, I'm ready to break down complex concepts into understandable parts. What subject challenges you?`
             ];
             
-            return responses[Math.floor(Math.random() * responses.length)];
+            return generalResponses[Math.floor(Math.random() * generalResponses.length)];
         }
 
-        function quickAction(type) {
-            const userName = currentUser ? currentUser.name : 'friend';
+        // ============ STUDY TASK MANAGEMENT ============
+        function addStudyTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
             
-            switch(type) {
-                case 'motivation':
-                    getMotivation();
-                    break;
-                case 'tips':
-                    addChatMessage(`💡 Pro Tip: Use the 2-minute rule, ${userName}! If something takes less than 2 minutes, do it immediately instead of putting it off.`, 'ai');
-                    break;
-                case 'quote':
-                    showMotivationalQuote();
-                    break;
-                case 'focus':
-                    addChatMessage(`🎯 Focus Strategy: Try timeboxing, ${userName}! Allocate specific time slots for each task and stick to them. This prevents work from expanding unnecessarily.`, 'ai');
-                    break;
-            }
-        }
-
-        function getMotivation() {
-            const userName = currentUser ? currentUser.name : 'friend';
-            const message = motivationalMessages[motivationCount % motivationalMessages.length].replace('{name}', userName);
-            motivationCount++;
-            
-            addChatMessage(message, 'ai');
-            speak(message);
-            showMotivationalQuote();
-        }
-
-        // Quote Management
-        function showMotivationalQuote() {
-            const categories = Object.keys(quotes);
-            const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-            const categoryQuotes = quotes[randomCategory];
-            const quote = categoryQuotes[Math.floor(Math.random() * categoryQuotes.length)];
-            
-            document.getElementById('quoteText').textContent = `"${quote.text}"`;
-            document.getElementById('quoteAuthor').textContent = `— ${quote.author}`;
-            document.getElementById('quoteCategory').textContent = randomCategory.charAt(0).toUpperCase() + randomCategory.slice(1);
-        }
-
-        // ChatGPT Simulation
-        function askChatGPT() {
-            const input = document.getElementById('chatgptInput');
-            const question = input.value.trim();
-            
-            if (!question) {
-                showToast('❌ Please enter a question');
+            if (!text) {
+                showToast('❌ Please enter a study task');
                 return;
             }
             
-            const response = generateChatGPTResponse(question);
-            document.getElementById('chatgptAnswer').textContent = response;
-            document.getElementById('chatgptResponse').classList.add('show');
-        }
-
-        function generateChatGPTResponse(question) {
-            const responses = [
-                "This is a great question! Based on current research and best practices, here's what I recommend: Focus on breaking complex problems into smaller, manageable parts. This approach helps reduce cognitive load and makes progress more visible.",
-                
-                "Excellent inquiry! The key principle here involves understanding the fundamental concepts first, then building upon them systematically. Think of it like constructing a building - you need a solid foundation before adding floors.",
-                
-                "Thank you for this thoughtful question! The most effective approach typically combines theoretical understanding with practical application. I suggest starting with the core concepts and then practicing through real-world examples.",
-                
-                "Great question! Research shows that the best results come from consistent, deliberate practice combined with regular reflection on your progress. Consider setting specific, measurable goals and tracking your improvement over time."
-            ];
+            const task = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                createdAt: new Date(),
+                type: 'study'
+            };
             
-            return responses[Math.floor(Math.random() * responses.length)];
+            tasks.push(task);
+            input.value = '';
+            renderTasks();
+            updateStats();
+            saveUserData();
+            
+            speak(`Study task added: ${text}`);
+            showToast('✅ Study task added!');
         }
 
-        function clearChatGPT() {
-            document.getElementById('chatgptInput').value = '';
-            document.getElementById('chatgptResponse').classList.remove('show');
-        }
-
-        function speakResponse() {
-            const response = document.getElementById('chatgptAnswer').textContent;
-            if (response) {
-                speak(response);
-            } else {
-                showToast('❌ No response to speak');
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                
+                if (task.completed) {
+                    speak(`Great job completing your study task!`);
+                    showToast('🎉 Study task completed!');
+                }
+                
+                renderTasks();
+                updateStats();
+                saveUserData();
             }
         }
 
-        // Theme Management
-        function setTheme(themeName) {
-            document.body.setAttribute('data-theme', themeName);
-            
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.toLowerCase() === themeName);
-            });
-            
-            localStorage.setItem('flowstate-theme', themeName);
-            showToast(`🎨 Theme changed to ${themeName}`);
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderTasks();
+            updateStats();
+            saveUserData();
+            showToast('🗑️ Task deleted');
         }
 
-        // Feature Functions
-        function openFeature(feature) {
-            const features = {
-                flashcards: '🃏 Flashcards feature coming soon! Create and study with AI-generated flashcards.',
-                timer: '⏱️ Study Timer activated! Use focus sessions to maximize your learning efficiency.',
-                notes: '📝 Smart Notes feature will help you organize and connect your ideas intelligently.',
-                quiz: '❓ Quiz Mode will test your knowledge and help reinforce learning.'
+        function renderTasks() {
+            const container = document.getElementById('tasksList');
+            const summary = document.getElementById('tasksSummary');
+            
+            if (tasks.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                        <div>Create your first study task!</div>
+                    </div>
+                `;
+                summary.textContent = 'No tasks yet';
+                return;
+            }
+            
+            const completedToday = tasks.filter(t => t.completed).length;
+            summary.textContent = `${completedToday}/${tasks.length} study goals completed`;
+            
+            container.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task-item';
+                
+                taskElement.innerHTML = `
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})">
+                        ${task.completed ? '✓' : ''}
+                    </div>
+                    <div class="task-content">
+                        <div class="task-title">${task.text}</div>
+                        <div class="task-meta">
+                            <span>📚 Study Goal</span>
+                            <span>${new Date(task.createdAt).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    <button style="background: var(--danger-color); color: white; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer;" onclick="deleteTask(${task.id})">×</button>
+                `;
+                
+                container.appendChild(taskElement);
+            });
+        }
+
+        function updateStats() {
+            if (!currentUser) return;
+            
+            const totalTasks = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('studyTime').textContent = Math.floor(completed * 0.5) + 'h';
+            document.getElementById('studyStreak').textContent = Math.min(completed, 30);
+        }
+
+        // ============ STUDY RESOURCES ============
+        function openResource(resource) {
+            const resources = {
+                flashcards: '🗂️ Digital flashcards coming soon! Create smart study cards with spaced repetition.',
+                timer: '⏱️ Pomodoro study timer activated! 25 minutes of focused study, 5 minutes break.',
+                notes: '📝 Smart note-taking feature will help organize and connect your study materials.',
+                quiz: '❓ AI-generated quizzes will test your knowledge and reinforce learning.'
             };
             
-            showToast(features[feature] || '✨ Feature coming soon!');
+            const message = resources[resource] || '✨ Study feature coming soon!';
+            addChatMessage(message, 'ai');
+            speak(message);
         }
 
-        // Data Management
+        // ============ DATA MANAGEMENT ============
         function saveUserData() {
             if (!currentUser) return;
             
             currentUser.tasks = tasks;
-            currentUser.completedTasks = completedTasks;
             
             const userKey = currentUser.name.toLowerCase();
             users[userKey] = currentUser;
             
-            localStorage.setItem('flowstate-users', JSON.stringify(users));
-            localStorage.setItem('flowstate-current-user', JSON.stringify(currentUser));
+            localStorage.setItem('academic-hub-users', JSON.stringify(users));
+            localStorage.setItem('academic-hub-current-user', JSON.stringify(currentUser));
         }
 
         function loadUserData() {
             if (!currentUser) return;
             
             tasks = currentUser.tasks || [];
-            completedTasks = currentUser.completedTasks || [];
-            
             renderTasks();
             updateStats();
-            updateProgress();
         }
 
-        function exportData() {
-            if (!currentUser) {
-                showToast('❌ Please log in to export data');
-                return;
-            }
-            
-            const data = {
-                user: currentUser,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `flowstate-${currentUser.name}-data.json`;
-            link.click();
-            
-            showToast('📤 Data exported successfully!');
-        }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const data = JSON.parse(e.target.result);
-                            if (data.user && data.user.tasks) {
-                                tasks = data.user.tasks;
-                                completedTasks = data.user.completedTasks || [];
-                                renderTasks();
-                                updateStats();
-                                updateProgress();
-                                saveUserData();
-                                showToast('📥 Data imported successfully!');
-                            } else {
-                                showToast('❌ Invalid file format');
-                            }
-                        } catch (error) {
-                            showToast('❌ Error reading file');
-                        }
-                    };
-                    reader.readAsText(file);
-                }
-            };
-            input.click();
-        }
-
-        function showHelp() {
-            const helpText = `🆘 FlowState Pro Help:
-
-🎤 Voice Commands: Click microphone and say "create task" or "motivate me"
-🧠 AI Assistant: Ask questions and get personalized productivity advice  
-🎯 Tasks: Add tasks with natural language, check them off when complete
-📊 Progress: Track your daily completion rate and productivity statistics
-🎨 Themes: Switch between Light, Dark, and Elegant themes
-💾 Data: Export/import your data to backup your progress
-
-Need more help? Just ask the AI assistant!`;
-            
-            addChatMessage(helpText, 'ai');
-        }
-
-        // Utility Functions
+        // ============ UTILITY FUNCTIONS ============
         function showToast(message) {
             const toast = document.createElement('div');
             toast.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: var(--card-bg);
+                background: var(--bg-card);
                 color: var(--text-primary);
                 padding: 16px 24px;
                 border-radius: 12px;
                 box-shadow: var(--shadow-primary);
-                z-index: 1000;
+                z-index: 5000;
                 border: 1px solid var(--border-color);
                 animation: fadeIn 0.3s ease;
                 max-width: 300px;
+                font-weight: 500;
             `;
             toast.textContent = message;
             
@@ -1747,12 +1216,7 @@ Need more help? Just ask the AI assistant!`;
             }, 3000);
         }
 
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-
-        console.log('🎯 FlowState Pro loaded successfully!');
+        console.log('🎓 Academic Hub loaded successfully!');
     </script>
 </body>
 </html>
