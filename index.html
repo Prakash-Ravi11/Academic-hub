@@ -665,13 +665,24 @@
                 </div>
             </div>
 
-            <div class="ai-placeholder">
-                <div class="ai-placeholder-text">AI Assistant</div>
-                <div class="ai-placeholder-icon">🤖</div>
-                <div style="font-size: 10px; color: #6d6d70; margin-top: 4px;">LLM Integration Coming Soon</div>
-            </div>
+            <!-- Enhanced AI Chat Section in Sidebar -->
+<div class="ai-chat-container">
+    <div class="ai-chat-header">
+        <div class="ai-status online"></div>
+        <span>Study Assistant AI</span>
+    </div>
+    <div class="ai-chat-messages" id="aiMessages">
+        <div class="ai-message">
+            <span class="ai-avatar">🤖</span>
+            <div class="message-content">Hi! I'm your study assistant. Ask me about your subjects, get explanations, or request study tips!</div>
         </div>
     </div>
+    <div class="ai-input-container">
+        <input type="text" id="aiInput" placeholder="Ask about your studies..." class="ai-input">
+        <button onclick="sendAIMessage()" class="ai-send-btn">📤</button>
+    </div>
+</div>
+
 
     <!-- Main Content -->
     <div class="main-content">
@@ -1449,7 +1460,334 @@
         `;
         document.head.appendChild(style);
 
-        console.log('🎓 Academic Hub Ready - All functions working!');
+        console.log('🎓 Academic Hub Ready - All functions working!');<!-- Study Analytics Content -->
+<div class="content-area" id="progress-content">
+    <div class="content-title">📊 Study Analytics</div>
+    
+    <div class="analytics-grid">
+        <div class="analytics-card">
+            <h3>Weekly Progress</h3>
+            <canvas id="weeklyChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="analytics-card">
+            <h3>Subject Distribution</h3>
+            <canvas id="subjectChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="analytics-card">
+            <h3>Study Streak</h3>
+            <div class="streak-display">
+                <div class="streak-number" id="currentStreak">7</div>
+                <div class="streak-label">Days</div>
+            </div>
+        </div>
+        
+        <div class="analytics-card">
+            <h3>Performance Metrics</h3>
+            <div class="metrics-list">
+                <div class="metric-item">
+                    <span>Total Study Time</span>
+                    <span id="totalStudyTime">42h 30m</span>
+                </div>
+                <div class="metric-item">
+                    <span>Average Session</span>
+                    <span id="avgSession">1h 15m</span>
+                </div>
+                <div class="metric-item">
+                    <span>Most Productive Time</span>
+                    <span>2:00 PM - 4:00 PM</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        <!-- Goals Content -->
+<div class="content-area" id="goals-content">
+    <div class="content-title">🎯 Study Goals</div>
+    
+    <div class="goals-header">
+        <button class="btn btn-primary" onclick="addNewGoal()">+ Add New Goal</button>
+        <div class="goal-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="daily">Daily</button>
+            <button class="filter-btn" data-filter="weekly">Weekly</button>
+            <button class="filter-btn" data-filter="semester">Semester</button>
+        </div>
+    </div>
+    
+    <div class="goals-container" id="goalsContainer">
+        <!-- Goals will be dynamically populated -->
+    </div>
+</div>
+
+<!-- Goal Creation Modal -->
+<div class="modal" id="goalModal">
+    <div class="modal-content">
+        <h2>Create New Goal</h2>
+        <form id="goalForm">
+            <div class="form-group">
+                <label>Goal Title</label>
+                <input type="text" id="goalTitle" required>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <select id="goalSubject">
+                    <option value="all">All Subjects</option>
+                    <option value="math">Mathematics</option>
+                    <option value="dsa">Data Structures</option>
+                    <!-- Add other subjects -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Goal Type</label>
+                <select id="goalType">
+                    <option value="study-time">Study Time</option>
+                    <option value="materials">Complete Materials</option>
+                    <option value="custom">Custom Target</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Target Value</label>
+                <input type="number" id="goalTarget" required>
+            </div>
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" id="goalDeadline" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Goal</button>
+                <button type="button" class="btn btn-secondary" onclick="closeGoalModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+        <!-- Schedule Content -->
+<div class="content-area" id="schedule-content">
+    <div class="content-title">📅 Academic Calendar</div>
+    
+    <div class="calendar-controls">
+        <button class="btn btn-secondary" onclick="prevMonth()">← Previous</button>
+        <h3 id="currentMonth">January 2024</h3>
+        <button class="btn btn-secondary" onclick="nextMonth()">Next →</button>
+        <button class="btn btn-primary" onclick="addEvent()">+ Add Event</button>
+    </div>
+    
+    <div class="calendar-grid" id="calendarGrid">
+        <!-- Calendar will be dynamically generated -->
+    </div>
+    
+    <div class="upcoming-events">
+        <h3>Upcoming Deadlines</h3>
+        <div class="events-list" id="upcomingEvents">
+            <!-- Events will be populated dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Event Creation Modal -->
+<div class="modal" id="eventModal">
+    <div class="modal-content">
+        <h2>Add Calendar Event</h2>
+        <form id="eventForm">
+            <div class="form-group">
+                <label>Event Title</label>
+                <input type="text" id="eventTitle" required>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <select id="eventSubject">
+                    <!-- Subject options -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Event Type</label>
+                <select id="eventType">
+                    <option value="assignment">Assignment Due</option>
+                    <option value="exam">Exam</option>
+                    <option value="class">Class</option>
+                    <option value="study">Study Session</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date & Time</label>
+                <input type="datetime-local" id="eventDateTime" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Event</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+        <!-- Notes Content -->
+<div class="content-area" id="notes-content">
+    <div class="content-title">📝 Smart Notes</div>
+    
+    <div class="notes-header">
+        <button class="btn btn-primary" onclick="createNewNote()">+ New Note</button>
+        <div class="notes-search">
+            <input type="text" id="notesSearch" placeholder="Search notes...">
+        </div>
+        <select id="notesFilter">
+            <option value="all">All Subjects</option>
+            <option value="math">Mathematics</option>
+            <option value="dsa">Data Structures</option>
+            <!-- Add other subjects -->
+        </select>
+    </div>
+    
+    <div class="notes-layout">
+        <div class="notes-sidebar">
+            <div class="notes-list" id="notesList">
+                <!-- Notes list will be populated -->
+            </div>
+        </div>
+        
+        <div class="notes-editor">
+            <div class="editor-toolbar">
+                <button onclick="formatText('bold')"><b>B</b></button>
+                <button onclick="formatText('italic')"><i>I</i></button>
+                <button onclick="formatText('underline')"><u>U</u></button>
+                <button onclick="insertList()">• List</button>
+                <button onclick="insertLink()">🔗 Link</button>
+                <button onclick="saveNote()">💾 Save</button>
+            </div>
+            
+            <div class="note-header">
+                <input type="text" id="noteTitle" placeholder="Note title..." class="note-title-input">
+                <select id="noteSubject">
+                    <option value="">Select Subject</option>
+                    <!-- Subject options -->
+                </select>
+            </div>
+            
+            <div id="noteEditor" class="rich-text-editor" contenteditable="true">
+                Start typing your notes here...
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Enhanced Materials Modal with Sharing -->
+<div class="modal" id="materialsModal">
+    <div class="modal-content">
+        <h2 class="modal-title" id="materialsSubject">Subject Materials</h2>
+        
+        <div class="materials-actions">
+            <button class="btn btn-primary" onclick="uploadFile(currentMaterialsSubject)">📎 Upload</button>
+            <button class="btn btn-secondary" onclick="shareAllMaterials()">🔗 Share All</button>
+            <button class="btn btn-secondary" onclick="exportMaterials()">📤 Export</button>
+        </div>
+        
+        <div class="materials-list" id="materialsList">
+            <!-- Enhanced file items with sharing options -->
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal" id="shareModal">
+    <div class="modal-content">
+        <h2>Share Materials</h2>
+        <div class="share-options">
+            <div class="share-link-container">
+                <label>Shareable Link</label>
+                <div class="link-input-group">
+                    <input type="text" id="shareLink" readonly>
+                    <button onclick="copyShareLink()">📋 Copy</button>
+                </div>
+            </div>
+            
+            <div class="share-permissions">
+                <label>Permissions</label>
+                <select id="sharePermissions">
+                    <option value="view">View Only</option>
+                    <option value="download">View & Download</option>
+                </select>
+            </div>
+            
+            <div class="share-expiry">
+                <label>Link Expires</label>
+                <select id="shareExpiry">
+                    <option value="24h">24 Hours</option>
+                    <option value="7d">7 Days</option>
+                    <option value="30d">30 Days</option>
+                    <option value="never">Never</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button class="btn btn-primary" onclick="generateShareLink()">Generate Link</button>
+            <button class="btn btn-secondary" onclick="closeShareModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+        <!-- Enhanced Settings with Backup/Sync -->
+<div class="content-area" id="settings-content">
+    <div class="content-title">⚙️ Settings</div>
+    
+    <div class="settings-sections">
+        <div class="settings-section">
+            <h3>☁️ Backup & Sync</h3>
+            <div class="setting-item">
+                <label>Cloud Sync</label>
+                <div class="setting-control">
+                    <input type="checkbox" id="cloudSync" onchange="toggleCloudSync()">
+                    <span class="sync-status" id="syncStatus">Disabled</span>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <label>Auto Backup</label>
+                <select id="autoBackup">
+                    <option value="disabled">Disabled</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+            
+            <div class="backup-actions">
+                <button class="btn btn-primary" onclick="createBackup()">📦 Create Backup</button>
+                <button class="btn btn-secondary" onclick="restoreBackup()">📥 Restore Backup</button>
+                <button class="btn btn-secondary" onclick="exportData()">📤 Export Data</button>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h3>🎨 Appearance</h3>
+            <div class="setting-item">
+                <label>Theme</label>
+                <select id="themeSelect">
+                    <option value="dark">Dark Mode</option>
+                    <option value="light">Light Mode</option>
+                    <option value="auto">Auto</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h3>🔔 Notifications</h3>
+            <div class="setting-item">
+                <label>Study Reminders</label>
+                <input type="checkbox" id="studyReminders" checked>
+            </div>
+            <div class="setting-item">
+                <label>Assignment Alerts</label>
+                <input type="checkbox" id="assignmentAlerts" checked>
+            </div>
+        </div>
+    </div>
+</div>
+
+        
+
+        
     </script>
+        
 </body>
 </html>
