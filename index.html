@@ -3630,6 +3630,43 @@ function formatTime(seconds) {
 console.log('✅ Progress section initialized!');
 
 // ========== END PROGRESS SECTION FIX ==========
+<script>
+    // All your existing JavaScript code...
+    // ...
+    // ...
+    
+    console.log('🎓 Academic Hub JavaScript Loaded Successfully!');
+    
+    // ========== BUTTON FIX - ADD THIS ENTIRE BLOCK HERE ==========
+    
+    // Fix all subject card buttons after page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔧 Fixing button connections...');
+        
+        // Fix "Start Studying" buttons
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            if (btn.textContent.includes('Start Studying')) {
+                const card = btn.closest('.subject-card');
+                const subjectId = card ? card.getAttribute('data-subject') : null;
+                if (subjectId) {
+                    btn.onclick = function(e) {
+                        e.preventDefault();
+                        startStudying(subjectId);
+                    };
+                }
+            }
+        });
+        
+        // ... rest of the button fix code ...
+        
+        console.log('✅ All buttons fixed!');
+    });
+    
+    // All the function definitions (startStudying, viewMaterials, etc.)
+    
+    console.log('🔧 Button fixes applied!');
+    
+</script> ← This is where it ends
 
 
 
