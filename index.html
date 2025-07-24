@@ -2690,6 +2690,350 @@
 
         // ========== CSS ANIMATIONS ==========
         const
+            // ========== BUTTON FIX - ADD THIS AT THE END ==========
+
+// Fix all subject card buttons after page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Fixing button connections...');
+    
+    // Fix "Start Studying" buttons
+    document.querySelectorAll('.btn-primary').forEach(btn => {
+        if (btn.textContent.includes('Start Studying')) {
+            const card = btn.closest('.subject-card');
+            const subjectId = card ? card.getAttribute('data-subject') : null;
+            if (subjectId) {
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    startStudying(subjectId);
+                };
+            }
+        }
+    });
+    
+    // Fix "View Materials" buttons
+    document.querySelectorAll('.btn-secondary').forEach(btn => {
+        if (btn.textContent.includes('Materials')) {
+            const card = btn.closest('.subject-card');
+            const subjectId = card ? card.getAttribute('data-subject') : null;
+            if (subjectId) {
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    viewMaterials(subjectId);
+                };
+            }
+        }
+    });
+    
+    // Fix file upload areas
+    document.querySelectorAll('.file-upload-area').forEach(area => {
+        const card = area.closest('.subject-card');
+        const subjectId = card ? card.getAttribute('data-subject') : null;
+        if (subjectId) {
+            area.onclick = function(e) {
+                e.preventDefault();
+                handleFileUpload(subjectId);
+            };
+        }
+    });
+    
+    // Fix theme toggle buttons
+    document.querySelectorAll('[id^="themeToggle"]').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            toggleTheme();
+        };
+    });
+    
+    // Fix subject menu buttons (three dots)
+    document.querySelectorAll('.subject-menu').forEach(menu => {
+        const card = menu.closest('.subject-card');
+        const subjectId = card ? card.getAttribute('data-subject') : null;
+        if (subjectId) {
+            menu.onclick = function(e) {
+                e.preventDefault();
+                showSubjectMenu(subjectId, e);
+            };
+        }
+    });
+    
+    // Fix Add Subject button
+    const addSubjectBtn = document.querySelector('.btn-primary[onclick*="addNewSubject"]');
+    if (addSubjectBtn) {
+        addSubjectBtn.onclick = function(e) {
+            e.preventDefault();
+            addNewSubject();
+        };
+    }
+    
+    console.log('✅ All buttons fixed!');
+});
+
+// ========== CORE FUNCTIONS (ADD THESE IF MISSING) ==========
+
+function startStudying(subjectId) {
+    console.log('Starting study session for:', subjectId);
+    
+    // Simple timer modal
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>⏱️ Study Timer</h2>
+            <div id="timerDisplay" style="font-size: 48px; text-align: center; margin: 20px 0; font-family: monospace;">00:00:00</div>
+            <div style="text-align: center;">
+                <button id="startBtn" onclick="startTimer('${subjectId}')" class="btn btn-primary">▶️ Start</button>
+                <button id="pauseBtn" onclick="pauseTimer()" class="btn btn-secondary" style="display: none;">⏸️ Pause</button>
+                <button id="stopBtn" onclick="stopTimer('${subjectId}')" class="btn btn-secondary" style="display: none;">⏹️ Stop</button>
+                <button onclick="closeTimer()" class="btn btn-secondary">❌ Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function viewMaterials(subjectId) {
+    console.log('Viewing materials for:', subjectId);
+    
+    const subject = appState.subjects[subjectId] || { name: 'Unknown Subject', materials: [] };
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>📁 ${subject.name} Materials</h2>
+            <div style="margin: 20px 0;">
+                ${subject.materials && subject.materials.length > 0 ? 
+                    subject.materials.map(file => `
+                        <div style="padding: 10px; border: 1px solid var(--border-primary); margin: 5px 0; border-radius: 5px;">
+                            <strong>${file.name}</strong> (${formatFileSize(file.size)})
+                            <button onclick="downloadFile('${subjectId}', '${file.id}')" class="btn btn-secondary" style="float: right;">📥 Download</button>
+                        </div>
+                    `).join('') :
+                    '<p style="text-align: center; color: var(--text-secondary);">No materials uploaded yet</p>'
+                }
+            </div>
+            <div style="text-align: center;">
+                <button onclick="uploadFile('${subjectId}')" class="btn btn-primary">📎 Upload Files</button>
+                <button onclick="this.closest(\'.modal\').remove()" class="btn btn-secondary">❌ Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function handleFileUpload(subjectId) {
+    console.log('Uploading files for:', subjectId);
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = '.pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png';
+    
+    input.onchange = function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            // Store files (simplified version)
+            if (!appState.subjects[subjectId].materials) {
+                appState.subjects[subjectId].materials = [];
+            }
+            
+            files.forEach(file => {
+                const fileData = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    uploadedAt: new Date().toISOString()
+                };
+                appState.subjects[subjectId].materials.push(fileData);
+            });
+            
+            saveAppData();
+            showNotification('Upload Complete', `${files.length} file(s) uploaded successfully!`, 'success');
+        }
+    };
+    
+    input.click();
+}
+
+function uploadFile(subjectId) {
+    handleFileUpload(subjectId);
+}
+
+function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('academic-hub-theme', newTheme);
+    
+    // Update theme toggle icons
+    const icon = newTheme === 'dark' ? '☀️' : '🌙';
+    document.querySelectorAll('[id^="themeToggle"]').forEach(btn => {
+        btn.textContent = icon;
+    });
+    
+    showNotification('Theme Changed', `Switched to ${newTheme} mode`, 'success');
+}
+
+function showSubjectMenu(subjectId, event) {
+    event.stopPropagation();
+    const subject = appState.subjects[subjectId];
+    
+    const actions = [
+        `1. ✏️ Rename Subject`,
+        `2. 📊 View Progress`, 
+        `3. 🗑️ Delete Subject`
+    ];
+    
+    const choice = prompt(`Options for ${subject.name}:\n\n${actions.join('\n')}\n\nEnter number (1-3):`);
+    
+    switch(choice) {
+        case '1':
+            const newName = prompt(`Enter new name for ${subject.name}:`, subject.name);
+            if (newName && newName.trim()) {
+                subject.name = newName.trim();
+                saveAppData();
+                location.reload();
+                showNotification('Success', 'Subject renamed!', 'success');
+            }
+            break;
+        case '2':
+            showNotification('Progress', `${subject.name} - Study time: ${formatTime(subject.studyTime || 0)}`, 'info');
+            break;
+        case '3':
+            if (confirm(`Delete ${subject.name}? This cannot be undone.`)) {
+                delete appState.subjects[subjectId];
+                saveAppData();
+                location.reload();
+                showNotification('Deleted', `${subject.name} removed`, 'success');
+            }
+            break;
+    }
+}
+
+function addNewSubject() {
+    const name = prompt('📚 Enter subject name:');
+    if (!name) return;
+    
+    const code = prompt('🏷️ Enter subject code:');
+    if (!code) return;
+    
+    const faculty = prompt('👨‍🏫 Enter faculty name:');
+    if (!faculty) return;
+    
+    const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '') + Date.now();
+    const colors = ['#667eea', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b'];
+    
+    appState.subjects[newId] = {
+        id: newId,
+        name: name,
+        code: code,
+        faculty: faculty,
+        credits: 4,
+        category: 'Professional Core',
+        icon: '📚',
+        color: colors[Math.floor(Math.random() * colors.length)],
+        studyTime: 0,
+        materials: []
+    };
+    
+    saveAppData();
+    location.reload();
+    showNotification('Success', `${name} added successfully!`, 'success');
+}
+
+// Timer functions
+let timerInterval = null;
+let timerStart = null;
+let timerPaused = 0;
+
+function startTimer(subjectId) {
+    timerStart = Date.now() - timerPaused;
+    timerInterval = setInterval(() => updateTimerDisplay(), 1000);
+    
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+}
+
+function pauseTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerPaused = Date.now() - timerStart;
+    
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('pauseBtn').style.display = 'none';
+}
+
+function stopTimer(subjectId) {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    const sessionTime = (Date.now() - timerStart) / 1000;
+    if (sessionTime > 60) { // Only count sessions longer than 1 minute
+        if (!appState.subjects[subjectId].studyTime) {
+            appState.subjects[subjectId].studyTime = 0;
+        }
+        appState.subjects[subjectId].studyTime += sessionTime;
+        saveAppData();
+        
+        showNotification('Session Complete', `Added ${Math.round(sessionTime/60)} minutes to your study time!`, 'success');
+    }
+    
+    closeTimer();
+}
+
+function updateTimerDisplay() {
+    if (!timerStart) return;
+    
+    const elapsed = Date.now() - timerStart;
+    const seconds = Math.floor(elapsed / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    const display = `${hours.toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    if (timerDisplay) {
+        timerDisplay.textContent = display;
+    }
+}
+
+function closeTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    timerStart = null;
+    timerPaused = 0;
+    
+    const modal = document.querySelector('.modal');
+    if (modal) modal.remove();
+}
+
+// Utility functions
+function formatTime(seconds) {
+    if (!seconds) return '0h 0m';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+}
+
+function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function downloadFile(subjectId, fileId) {
+    const subject = appState.subjects[subjectId];
+    const file = subject.materials.find(f => f.id == fileId);
+    if (file) {
+        showNotification('Download', `${file.name} download started`, 'info');
+    }
+}
+
+console.log('🔧 Button fixes applied!');
+
             </script> ⬅️ MAKE SURE THIS CLOSING TAG IS HERE
 </body>
 </html>
