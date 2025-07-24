@@ -7,6 +7,10 @@
     <meta name="description" content="Academic dashboard for BTech AIML Semester 3">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
+<!-- Add these Chart.js CDN links -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
     <style>
         * {
             margin: 0;
@@ -1416,10 +1420,134 @@
         </div>
 
         <!-- Other Content Areas -->
-        <div class="content-area" id="progress-content">
-            <div class="content-title">📊 Study Progress</div>
-            <p style="color: #8e8e93;">Overall study progress and analytics will be displayed here.</p>
+       <!-- Enhanced Progress Content -->
+<div class="content-area" id="progress-content">
+    <div class="top-bar">
+        <h1 class="page-title">📊 Study Progress Analytics</h1>
+        <div class="real-time-clock">
+            <div class="current-date" id="currentDate"></div>
+            <div class="current-time" id="currentTime"></div>
         </div>
+    </div>
+
+    <div class="progress-container">
+        <!-- Real-time Stats Overview -->
+        <div class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-number" id="totalStudyTime">0h 0m</div>
+                    <div class="stat-label">Total Study Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" id="averageProgress">0%</div>
+                    <div class="stat-label">Average Progress</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="studyStreak">0</div>
+                    <div class="stat-label">Study Streak (Days)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number" id="todayStudyTime">0h 0m</div>
+                    <div class="stat-label">Today's Study Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="charts-grid">
+                <!-- Weekly Progress Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>📊 Weekly Study Progress</h3>
+                        <div class="chart-controls">
+                            <select id="weeklyChartSubject">
+                                <option value="all">All Subjects</option>
+                                <option value="math">Mathematics</option>
+                                <option value="dsa">Data Structures</option>
+                                <option value="coa">Computer Architecture</option>
+                                <option value="prog">Programming</option>
+                                <option value="os">Operating Systems</option>
+                                <option value="uhv">Human Values</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="weeklyProgressChart"></canvas>
+                </div>
+
+                <!-- Subject Comparison Doughnut Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>🎯 Subject Progress Comparison</h3>
+                        <div class="progress-legend" id="progressLegend"></div>
+                    </div>
+                    <canvas id="subjectProgressChart"></canvas>
+                </div>
+
+                <!-- Daily Activity Heatmap -->
+                <div class="chart-container full-width">
+                    <div class="chart-header">
+                        <h3>🗓️ Study Activity Heatmap (Last 30 Days)</h3>
+                        <div class="heatmap-legend">
+                            <span>Less</span>
+                            <div class="heatmap-scale">
+                                <div class="scale-item" data-level="0"></div>
+                                <div class="scale-item" data-level="1"></div>
+                                <div class="scale-item" data-level="2"></div>
+                                <div class="scale-item" data-level="3"></div>
+                                <div class="scale-item" data-level="4"></div>
+                            </div>
+                            <span>More</span>
+                        </div>
+                    </div>
+                    <div class="heatmap-container" id="studyHeatmap"></div>
+                </div>
+
+                <!-- Performance Trends -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>📈 Performance Trends</h3>
+                        <div class="trend-period">
+                            <button class="trend-btn active" data-period="7">7 Days</button>
+                            <button class="trend-btn" data-period="30">30 Days</button>
+                            <button class="trend-btn" data-period="90">3 Months</button>
+                        </div>
+                    </div>
+                    <canvas id="performanceTrendChart"></canvas>
+                </div>
+
+                <!-- Goal Progress -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>🎯 Daily Goals Progress</h3>
+                        <div class="goal-status" id="goalStatus">
+                            <span class="goal-indicator"></span>
+                            <span class="goal-text">On Track</span>
+                        </div>
+                    </div>
+                    <canvas id="goalProgressChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Subject Breakdown -->
+        <div class="subject-breakdown">
+            <h3>📚 Subject-wise Detailed Progress</h3>
+            <div class="breakdown-grid" id="subjectBreakdown"></div>
+        </div>
+
+        <!-- Achievement Badges -->
+        <div class="achievements-section">
+            <h3>🏆 Recent Achievements</h3>
+            <div class="achievements-grid" id="achievementsBadges"></div>
+        </div>
+    </div>
+</div>
+
 
         <div class="content-area" id="schedule-content">
             <div class="content-title">📅 Schedule</div>
