@@ -1105,3 +1105,521 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Enhanced Academic Hub Ready with all features!');
 });
+<script>
+    // Application State
+    let subjectFiles = {};
+    let studyTimes = {};
+    let currentStudySubject = null;
+    let currentMaterialsSubject = null;
+    let studyTimer = null;
+    let startTime = null;
+    let pausedTime = 0;
+
+    // Subject data
+    const subjects = {
+        math: 'Transforms and Boundary Value Problems',
+        dsa: 'Data Structures and Algorithms',
+        coa: 'Computer Organization and Architecture',
+        prog: 'Advanced Programming Practice',
+        os: 'Operating Systems',
+        uhv: 'Universal Human Values - II'
+    };
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🎓 Academic Hub Loading...');
+        loadUserData();
+        initializeNavigation();
+        initializeSearch();
+        initializeFileHandling();
+        updateAllProgress();
+        registerServiceWorker();
+        console.log('✅ Academic Hub Ready!');
+    });
+
+    // Service Worker Registration
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => console.log('SW registered:', registration))
+                .catch(error => console.log('SW registration failed:', error));
+        }
+    }
+
+    // Navigation Functions
+    function initializeNavigation() {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const content = this.getAttribute('data-content');
+                if (content) {
+                    switchContent(content);
+                    
+                    // Update active nav item
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeAllModals();
+            }
+        });
+    }
+
+    function switchContent(contentId) {
+        document.querySelectorAll('.content-area').forEach(area => {
+            area.classList.remove('active');
+        });
+        
+        const targetContent = document.getElementById(contentId + '-content');
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('show');
+        });
+        resetTimer();
+    }
+
+    // Search Functions
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                filterSubjects(query);
+            });
+        }
+    }
+
+    function filterSubjects(query) {
+        document.querySelectorAll('.subject-card').forEach(card => {
+            const title = card.querySelector('.subject-title')?.textContent.toLowerCase() || '';
+            const code = card.querySelector('.subject-code')?.textContent.toLowerCase() || '';
+            const faculty = card.querySelector('.faculty-name')?.textContent.toLowerCase() || '';
+            
+            const matches = title.includes(query) || code.includes(query) || faculty.includes(query);
+            card.style.display = matches ? 'block' : 'none';
+        });
+    }
+
+    // File Upload Functions
+    function initializeFileHandling() {
+        document.querySelectorAll('.file-upload-area').forEach(area => {
+            area.addEventListener('dragover', handleDragOver);
+            area.addEventListener('dragleave', handleDragLeave);
+            area.addEventListener('drop', handleDrop);
+        });
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        this.style.borderColor = 'var(--accent-color)';
+        this.style.background = 'rgba(102, 126, 234, 0.1)';
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        this.style.borderColor = '#3a3b42';
+        this.style.background = '#2d2e36';
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const files = Array.from(e.dataTransfer.files);
+        const subject = getSubjectFromElement(this);
+        if (subject) {
+            handleFileUpload(subject, files);
+        }
+        
+        this.style.borderColor = '#3a3b42';
+        this.style.background = '#2d2e36';
+    }
+
+    function uploadFile(subject) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif';
+        
+        input.onchange = function(e) {
+            const files = Array.from(e.target.files);
+            handleFileUpload(subject, files);
+        };
+        
+        input.click();
+    }
+
+    function handleFileUpload(subject, files) {
+        if (!subjectFiles[subject]) {
+            subjectFiles[subject] = [];
+        }
+        
+        let uploadedCount = 0;
+        
+        files.forEach(file => {
+            if (file.size > 10 * 1024 * 1024) {
+                showNotification('File Too Large', `${file.name} exceeds 10MB limit`);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileData = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    data: e.target.result,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                subjectFiles[subject].push(fileData);
+                uploadedCount++;
+                
+                if (uploadedCount === files.length) {
+                    saveUserData();
+                    showNotification('Upload Complete', `${files.length} file(s) uploaded to ${subjects[subject]}`);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function getSubjectFromElement(element) {
+        const card = element.closest('.subject-card');
+        return card ? card.getAttribute('data-subject') : null;
+    }
+
+    // Materials Functions
+    function viewMaterials(subject) {
+        currentMaterialsSubject = subject;
+        const subjectTitle = document.getElementById('materialsSubject');
+        if (subjectTitle) {
+            subjectTitle.textContent = subjects[subject] + ' Materials';
+        }
+        
+        const materialsList = document.getElementById('materialsList');
+        const files = subjectFiles[subject] || [];
+        
+        if (materialsList) {
+            if (files.length === 0) {
+                materialsList.innerHTML = '<p style="color: #8e8e93; text-align: center; padding: 40px;">No materials uploaded yet</p>';
+            } else {
+                materialsList.innerHTML = files.map(file => `
+                    <div class="file-item">
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${formatFileSize(file.size)} • ${new Date(file.uploadedAt).toLocaleDateString()}</div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-btn" onclick="downloadFile('${subject}', '${file.id}')">📥 Download</button>
+                            <button class="file-btn" onclick="deleteFile('${subject}', '${file.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        const modal = document.getElementById('materialsModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+    }
+
+    function closeMaterials() {
+        const modal = document.getElementById('materialsModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        currentMaterialsSubject = null;
+    }
+
+    function downloadFile(subject, fileId) {
+        const file = subjectFiles[subject]?.find(f => f.id == fileId);
+        if (file) {
+            const link = document.createElement('a');
+            link.href = file.data;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification('Download Started', `Downloading ${file.name}`);
+        }
+    }
+
+    function deleteFile(subject, fileId) {
+        if (confirm('Are you sure you want to delete this file?')) {
+            if (subjectFiles[subject]) {
+                subjectFiles[subject] = subjectFiles[subject].filter(f => f.id != fileId);
+                saveUserData();
+                viewMaterials(subject);
+                showNotification('File Deleted', 'File has been removed');
+            }
+        }
+    }
+
+    // Study Timer Functions
+    function startStudying(subject) {
+        currentStudySubject = subject;
+        const timerSubject = document.getElementById('timerSubject');
+        if (timerSubject) {
+            timerSubject.textContent = `Studying ${subjects[subject]}`;
+        }
+        
+        const modal = document.getElementById('timerModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+        resetTimer();
+    }
+
+    function startTimer() {
+        if (studyTimer) return;
+        
+        startTime = Date.now() - pausedTime;
+        studyTimer = setInterval(updateTimer, 1000);
+        
+        toggleTimerButtons('running');
+        showNotification('Timer Started', `Study session for ${subjects[currentStudySubject]} has begun!`);
+    }
+
+    function pauseTimer() {
+        if (!studyTimer) return;
+        
+        clearInterval(studyTimer);
+        studyTimer = null;
+        pausedTime = Date.now() - startTime;
+        
+        toggleTimerButtons('paused');
+        showNotification('Timer Paused', 'Study session paused');
+    }
+
+    function stopTimer() {
+        if (!studyTimer && pausedTime === 0) return;
+        
+        const sessionTime = studyTimer ? Date.now() - startTime : pausedTime;
+        const sessionSeconds = Math.floor(sessionTime / 1000);
+        
+        if (!studyTimes[currentStudySubject]) {
+            studyTimes[currentStudySubject] = 0;
+        }
+        studyTimes[currentStudySubject] += sessionSeconds;
+        
+        if (studyTimer) {
+            clearInterval(studyTimer);
+            studyTimer = null;
+        }
+        
+        updateProgress(currentStudySubject);
+        saveUserData();
+        
+        const sessionMinutes = Math.floor(sessionSeconds / 60);
+        showNotification('Study Session Complete', 
+            `Great job! You studied for ${sessionMinutes} minutes. Progress updated!`);
+        
+        closeTimer();
+    }
+
+    function toggleTimerButtons(state) {
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        
+        if (startBtn && pauseBtn && stopBtn) {
+            switch(state) {
+                case 'running':
+                    startBtn.classList.add('hidden');
+                    pauseBtn.classList.remove('hidden');
+                    stopBtn.classList.remove('hidden');
+                    break;
+                case 'paused':
+                    startBtn.classList.remove('hidden');
+                    pauseBtn.classList.add('hidden');
+                    stopBtn.classList.remove('hidden');
+                    break;
+                case 'stopped':
+                    startBtn.classList.remove('hidden');
+                    pauseBtn.classList.add('hidden');
+                    stopBtn.classList.add('hidden');
+                    break;
+            }
+        }
+    }
+
+    function updateTimer() {
+        if (!startTime) return;
+        
+        const elapsed = Date.now() - startTime;
+        const totalSeconds = Math.floor(elapsed / 1000);
+        
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const timerDisplay = document.getElementById('timerDisplay');
+        if (timerDisplay) {
+            timerDisplay.textContent = display;
+        }
+    }
+
+    function resetTimer() {
+        if (studyTimer) {
+            clearInterval(studyTimer);
+            studyTimer = null;
+        }
+        
+        startTime = null;
+        pausedTime = 0;
+        
+        const timerDisplay = document.getElementById('timerDisplay');
+        if (timerDisplay) {
+            timerDisplay.textContent = '00:00:00';
+        }
+        
+        toggleTimerButtons('stopped');
+    }
+
+    function closeTimer() {
+        const modal = document.getElementById('timerModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        resetTimer();
+        currentStudySubject = null;
+    }
+
+    // Progress Functions
+    function updateProgress(subject) {
+        const totalStudyTime = studyTimes[subject] || 0;
+        const fourHoursInSeconds = 4 * 60 * 60;
+        const percentage = Math.min((totalStudyTime / fourHoursInSeconds) * 100, 100);
+        
+        const hours = Math.floor(totalStudyTime / 3600);
+        const minutes = Math.floor((totalStudyTime % 3600) / 60);
+        
+        const timeElement = document.getElementById(`time-${subject}`);
+        if (timeElement) {
+            timeElement.textContent = `Study Time: ${hours}h ${minutes}m`;
+        }
+        
+        const progressElement = document.getElementById(`progress-${subject}`);
+        if (progressElement) {
+            progressElement.style.width = percentage + '%';
+        }
+        
+        const progressTextElement = document.getElementById(`progress-text-${subject}`);
+        if (progressTextElement) {
+            progressTextElement.textContent = Math.round(percentage) + '% Complete';
+        }
+    }
+
+    function updateAllProgress() {
+        Object.keys(subjects).forEach(subject => {
+            updateProgress(subject);
+        });
+    }
+
+    // Utility Functions
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Data Management
+    function saveUserData() {
+        try {
+            localStorage.setItem('academic-hub-files', JSON.stringify(subjectFiles));
+            localStorage.setItem('academic-hub-study-times', JSON.stringify(studyTimes));
+        } catch (error) {
+            console.error('Failed to save data:', error);
+            showNotification('Save Error', 'Failed to save data to local storage');
+        }
+    }
+
+    function loadUserData() {
+        try {
+            const savedFiles = localStorage.getItem('academic-hub-files');
+            if (savedFiles) {
+                subjectFiles = JSON.parse(savedFiles);
+            }
+            
+            const savedTimes = localStorage.getItem('academic-hub-study-times');
+            if (savedTimes) {
+                studyTimes = JSON.parse(savedTimes);
+            }
+        } catch (error) {
+            console.error('Failed to load data:', error);
+            subjectFiles = {};
+            studyTimes = {};
+        }
+    }
+
+    // Notification System
+    function showNotification(title, message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1a1b23;
+            color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid #2d2e36;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            max-width: 350px;
+            animation: slideIn 0.3s ease;
+        `;
+        
+        notification.innerHTML = `
+            <div style="font-weight: 700; margin-bottom: 4px;">${title}</div>
+            <div style="font-size: 14px; color: #8e8e93;">${message}</div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    // Add required CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Global error handling
+    window.addEventListener('error', function(e) {
+        console.error('JavaScript Error:', e.error);
+        showNotification('Error', 'An error occurred. Check console for details.');
+    });
+
+    console.log('🎓 Academic Hub JavaScript Loaded Successfully!');
+</script>
+
