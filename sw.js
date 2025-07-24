@@ -1,9 +1,7 @@
 const CACHE_NAME = 'academic-hub-v1';
 const urlsToCache = [
     '/',
-    '/manifest.json',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png'
+    '/manifest.json'
 ];
 
 self.addEventListener('install', event => {
