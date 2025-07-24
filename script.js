@@ -1098,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSearch();
     initializeFileHandling();
     updateAllProgress();
-    
+    updateAnalytics();  
     // New feature initialization
     initializeAnalytics();
     initializeCalendar();
