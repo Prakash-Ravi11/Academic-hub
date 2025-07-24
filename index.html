@@ -1923,7 +1923,7 @@
                 studyTimes[currentStudySubject] = 0;
             }
             studyTimes[currentStudySubject] += sessionSeconds;
-            
+             recordStudySession(currentStudySubject, sessionSeconds);
             if (studyTimer) {
                 clearInterval(studyTimer);
                 studyTimer = null;
