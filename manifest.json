@@ -1,17 +1,21 @@
 {
-    "name": "Academic Hub - Study Dashboard",
-    "short_name": "Academic Hub",
-    "description": "Comprehensive study dashboard for BTech AI/ML students",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0a0b0f",
-    "theme_color": "#667eea",
-    "orientation": "portrait-primary",
-    "icons": [
-        {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23667eea' width='192' height='192' rx='20'/%3E%3Ctext x='96' y='120' font-family='Arial' font-size='80' font-weight='bold' text-anchor='middle' fill='white'%3EAH%3C/text%3E%3C/svg%3E",
-            "sizes": "192x192",
-            "type": "image/svg+xml"
-        }
-    ]
+  "name": "Academic Hub Pro",
+  "short_name": "Hub Pro",
+  "description": "PWA for SRM B.Tech CSE AI/ML Semester 3 management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1b23",
+  "theme_color": "#1a1b23",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
