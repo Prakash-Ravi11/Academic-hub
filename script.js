@@ -1,271 +1,110 @@
-// Comment: PWA Setup
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('Service Worker registered', reg))
-        .catch(err => console.log('Service Worker registration failed', err));
-}
+// Loading Screen
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            checkUsername();
+        }, 1000);
+    }, 2000); // Stunning effect duration
+});
 
-// Comment: LocalStorage Data Structure
-const appData = {
-    users: { praksharvai: 'srm2025' },
-    subjects: [
-        {
-            name: "Boundary Value Problems",
-            code: "2IMABO2IT",
-            credits: 4,
-            faculty: "Dr. Prince Chelladurai S",
-            progress: 65,
-            studyTime: 0,
-            materials: []
-        },
-        {
-            name: "Data Structures and Algorithms",
-            code: "2ICSC2O1J",
-            credits: 4,
-            faculty: "Dr. J. Marhharan",
-            progress: 40,
-            studyTime: 0,
-            materials: []
-        },
-        {
-            name: "Organization and Architecture",
-            code: "2ICSC2O1J",
-            credits: 4,
-            faculty: "Dr. J. Marhharan",
-            progress: 55,
-            studyTime: 0,
-            materials: []
-        },
-        {
-            name: "Programming",
-            code: "2ICSC2O3SP",
-            credits: 4,
-            faculty: "TBD",
-            progress: 30,
-            studyTime: 0,
-            materials: []
-        },
-        {
-            name: "Operating Systems",
-            code: "2ICSC2O2J",
-            credits: 4,
-            faculty: "TBD",
-            progress: 70,
-            studyTime: 0,
-            materials: []
-        },
-        {
-            name: "Understanding Human Values",
-            code: "2ILEM2O2IT",
-            credits: 0,
-            faculty: "TBD",
-            progress: 20,
-            studyTime: 0,
-            materials: []
-        },
-        {
-            name: "Professional Ethics",
-            code: "2ILEM2O2IT",
-            credits: 0,
-            faculty: "TBD",
-            progress: 10,
-            studyTime: 0,
-            materials: []
-        }
-    ],
-    theme: 'light' // Default theme
-};
-
-// Comment: Load Saved Data from localStorage
-function loadData() {
-    const savedData = localStorage.getItem('academicHubData');
-    if (savedData) {
-        Object.assign(appData, JSON.parse(savedData));
-    }
-}
-
-// Comment: Save Data to localStorage
-function saveData() {
-    localStorage.setItem('academicHubData', JSON.stringify(appData));
-}
-
-// Comment: Login Functionality
-function login() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const error = document.getElementById('login-error');
-
-    if (appData.users[username] === password) {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        loadDashboard();
-        saveData();
+// Username Prompt and Display
+function checkUsername() {
+    const savedName = localStorage.getItem('userName');
+    if (!savedName) {
+        document.getElementById('username-modal').style.display = 'flex';
     } else {
-        error.classList.remove('hidden');
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('user-name-display').textContent = `Welcome, ${savedName}`;
     }
 }
 
-// Comment: Particle Animation for Login
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-for (let i = 0; i < 100; i++) {
-    particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: Math.random() * 2 - 1,
-        vy: Math.random() * 2 - 1,
-        size: Math.random() * 2 + 1
-    });
+function saveUsername() {
+    const name = document.getElementById('username-input').value.trim();
+    if (name) {
+        localStorage.setItem('userName', name);
+        document.getElementById('username-modal').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('user-name-display').textContent = `Welcome, ${name}`;
+    }
 }
 
-function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.width) p.vx = -p.vx;
-        if (p.y < 0 || p.y > canvas.height) p.vy = -p.vy;
-        ctx.fillStyle = var(--accent-primary);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-    });
-    requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-// Comment: Theme Toggle
+// Theme Toggle
 function toggleTheme() {
-    const body = document.body;
-    body.classList.toggle('dark-theme');
-    appData.theme = body.classList.contains('dark-theme') ? 'dark' : 'light';
-    saveData();
+    document.body.classList.toggle('dark-theme');
+    localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
 }
 
-// Comment: Load Dashboard (Generate Subject Cards)
-function loadDashboard() {
-    const grid = document.querySelector('.subject-grid');
-    grid.innerHTML = '';
-    appData.subjects.forEach((subject, index) => {
-        const card = document.createElement('div');
-        card.classList.add('subject-card');
-        card.innerHTML = `
-            <div class="subject-name">${subject.name}</div>
-            <div class="subject-faculty">Faculty: ${subject.faculty}</div>
-            <div class="subject-credits">Credits: ${subject.credits}</div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${subject.progress}%"></div>
-            </div>
-            <div class="study-time">Study Time: ${subject.studyTime} minutes</div>
-            <div class="file-upload" ondrop="dropFile(event, ${index})" ondragover="allowDrop(event)">
-                <div class="file-upload-text">Drag & Drop Files</div>
-                <div class="file-upload-subtext">or click to upload materials</div>
-            </div>
-            <div class="materials-list" id="materials-${index}"></div>
-        `;
-        grid.appendChild(card);
-        renderMaterials(index);
-    });
+// Load Saved Theme
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-theme');
 }
 
-// Comment: File Management with Base64 Encoding
-function allowDrop(event) {
-    event.preventDefault();
-}
-
-function dropFile(event, subjectIndex) {
+// File Drop Handling with Base64
+function handleDrop(event, subject) {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
-    if (file.size > 10 * 1024 * 1024) {
-        alert('File too large (max 10MB)');
-        return;
-    }
-
     const reader = new FileReader();
     reader.onload = () => {
-        appData.subjects[subjectIndex].materials.push({
-            name: file.name,
-            type: file.type,
-            data: reader.result  // Base64 encoded
-        });
-        saveData();
-        renderMaterials(subjectIndex);
+        const base64 = reader.result;
+        let files = JSON.parse(localStorage.getItem(subject) || '[]');
+        files.push(base64);
+        localStorage.setItem(subject, JSON.stringify(files));
+        alert('File uploaded and encoded!');
     };
     reader.readAsDataURL(file);
 }
 
-function renderMaterials(subjectIndex) {
-    const list = document.getElementById(`materials-${subjectIndex}`);
-    list.innerHTML = '';
-    appData.subjects[subjectIndex].materials.forEach((material, index) => {
-        const item = document.createElement('div');
-        item.innerHTML = `
-            ${material.name} 
-            <button onclick="downloadFile(${subjectIndex}, ${index})">Download</button>
-            <button onclick="deleteFile(${subjectIndex}, ${index})">Delete</button>
-        `;
-        list.appendChild(item);
+// OpenRouter API Integration (ChatGPT)
+async function chatWithAI(message, apiKey) {
+    if (!apiKey) {
+        alert('Enter OpenRouter API key in settings');
+        return;
+    }
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: message }]
+        })
     });
+    const data = await response.json();
+    console.log(data.choices[0].message.content); // Display in app UI
 }
 
-function downloadFile(subjectIndex, fileIndex) {
-    const material = appData.subjects[subjectIndex].materials[fileIndex];
-    const link = document.createElement('a');
-    link.href = material.data;
-    link.download = material.name;
-    link.click();
+// TensorFlow.js Integration (Simple Prediction Example)
+async function predictProgress() {
+    const model = tf.sequential();
+    model.add(tf.layers.dense({units: 1, inputShape: [1]}));
+    model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+    // Train with dummy data
+    const xs = tf.tensor2d([1, 2, 3, 4], [4, 1]);
+    const ys = tf.tensor2d([1, 3, 5, 7], [4, 1]);
+    await model.fit(xs, ys, {epochs: 10});
+    const prediction = model.predict(tf.tensor2d([5], [1, 1]));
+    console.log(prediction.dataSync()[0]); // Use in progress bar
 }
+predictProgress();
 
-function deleteFile(subjectIndex, fileIndex) {
-    if (confirm('Delete this file?')) {
-        appData.subjects[subjectIndex].materials.splice(fileIndex, 1);
-        saveData();
-        renderMaterials(subjectIndex);
+// Java Integration (Simple Embedded Example - Use for calculations)
+class SimpleCalculator {
+    static int add(int a, int b) {
+        return a + b;
     }
 }
+// Note: Java isn't native in browser; simulate or use JS equivalent. For real Java, need backend.
 
-// Comment: Sidebar Toggle for Mobile
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
+// Cloud Storage Simulation (Using localStorage as fallback)
+function syncToCloud(data, apiKey) {
+    // Simulate cloud sync with OpenRouter (not storage API, so local fallback)
+    localStorage.setItem('cloudData', JSON.stringify(data));
+    console.log('Synced to "cloud" (localStorage)');
 }
-
-// Comment: Navigation (Example for Dashboard)
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-        // Handle navigation (add logic for section switching)
-        console.log('Navigated to', item.dataset.section);
-    });
-});
-
-// Comment: Live Clock (Asia/Kolkata)
-function updateClock() {
-    const now = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
-    document.getElementById('live-clock').textContent = now;
-}
-setInterval(updateClock, 1000);
-
-// Comment: Load Initial Data
-loadData();
-
-// Comment: 3D Card Hover Effects (Using CSS for simplicity, enhance with JS if needed)
-document.querySelectorAll('.subject-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.transform = `perspective(1000px) rotateY(${(x - rect.width / 2) / 20}deg) rotateX(${ (rect.height / 2 - y) / 20}deg)`;
-    });
-    card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg)';
-    });
-});
-
-// Comment: Service Worker for PWA Offline Caching (service-worker.js)
-if (navigator.serviceWorker) {
-    navigator.serviceWorker.register('/service-worker.js');
-}
+brython(); // Initialize Brython
+// Run Python code
+document.body.insertAdjacentHTML('beforeend', '<script type="text/python">from python_script import *</script>');
