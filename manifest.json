@@ -1,21 +1,20 @@
 {
-  "name": "Academic Hub Pro",
-  "short_name": "Hub Pro",
-  "description": "PWA for SRM B.Tech CSE AI/ML Semester 3 management",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#1a1b23",
-  "theme_color": "#1a1b23",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "Academic Hub Pro",
+    "short_name": "Hub Pro",
+    "description": "Personal Academic Dashboard for SRM B.Tech CSE AI/ML",
+    "start_url": "/academic-hub-pro/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#007AFF",
+    "scope": "/academic-hub-pro/",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23007AFF'/%3E%3Ctext x='256' y='320' font-family='Arial' font-size='200' fill='white' text-anchor='middle'%3EAH%3C/text%3E%3C/svg%3E",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": ["education", "productivity"],
+    "lang": "en",
+    "dir": "ltr"
 }
