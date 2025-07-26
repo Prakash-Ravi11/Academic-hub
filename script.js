@@ -1347,3 +1347,117 @@ if (typeof document !== 'undefined') {
 }
 
 console.log('🚀 Academic Hub Pro JavaScript loaded successfully!');
+// ==================== API KEY MANAGEMENT ====================
+class APIKeyManager {
+    constructor() {
+        this.apiKey = this.loadAPIKey();
+    }
+    
+    loadAPIKey() {
+        // Try multiple sources for the API key
+        
+        // 1. Environment variable (if running locally with build tools)
+        if (typeof process !== 'undefined' && process.env && process.env.OPENROUTER_API_KEY) {
+            return process.env.OPENROUTER_API_KEY;
+        }
+        
+        // 2. Window global variable (set in HTML)
+        if (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) {
+            return window.OPENROUTER_API_KEY;
+        }
+        
+        // 3. LocalStorage (user-entered)
+        const stored = localStorage.getItem('academic-hub-api-key');
+        if (stored) {
+            return stored;
+        }
+        
+        // 4. Prompt user to enter
+        return null;
+    }
+    
+    setAPIKey(key) {
+        this.apiKey = key;
+        localStorage.setItem('academic-hub-api-key', key);
+    }
+    
+    getAPIKey() {
+        return this.apiKey;
+    }
+    
+    isValid() {
+        return this.apiKey && this.apiKey.length > 0;
+    }
+}
+
+// ==================== UPDATED AI CHAT INTEGRATION ====================
+// Update your existing AcademicHubApp class with this method:
+
+async callOpenRouterAPI(message) {
+    const apiKeyManager = new APIKeyManager();
+    
+    if (!apiKeyManager.isValid()) {
+        throw new Error('API key not configured. Please set your OpenRouter API key in settings.');
+    }
+    
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKeyManager.getAPIKey()}`,
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'Academic Hub Pro'
+            },
+            body: JSON.stringify({
+                model: 'openai/gpt-3.5-turbo', // or 'openai/gpt-4' for better responses
+                messages: [
+                    {
+                        role: 'system',
+                        content: `You are an AI study assistant for ${this.state.user.name}, a B.Tech CSE AI/ML student at SRM University. 
+                        
+                        Current subjects and progress:
+                        ${Object.values(this.state.subjects).map(s => 
+                            `- ${s.title} (${s.code}): ${s.progress}% complete, ${Math.floor(s.studyTime/60)}h studied`
+                        ).join('\n')}
+                        
+                        Help with academic questions, study planning, coding problems, and subject-specific guidance. 
+                        Be encouraging, specific, and practical in your responses.`
+                    },
+                    {
+                        role: 'user',
+                        content: message
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 800,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`API Error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
+        }
+        
+        const data = await response.json();
+        return data.choices[0].message.content;
+        
+    } catch (error) {
+        console.error('OpenRouter API Error:', error);
+        
+        // Provide helpful error messages
+        if (error.message.includes('401')) {
+            throw new Error('Invalid API key. Please check your OpenRouter API key in settings.');
+        } else if (error.message.includes('429')) {
+            throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+        } else if (error.message.includes('insufficient_quota')) {
+            throw new Error('API quota exceeded. Please check your OpenRouter account balance.');
+        } else {
+            throw new Error(`AI service temporarily unavailable: ${error.message}`);
+        }
+    }
+}
+
