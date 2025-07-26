@@ -20,7 +20,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Hub Pro | R R PRAKASHRAVI</title>
+    <title>Academic Hub Pro | </title>
     <meta name="description" content="Personal Academic Dashboard for SRM B.Tech CSE AI/ML Semester 3">
     <meta name="author" content="R R PRAKASHRAVI">
     
@@ -1163,6 +1163,45 @@
                 transform: translateY(0);
             }
         }
+        <!-- GitHub Pages Configuration -->
+<script>
+    // GitHub Pages environment detection
+    if (window.location.hostname.includes('github.io')) {
+        console.log('🚀 Running on GitHub Pages');
+        
+        // Load config if available (only for private repos)
+        const configScript = document.createElement('script');
+        configScript.src = './config.js';
+        configScript.onerror = () => {
+            console.log('📝 Config file not found - user will enter API key manually');
+        };
+        document.head.appendChild(configScript);
+    }
+    
+    // PWA install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button
+        const installBtn = document.createElement('button');
+        installBtn.textContent = '📱 Install App';
+        installBtn.className = 'install-prompt';
+        installBtn.onclick = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installBtn.remove();
+            }
+        };
+        
+        document.body.appendChild(installBtn);
+    });
+</script>
+
     </style>
 </head>
 <body data-theme="light">
