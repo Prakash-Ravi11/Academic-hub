@@ -26,7 +26,7 @@ class APIKeyManager {
     getEmbeddedAPIKey() {
         // API key is controlled by developers only
         // Replace this with your actual OpenRouter API key
-        const DEV_API_KEY = 'sk-or-v1-your-actual-openrouter-api-key-here'; // 🔥 PUT YOUR KEY HERE
+        const DEV_API_KEY = 'k-or-v1-5e5b76cdd3cc50ea47e19febf0fe3a3fc6fa5e4ef23736b46073deb37ff1b455'; // 🔥 PUT YOUR KEY HERE
         
         // For GitHub Actions deployment (placeholder gets replaced automatically)
         const GITHUB_EMBEDDED_KEY = '${OPENROUTER_API_KEY}';
@@ -235,7 +235,7 @@ class AcademicHubApp {
             '21MAB201T': {
                 code: '21MAB201T',
                 title: 'Transforms and Boundary Value Problems',
-                faculty: 'Dr. V. Vidhya',
+                faculty: 'Dr. P. Godhandaraman',
                 credits: 4,
                 category: 'Basic Science',
                 room: 'LH905',
@@ -320,7 +320,7 @@ class AcademicHubApp {
             '21LEM202T': {
                 code: '21LEM202T',
                 title: 'UHV-II: Universal Human Values',
-                faculty: 'Dr. Caleb Theodar M',
+                faculty: 'Mr.D.Boopathi',
                 credits: 3,
                 category: 'Engineering Science',
                 room: 'To be Alloted',
