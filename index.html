@@ -1744,6 +1744,16 @@
             document.getElementById('userName').textContent = savedUsername;
             document.getElementById('userAvatar').textContent = savedUsername.charAt(0).toUpperCase();
         }
+        <script>
+    // Set your OpenRouter API key here
+    window.OPENROUTER_API_KEY = 'YOUR_ACTUAL_API_KEY_HERE';
+    
+    // Or for production, you might load it from your server
+    // fetch('/api/config').then(r => r.json()).then(config => {
+    //     window.OPENROUTER_API_KEY = config.OPENROUTER_API_KEY;
+    // });
+</script>
+
     </script>
 </body>
 </html>
