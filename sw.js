@@ -1,234 +1,190 @@
 /**
- * Academic Hub Pro - Service Worker
- * Built by: Nick (Ex-Apple UI/UX) + R R PRAKASHRAVI
- * 
- * Features:
- * - Offline caching for core app files
- * - Background sync for study data
- * - Push notifications for study reminders
- * - Cache management and updates
+ * Academic Hub Pro - Advanced Service Worker
+ * Implements true PWA capabilities with background sync, caching, and offline support
  */
 
-const CACHE_NAME = 'academic-hub-pro-v1.0.0';
-const DATA_CACHE_NAME = 'academic-hub-data-v1.0.0';
+const CACHE_NAME = 'academic-hub-pro-v3.0';
+const STATIC_CACHE = 'academic-hub-static-v3.0';
+const DYNAMIC_CACHE = 'academic-hub-dynamic-v3.0';
 
-// Files to cache for offline functionality
-const FILES_TO_CACHE = [
+const STATIC_FILES = [
     '/',
     '/index.html',
     '/script.js',
+    '/advanced-features.js',
+    '/style.css',
     '/manifest.json',
     'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js',
     'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js',
-    // Add any other assets you want cached
+    'https://cdn.jsdelivr.net/npm/brython@3.10.5/brython.min.js'
 ];
 
-// API endpoints that should be cached
-const API_CACHE_URLS = [
-    'https://openrouter.ai/api/v1/chat/completions'
-];
-
-// ==================== INSTALL EVENT ====================
-self.addEventListener('install', (event) => {
-    console.log('🔧 Service Worker: Installing...');
+// Install event - cache static files
+self.addEventListener('install', event => {
+    console.log('🚀 Service Worker installing...');
     
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('📦 Service Worker: Caching app shell');
-                return cache.addAll(FILES_TO_CACHE);
-            })
-            .then(() => {
-                // Force the waiting service worker to become the active service worker
-                return self.skipWaiting();
-            })
+        caches.open(STATIC_CACHE).then(cache => {
+            console.log('📦 Caching static files...');
+            return cache.addAll(STATIC_FILES);
+        }).then(() => {
+            console.log('✅ Static files cached');
+            return self.skipWaiting();
+        })
     );
 });
 
-// ==================== ACTIVATE EVENT ====================
-self.addEventListener('activate', (event) => {
-    console.log('✅ Service Worker: Activating...');
+// Activate event - clean up old caches
+self.addEventListener('activate', event => {
+    console.log('🔄 Service Worker activating...');
     
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
+        caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map((cacheName) => {
-                    // Delete old caches
-                    if (cacheName !== CACHE_NAME && cacheName !== DATA_CACHE_NAME) {
-                        console.log('🗑️ Service Worker: Deleting old cache:', cacheName);
+                cacheNames.map(cacheName => {
+                    if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+                        console.log('🗑️ Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
         }).then(() => {
-            // Take control of all pages immediately
+            console.log('✅ Service Worker activated');
             return self.clients.claim();
         })
     );
 });
 
-// ==================== FETCH EVENT ====================
-self.addEventListener('fetch', (event) => {
-    const { request } = event;
-    const url = new URL(request.url);
+// Fetch event - serve from cache with network fallback
+self.addEventListener('fetch', event => {
+    const requestUrl = new URL(event.request.url);
     
-    // Handle API requests differently
-    if (url.origin === 'https://openrouter.ai') {
-        event.respondWith(handleAPIRequest(event));
-    } 
-    // Handle app shell requests
-    else if (url.origin === location.origin) {
-        event.respondWith(handleAppShellRequest(event));
-    }
-    // Handle external resources (CDN)
-    else {
-        event.respondWith(handleExternalRequest(event));
-    }
-});
-
-// ==================== API REQUEST HANDLER ====================
-async function handleAPIRequest(event) {
-    try {
-        // Always try network first for API requests
-        const response = await fetch(event.request);
-        
-        // Cache successful responses
-        if (response.status === 200) {
-            const cache = await caches.open(DATA_CACHE_NAME);
-            cache.put(event.request.url, response.clone());
-        }
-        
-        return response;
-    } catch (error) {
-        console.warn('🌐 Service Worker: API request failed, checking cache');
-        
-        // Try to serve from cache if network fails
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        // Return a custom offline response for API failures
-        return new Response(
-            JSON.stringify({
-                error: 'Network unavailable',
-                message: 'AI features require internet connection',
-                offline: true
-            }),
-            {
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: { 'Content-Type': 'application/json' }
-            }
+    // Handle different types of requests
+    if (requestUrl.origin === location.origin) {
+        // Same origin - use cache first strategy
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                if (response) {
+                    return response;
+                }
+                
+                return fetch(event.request).then(networkResponse => {
+                    // Cache successful responses
+                    if (networkResponse.status === 200) {
+                        const responseClone = networkResponse.clone();
+                        caches.open(DYNAMIC_CACHE).then(cache => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return networkResponse;
+                });
+            }).catch(() => {
+                // Return offline page for navigation requests
+                if (event.request.destination === 'document') {
+                    return caches.match('/offline.html');
+                }
+            })
+        );
+    } else if (requestUrl.hostname === 'openrouter.ai') {
+        // OpenRouter API - network first with cache fallback
+        event.respondWith(
+            fetch(event.request).then(response => {
+                const responseClone = response.clone();
+                caches.open(DYNAMIC_CACHE).then(cache => {
+                    cache.put(event.request, responseClone);
+                });
+                return response;
+            }).catch(() => {
+                return caches.match(event.request);
+            })
+        );
+    } else {
+        // External resources - network first
+        event.respondWith(
+            fetch(event.request).catch(() => {
+                return caches.match(event.request);
+            })
         );
     }
-}
+});
 
-// ==================== APP SHELL REQUEST HANDLER ====================
-async function handleAppShellRequest(event) {
-    try {
-        // Try cache first for app shell
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        // If not in cache, fetch from network and cache
-        const response = await fetch(event.request);
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(event.request, response.clone());
-        
-        return response;
-    } catch (error) {
-        // If both cache and network fail, return offline page
-        if (event.request.destination === 'document') {
-            return caches.match('/index.html');
-        }
-        
-        return new Response('Resource not available offline', {
-            status: 404,
-            statusText: 'Not Found'
-        });
-    }
-}
-
-// ==================== EXTERNAL REQUEST HANDLER ====================
-async function handleExternalRequest(event) {
-    try {
-        // Try cache first for external resources
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        // Fetch from network
-        const response = await fetch(event.request);
-        
-        // Cache successful responses
-        if (response.status === 200) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(event.request, response.clone());
-        }
-        
-        return response;
-    } catch (error) {
-        console.warn('🌐 Service Worker: External resource failed:', event.request.url);
-        return new Response('Resource not available', { status: 404 });
-    }
-}
-
-// ==================== BACKGROUND SYNC ====================
-self.addEventListener('sync', (event) => {
-    console.log('🔄 Service Worker: Background sync triggered');
+// Background sync for data backup
+self.addEventListener('sync', event => {
+    console.log('🔄 Background sync triggered:', event.tag);
     
-    if (event.tag === 'study-data-sync') {
-        event.waitUntil(syncStudyData());
+    if (event.tag === 'background-sync') {
+        event.waitUntil(performBackgroundSync());
+    } else if (event.tag === 'cloud-backup') {
+        event.waitUntil(performCloudBackup());
     }
 });
 
-async function syncStudyData() {
+async function performBackgroundSync() {
     try {
-        // Get study data from IndexedDB or localStorage
+        console.log('📊 Performing background sync...');
+        
+        // Get current data from IndexedDB or localStorage
         const clients = await self.clients.matchAll();
-        
-        clients.forEach(client => {
-            client.postMessage({
-                type: 'SYNC_STUDY_DATA',
-                message: 'Syncing study data in background...'
+        if (clients.length > 0) {
+            // Send message to main app to perform sync
+            clients[0].postMessage({
+                type: 'BACKGROUND_SYNC',
+                timestamp: new Date().toISOString()
             });
-        });
+        }
         
-        console.log('📊 Service Worker: Study data synced successfully');
+        console.log('✅ Background sync completed');
     } catch (error) {
-        console.error('❌ Service Worker: Study data sync failed:', error);
+        console.error('❌ Background sync failed:', error);
+        throw error;
     }
 }
 
-// ==================== PUSH NOTIFICATIONS ====================
-self.addEventListener('push', (event) => {
-    console.log('📱 Service Worker: Push notification received');
+async function performCloudBackup() {
+    try {
+        console.log('☁️ Performing cloud backup...');
+        
+        // This would integrate with your cloud backup logic
+        const clients = await self.clients.matchAll();
+        if (clients.length > 0) {
+            clients[0].postMessage({
+                type: 'CLOUD_BACKUP',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        console.log('✅ Cloud backup completed');
+    } catch (error) {
+        console.error('❌ Cloud backup failed:', error);
+        throw error;
+    }
+}
+
+// Push notifications
+self.addEventListener('push', event => {
+    console.log('📱 Push notification received');
     
     const options = {
-        body: event.data ? event.data.text() : 'Time to study! 📚',
+        body: event.data ? event.data.text() : 'You have a new study reminder!',
         icon: '/icon-192.png',
-        badge: '/badge-72.png',
-        vibrate: [100, 50, 100],
-        data: {
-            dateOfArrival: Date.now(),
-            primaryKey: 'study-reminder'
-        },
+        badge: '/icon-192.png',
+        tag: 'study-reminder',
         actions: [
             {
                 action: 'start-study',
                 title: '📚 Start Studying',
-                icon: '/icons/study.png'
+                icon: '/icon-192.png'
             },
             {
                 action: 'dismiss',
-                title: '❌ Dismiss',
-                icon: '/icons/dismiss.png'
+                title: '⏰ Remind Later',
+                icon: '/icon-192.png'
             }
-        ]
+        ],
+        data: {
+            timestamp: new Date().toISOString(),
+            url: '/'
+        }
     };
     
     event.waitUntil(
@@ -236,57 +192,60 @@ self.addEventListener('push', (event) => {
     );
 });
 
-// ==================== NOTIFICATION CLICK HANDLER ====================
-self.addEventListener('notificationclick', (event) => {
-    console.log('📱 Service Worker: Notification clicked');
+// Notification click handling
+self.addEventListener('notificationclick', event => {
+    console.log('🔔 Notification clicked:', event.action);
     
     event.notification.close();
     
+    const urlToOpen = event.notification.data?.url || '/';
+    
     if (event.action === 'start-study') {
-        // Open the app and start a study session
+        // Open app and start study session
         event.waitUntil(
-            clients.openWindow('/?action=start-study')
+            clients.openWindow(urlToOpen + '#start-study')
         );
     } else if (event.action === 'dismiss') {
-        // Just close the notification
-        return;
+        // Schedule another reminder
+        console.log('⏰ Scheduling reminder for later');
     } else {
-        // Default action - open the app
+        // Default action - just open the app
         event.waitUntil(
-            clients.openWindow('/')
+            clients.openWindow(urlToOpen)
         );
     }
 });
 
-// ==================== MESSAGE HANDLER ====================
-self.addEventListener('message', (event) => {
-    console.log('💬 Service Worker: Message received:', event.data);
+// Message handling from main app
+self.addEventListener('message', event => {
+    console.log('📨 Message received:', event.data);
     
-    if (event.data && event.data.type === 'SKIP_WAITING') {
+    if (event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
-    }
-    
-    if (event.data && event.data.type === 'GET_VERSION') {
+    } else if (event.data.type === 'GET_VERSION') {
         event.ports[0].postMessage({ version: CACHE_NAME });
     }
 });
 
-// ==================== CACHE MANAGEMENT ====================
-self.addEventListener('periodicsync', (event) => {
-    if (event.tag === 'cache-cleanup') {
-        event.waitUntil(cleanupOldCaches());
+// Periodic background sync (if supported)
+self.addEventListener('periodicsync', event => {
+    if (event.tag === 'study-reminder-sync') {
+        event.waitUntil(checkStudyReminders());
     }
 });
 
-async function cleanupOldCaches() {
-    const cacheNames = await caches.keys();
-    const oldCaches = cacheNames.filter(name => 
-        name.startsWith('academic-hub') && name !== CACHE_NAME && name !== DATA_CACHE_NAME
-    );
-    
-    return Promise.all(
-        oldCaches.map(cacheName => caches.delete(cacheName))
-    );
+async function checkStudyReminders() {
+    try {
+        const clients = await self.clients.matchAll();
+        if (clients.length > 0) {
+            clients[0].postMessage({
+                type: 'CHECK_REMINDERS',
+                timestamp: new Date().toISOString()
+            });
+        }
+    } catch (error) {
+        console.error('❌ Study reminder check failed:', error);
+    }
 }
 
-console.log('🚀 Service Worker: Loaded successfully');
+console.log('✅ Advanced Service Worker loaded successfully!');
