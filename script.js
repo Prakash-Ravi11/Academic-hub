@@ -1348,37 +1348,42 @@ if (typeof document !== 'undefined') {
 
 console.log('🚀 Academic Hub Pro JavaScript loaded successfully!');
 // ==================== API KEY MANAGEMENT ====================
+// ==================== GITHUB PAGES API KEY MANAGEMENT ====================
 class APIKeyManager {
     constructor() {
         this.apiKey = this.loadAPIKey();
     }
     
     loadAPIKey() {
-        // Try multiple sources for the API key
+        // Priority order for GitHub Pages deployment:
         
-        // 1. Environment variable (if running locally with build tools)
-        if (typeof process !== 'undefined' && process.env && process.env.OPENROUTER_API_KEY) {
-            return process.env.OPENROUTER_API_KEY;
+        // 1. GitHub Actions Secret (if using build process)
+        if (typeof window !== 'undefined' && window.ENV && window.ENV.OPENROUTER_API_KEY) {
+            console.log('✅ API Key loaded from build environment');
+            return window.ENV.OPENROUTER_API_KEY;
         }
         
-        // 2. Window global variable (set in HTML)
-        if (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) {
-            return window.OPENROUTER_API_KEY;
-        }
-        
-        // 3. LocalStorage (user-entered)
+        // 2. LocalStorage (user manually entered - recommended for GitHub Pages)
         const stored = localStorage.getItem('academic-hub-api-key');
         if (stored) {
+            console.log('✅ API Key loaded from localStorage');
             return stored;
         }
         
-        // 4. Prompt user to enter
+        // 3. Check for config.js file (manual setup)
+        if (typeof window !== 'undefined' && window.ACADEMIC_HUB_CONFIG) {
+            console.log('✅ API Key loaded from config file');
+            return window.ACADEMIC_HUB_CONFIG.OPENROUTER_API_KEY;
+        }
+        
+        console.warn('⚠️ No API key found - user will need to enter manually');
         return null;
     }
     
     setAPIKey(key) {
         this.apiKey = key;
         localStorage.setItem('academic-hub-api-key', key);
+        console.log('✅ API Key manually set and cached');
     }
     
     getAPIKey() {
@@ -1386,9 +1391,32 @@ class APIKeyManager {
     }
     
     isValid() {
-        return this.apiKey && this.apiKey.length > 0;
+        return this.apiKey && this.apiKey.trim().length > 0 && this.apiKey.startsWith('sk-');
+    }
+    
+    getStatus() {
+        if (this.isValid()) {
+            return {
+                status: 'valid',
+                message: '✅ API Key configured and ready',
+                masked: this.apiKey.substring(0, 8) + '...' + this.apiKey.substring(this.apiKey.length - 4)
+            };
+        } else if (this.apiKey) {
+            return {
+                status: 'invalid',
+                message: '❌ API Key format invalid (should start with sk-)',
+                masked: 'Invalid format'
+            };
+        } else {
+            return {
+                status: 'missing',
+                message: '⚠️ Please enter your OpenRouter API key',
+                masked: 'Not configured'
+            };
+        }
     }
 }
+
 
 // ==================== UPDATED AI CHAT INTEGRATION ====================
 // Update your existing AcademicHubApp class with this method:
